@@ -1,0 +1,1 @@
+[(#{mailkit.applifecycle.error(${appName}, ${hostname}, ${cause})})]

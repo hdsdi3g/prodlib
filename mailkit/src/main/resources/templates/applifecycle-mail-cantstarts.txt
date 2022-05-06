@@ -1,0 +1,1 @@
+[(#{mailkit.applifecycle.cantstarts(${appName}, ${hostname}, ${cause})})]

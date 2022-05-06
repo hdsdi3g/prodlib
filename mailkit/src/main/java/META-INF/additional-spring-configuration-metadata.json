@@ -1,0 +1,32 @@
+{"properties": [
+  {
+    "name": "spring.main.log-startup-info",
+    "type": "java.lang.String",
+    "description": "SpringBoot startup info"
+  },
+  {
+    "name": "mailkit.default-sender",
+    "type": "java.lang.String",
+    "description": "The email address sender used for CLI test"
+  },
+  {
+    "name": "mailkit.default-recipient",
+    "type": "java.lang.String",
+    "description": "The email address recipient used for CLI test"
+  },
+  {
+    "name": "mailkit.sendtoFile",
+    "type": "java.io.File",
+    "description": "Instead of send mails, just writes files in this directory"
+  },
+  {
+    "name": "mailkit.sendtoFileWipeOnStart",
+    "type": "java.lang.Boolean",
+    "description": "On App boot, wipe all content founded on sendtoFile."
+  },
+  {
+    "name": "mailkit.applifecycle",
+    "type": "tv.hd3g.mailkit.mod.configuration.AppLifeCycleConfig",
+    "description": "The full configuration of AppLifeCycle"
+  }
+]}

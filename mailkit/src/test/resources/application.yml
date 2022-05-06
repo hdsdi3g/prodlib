@@ -1,0 +1,33 @@
+# Don't forget to update src/main/java/META-INF/additional-spring-configuration-metadata.json
+# after to adds non-official entries
+
+spring:
+    main:
+        banner-mode: "off"
+        log-startup-info: false
+    mail:
+        host: localhost
+        protocol: smtp
+        port: 25 # SMTP server port
+        defaultEncoding: UTF-8
+        #username=
+        #password=
+        #properties:
+        #    mail:
+        #        smtp:
+        #            auth: true
+        #            starttls:
+        #                enable: true
+        #            timeout: 5000
+        #            connectiontimeout: 5000
+mailkit:
+    applifecycle:
+        hostname: myhost
+        mailAddrAdmin: admin@mail
+        mailSender: send@mail
+#    sendtoFile: target/mailkit
+#    sendtoFileWipeOnStart: true
+#    sendtoFileAutomaticExt: true
+
+server:
+    port: 0

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+<title th:remove="all"></title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style type="text/css">
+body {
+	font-family: trebuchet ms,sans-serif;
+	font-size: 12pt;
+	color: #111111;
+}
+span.small {
+	font-size: 0.8em;
+}
+span.bold {
+	font-weight: bold;
+}
+</style>
+</head>
+<body>
+	<h1 th:text="#{mailkit.applifecycle.starts(${appName}, ${hostname})}"></h1>
+    <h3 th:text="${serviceName}"></h3>
+	<hr />
+	<p>
+        <span class="small" th:text="#{mailkit.applifecycle.sendBy(${hostname})}"></span><br />
+		<span class="small" th:text="#{mailkit.applifecycle.footer}"></span><br />
+		<span class="small bold" th:text="${origin}"></span>
+	</p>
+</body>
+</html>

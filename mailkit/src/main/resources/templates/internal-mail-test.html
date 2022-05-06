@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+<title th:remove="all">Example template for mail</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body>
+	<h1>MailKit email test!</h1>
+	With variable substitution:
+	<span th:text="${currentdate}">(error, can't get "currentdate" variable)</span>
+	<br>
+	Displayed lang: <span th:text="#{mailkit.displaylang}"></span>
+</body>
+</html>

@@ -1,4 +1,4 @@
-# prodlib: All libs and parent projects for production
+# ProdLib: All libs and parent projects for production
 
 ## Commons
 
@@ -14,6 +14,14 @@
 
 `tv.hd3g.commons.interfaces` for some shared cross-projects objects and definitions.
 
+## MailKit
+
+Mail engine as notification abstraction for Spring Boot
+
+## Vanity labels
+
 [![Java CI with Maven](https://github.com/hdsdi3g/prodlib/actions/workflows/maven-package.yml/badge.svg)](https://github.com/hdsdi3g/prodlib/actions/workflows/maven-package.yml)
 
 [![CodeQL](https://github.com/hdsdi3g/prodlib/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/hdsdi3g/prodlib/actions/workflows/codeql-analysis.yml)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=hdsdi3g_prodlib&metric=alert_status)](https://sonarcloud.io/dashboard?id=hdsdi3g_prodlib)

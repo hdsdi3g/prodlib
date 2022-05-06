@@ -1,0 +1,3 @@
+MailKit internal test mail,
+sended the [(${currentdate})]
+in [(#{mailkit.displaylang})]

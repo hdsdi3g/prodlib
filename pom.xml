@@ -24,6 +24,7 @@
         <module>interfaces</module>
         <module>app</module>
         <module>app-web</module>
+        <module>mailkit</module>
     </modules>
 
     <properties>
