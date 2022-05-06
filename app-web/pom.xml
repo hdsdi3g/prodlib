@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>app-web</artifactId>
+    <packaging>pom</packaging>
+
+    <name>Commons Maven SpringBoot Web Application</name>
+    <url>https://github.com/hdsdi3g/prodlib</url>
+    <description>Maven SpringBoot Web Application for all hdsdi3g' java projects</description>
+
+    <parent>
+        <groupId>tv.hd3g.commons</groupId>
+        <artifactId>parent-web</artifactId>
+        <version>9.0.0</version>
+        <relativePath>../parent-web/pom.xml</relativePath>
+    </parent>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License, Version 3</name>
+            <url>https://www.gnu.org/licenses/gpl.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>${maven.gpg.version}</version>
+                <configuration>
+                    <skip>${gpg.skip}</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
