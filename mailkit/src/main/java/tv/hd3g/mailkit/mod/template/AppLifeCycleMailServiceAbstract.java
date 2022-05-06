@@ -50,20 +50,20 @@ public abstract class AppLifeCycleMailServiceAbstract implements AppLifeCycleMai
 	private AppLifeCycleConfig config;
 
 	/**
-	 * @return like myapp-messages (point on myapp-messages.properties / myapp-messages_fr.properties...)
-	 *         or null/empty
+	 * Return like myapp-messages (point on myapp-messages.properties / myapp-messages_fr.properties...)
+	 * or null/empty
 	 */
 	protected String getMessageSourceBasename() {
 		return null;
 	}
 
 	/**
-	 * @return like "My Wonderfull App"
+	 * Return like "My Wonderfull App"
 	 */
 	protected abstract String getAppName();
 
 	/**
-	 * @return like "My Company / This Business Unit"
+	 * Return like "My Company / This Business Unit"
 	 */
 	protected abstract String getAppOrigin();
 
