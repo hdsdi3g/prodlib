@@ -16,6 +16,7 @@
  */
 package tv.hd3g.transfertfiles;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static tv.hd3g.transfertfiles.AbstractFile.normalizePath;
@@ -73,7 +74,7 @@ public class AbstractFileSystemURL implements Closeable {
 		final var protocol = url.getProtocol();
 		basePath = normalizePath(Optional.ofNullable(url.getPath()).orElse("/"));
 		final var host = resolveHostname(url);
-		final var query = url.getOptionZone();
+		final var query = requireNonNull(url.getOptionZone());
 		final var username = url.getUsername();
 		protectedRessourceURL = url.getProtectedRessourceURL() + " [" + host.getHostAddress() + "]";
 		final var password = url.getPassword();
