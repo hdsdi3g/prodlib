@@ -1,5 +1,7 @@
 # ProdLib: All libs and parent projects for production
 
+Please use Maven and Java 11 for build and test.
+
 ## Commons
 
 `tv.hd3g.commons.starter` for base projects SpringBoot reference.
@@ -17,6 +19,10 @@
 ## MailKit
 
 Mail engine as notification abstraction for Spring Boot
+
+## Transfertfiles
+
+A Java library for upload and download files, with protocol abstraction, and transfer progression events.
 
 ## Vanity labels
 
