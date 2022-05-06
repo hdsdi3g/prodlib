@@ -20,15 +20,16 @@ jobs:
         language: ['java']
         # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#overriding-automatic-language-detection
 
+    permissions:
+       security-events: write
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
         fetch-depth: 2
-    - run: git checkout HEAD^2
-      if: ${{ github.event_name == 'pull_request' }}
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v2
       with:
          languages: ${{ matrix.language }}
     - name: Set up JDK 11
@@ -37,4 +38,5 @@ jobs:
         java-version: 11
     - run: mvn -B clean package -Dgpg.skip=true -DskipTests -Dmaven.test.skip.exec -Dlicense.skip=true -Dmaven.javadoc.skip=true -Dmaven.source.skip=true
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2
+
