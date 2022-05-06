@@ -1,1 +1,1 @@
-ignoreRules = [ "JavaUtilDate" ]
+ignoreRules = [ "JavaUtilDate", "MissingSummary" ]
