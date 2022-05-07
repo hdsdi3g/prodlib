@@ -1,0 +1,8 @@
+# Don't forget to update src/main/java/META-INF/additional-spring-configuration-metadata.json
+# after to adds non-official entries
+
+spring:
+    main:
+        banner-mode: "off"
+server:
+    port: 0

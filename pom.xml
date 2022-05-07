@@ -25,7 +25,8 @@
         <module>app</module>
         <module>app-web</module>
         <module>mailkit</module>
-        <module>transfertfiles</module>
+	<module>transfertfiles</module>
+	<module>selfautorestdoc</module>
     </modules>
 
     <properties>
