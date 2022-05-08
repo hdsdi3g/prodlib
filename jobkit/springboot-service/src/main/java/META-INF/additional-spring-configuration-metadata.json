@@ -1,0 +1,7 @@
+{"properties": [
+  {
+    "name": "spring.main.log-startup-info",
+    "type": "java.lang.String",
+    "description": "SpringBoot startup info"
+  }
+]}

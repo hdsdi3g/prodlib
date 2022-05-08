@@ -27,6 +27,7 @@
         <module>selfautorestdoc</module>
         <module>authkit</module>
         <module>mailkit</module>
+        <module>jobkit</module>
         <module>transfertfiles</module>
     </modules>
 
@@ -61,6 +62,7 @@
 
         <codepolicyvalidation.version>1.0.4</codepolicyvalidation.version>
         <setupdb.version>2.0.2</setupdb.version>
+        <processlauncher.version>6.0.5</processlauncher.version>
     </properties>
 
     <dependencies>

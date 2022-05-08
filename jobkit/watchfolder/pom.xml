@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jobkit-watchfolder</artifactId>
+    <packaging>jar</packaging>
+
+    <name>JobKit Watchfolder</name>
+    <url>https://github.com/hdsdi3g/prodlib</url>
+    <description>Regulary scan folders (local or distant) and throws events on activity</description>
+
+    <parent>
+        <groupId>tv.hd3g</groupId>
+        <artifactId>jobkit-starter</artifactId>
+        <version>9.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>tv.hd3g</groupId>
+            <artifactId>transfertfiles</artifactId>
+            <version>9.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>tv.hd3g</groupId>
+            <artifactId>jobkit-engine</artifactId>
+            <version>9.0.0</version>
+        </dependency>
+    </dependencies>
+</project>

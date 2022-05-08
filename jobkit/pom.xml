@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>tv.hd3g</groupId>
+    <artifactId>jobkit-starter</artifactId>
+    <packaging>pom</packaging>
+
+    <name>Jobkit</name>
+    <url>https://github.com/hdsdi3g/prodlib</url>
+    <description>Tools for execute simple onetime and scheduled Java jobs with dynamic queues and events</description>
+
+    <parent>
+        <groupId>tv.hd3g.commons</groupId>
+        <artifactId>starter</artifactId>
+        <version>9.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <modules>
+        <module>engine</module>
+        <module>watchfolder</module>
+        <module>springboot-service</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>tv.hd3g</groupId>
+                <artifactId>selfautorestdoc</artifactId>
+                <version>9.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.hd3g</groupId>
+                <artifactId>transfertfiles</artifactId>
+                <version>9.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.hd3g</groupId>
+                <artifactId>processlauncher</artifactId>
+                <version>${processlauncher.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>${commons.text.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

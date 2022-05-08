@@ -1,6 +1,8 @@
-# ProdLib: All libs and parent projects for production
+# ProdLib: all libs and parent projects for production
 
 Please use Maven and Java 11 for build and test.
+
+All is tested on Windows 10 and Linux. Should be ok on macOS.
 
 [![Java CI with Maven](https://github.com/hdsdi3g/prodlib/actions/workflows/maven-package.yml/badge.svg)](https://github.com/hdsdi3g/prodlib/actions/workflows/maven-package.yml)
 
@@ -22,13 +24,27 @@ Please use Maven and Java 11 for build and test.
 
 `tv.hd3g.commons.interfaces` for some shared cross-projects objects and definitions.
 
+## JobKit
+
+Execute onetime and scheduled Java jobs with dynamic queues and events. It's a standalone lib splitted in 3 related Maven projects:
+
+- engine: the internal engine
+- service: a Spring Boot module for enable `@async` with JobKit.
+- watchfolder: it can found recently added files and directories in local filesystem, and start events (run Java code) on it.
+
+It's stable.
+
 ## MailKit
 
 Mail engine as notification abstraction for Spring Boot
 
+It's stable.
+
 ## Transfertfiles
 
 A Java library for upload and download files, with protocol abstraction, and transfer progression events.
+
+It's stable.
 
 ## SelfAutoRestDoc
 
@@ -36,9 +52,7 @@ Create an automatic SpringBoot REST documentation to markdown with [Spoon](http:
 
 It's still in alpha.
 
-### Setup
-
-Add in your pom file:
+For setup, add in your pom file:
 
 ```
 <dependency>
