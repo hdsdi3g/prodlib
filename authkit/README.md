@@ -1,41 +1,5 @@
 # AuthKit
 
-Authentication and RBAC module for Spring Boot 2 (Java 11).
-
-It's still in alpha.
-
-![Java CI with Maven](https://github.com/hdsdi3g/authkit/workflows/Java%20CI%20with%20Maven/badge.svg)
-
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=hdsdi3g_authkit&metric=alert_status)](https://sonarcloud.io/dashboard?id=hdsdi3g_authkit)
-
-![CodeQL](https://github.com/hdsdi3g/authkit/workflows/CodeQL/badge.svg)
-
----
-
-AuthKit provide a backend API & logon front with:
-
-- User/Group/Role/Right (access to a controller)/Right Context (access context limitation for a controller) as RBAC objects
-- Cookie-less and persistence-less session based on JSON web tokens via an HTTP bearer.
-- Cookie stateless/session less (same JWT from bearer) for non-REST purpose.
-- Optional 2 factors auth (TOTP)
-- Optional login by Active Directory via an LDAP auth
-- A Role can required a specific IP address before it enable during a request
-- Data persistance with the help of an Hibernate database compatible, like MySQL and H2.
-- Strongly tested by [integration tests](https://sonarcloud.io/component_measures?id=hdsdi3g_authkit&metric=Coverage)
-- An internal and systematic audit system on database, for trace any security/logon actions.
-- A ciphered and isolated table for storing personal information (privacy). An user is only referenced by its auto-generated UUID. The username (login name) is only manipulated during logon operations.
-
-AuthKit don't use Spring Security functions: it can be setup in addition for Spring Security.
-
-It's use Liquibase for setup/upgrade MySQL database via [setupdb](https://github.com/hdsdi3g/setupdb-maven-plugin), only if you don't want to use Hibernate to do it.
-
-## Changelog
-
-| Version          | Status   | Database updated schema | Supported on security terms |
-| ---------------- | -------- | ----------------------- | --------------------------- |
-| 0.0.1 to 0.2.1   | Inactive | n/a                     | no                          |
-| 0.3.0            | Active   | no                      | yes                         |
-
 ## Policy security
 
 ### Reporting a vulnerability

@@ -46,6 +46,31 @@ A Java library for upload and download files, with protocol abstraction, and tra
 
 It's stable.
 
+## AuthKit
+
+Authentication and RBAC module for Spring Boot 2 (Java 11).
+
+It's still in alpha.
+
+AuthKit provide a backend API & logon front with:
+
+- User/Group/Role/Right (access to a controller)/Right Context (access context limitation for a controller) as RBAC objects
+- Cookie-less and persistence-less session based on JSON web tokens via an HTTP bearer.
+- Cookie stateless/session less (same JWT from bearer) for non-REST purpose.
+- Optional 2 factors auth (TOTP)
+- Optional login by Active Directory via an LDAP auth
+- A Role can required a specific IP address before it enable during a request
+- Data persistance with the help of an Hibernate database compatible, like MySQL and H2.
+- Strongly tested by integration tests (see SonarQube reports)
+- An internal and systematic audit system on database, for trace any security/logon actions.
+- A ciphered and isolated table for storing personal information (privacy). An user is only referenced by its auto-generated UUID. The username (login name) is only manipulated during logon operations.
+
+AuthKit don't use Spring Security functions: it can be setup in addition for Spring Security.
+
+It's use Liquibase for setup/upgrade MySQL database via [setupdb](https://github.com/hdsdi3g/setupdb-maven-plugin), only if you don't want to use Hibernate to do it.
+
+See more on `authkit` dir.
+
 ## SelfAutoRestDoc
 
 Create an automatic SpringBoot REST documentation to markdown with [Spoon](http://spoon.gforge.inria.fr/).
