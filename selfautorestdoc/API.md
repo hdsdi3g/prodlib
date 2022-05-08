@@ -60,7 +60,7 @@ Response: "application/json" {
 }
 ```
 
-_Mandatory rights: rightForPatch & anotherRightForPatch_
+_Mandatory rights: anotherRightForPatch & rightForPatch_
 
 [Go to the top](#top) &bull; [DemoRestController :: patchActionController](/blob/master/src/main/java/tv/hd3g/selfautorestdoc/demo/DemoRestController.java#79)
 

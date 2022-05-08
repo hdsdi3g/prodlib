@@ -24,9 +24,10 @@
         <module>interfaces</module>
         <module>app</module>
         <module>app-web</module>
+        <module>selfautorestdoc</module>
+        <module>authkit</module>
         <module>mailkit</module>
-	<module>transfertfiles</module>
-	<module>selfautorestdoc</module>
+        <module>transfertfiles</module>
     </modules>
 
     <properties>
@@ -48,13 +49,18 @@
         <ftpserver.version>1.1.2</ftpserver.version>
         <sshd.version>2.8.0</sshd.version>
         <jsch.version>0.1.55</jsch.version>
+        <jsonwebtoken.version>0.11.2</jsonwebtoken.version>
+        <argon2.version>2.7</argon2.version>
+        <zxing.version>3.5.0</zxing.version>
         <log4j2.version>2.17.2</log4j2.version>
         <maven.gpg.version>3.0.1</maven.gpg.version>
         <gpg.skip>true</gpg.skip>
         <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.12</nexus-staging-maven-plugin.version>
         <maven.jacoco.version>0.8.8</maven.jacoco.version>
+
         <codepolicyvalidation.version>1.0.4</codepolicyvalidation.version>
+        <setupdb.version>2.0.2</setupdb.version>
     </properties>
 
     <dependencies>
