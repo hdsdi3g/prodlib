@@ -24,10 +24,12 @@ jobs:
       run: git fetch --unshallow
     - name: Build with Maven
       run: >-
-        mvn -B package test
+        mvn -B package test verify
         -Dgpg.skip=true
         -Dmaven.javadoc.skip=true
         -Dmaven.source.skip=true
+        -Pcoverage,sonar
+        -Dsonar.login=${{ secrets.SONAR_TOKEN }}
         --file pom.xml
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
