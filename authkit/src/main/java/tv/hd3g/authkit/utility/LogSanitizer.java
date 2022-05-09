@@ -30,6 +30,6 @@ public class LogSanitizer {
 		} else if (value.isEmpty()) {
 			return "";
 		}
-		return value.replaceAll("[\n|\r|\t]", " ").trim();
+		return value.replaceAll("[\n|\r|\t]", " ").trim();//NOSONAR S5869
 	}
 }
