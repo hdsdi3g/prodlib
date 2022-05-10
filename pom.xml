@@ -59,9 +59,14 @@
         <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.12</nexus-staging-maven-plugin.version>
         <maven.jacoco.version>0.8.8</maven.jacoco.version>
+        <sonar.version>3.9.1.2184</sonar.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.organization>hdsdi3g</sonar.organization>
         <sonar.projectKey>hdsdi3g_prodlib</sonar.projectKey>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <!-- sonar.language>java</sonar.language-->
 
         <codepolicyvalidation.version>1.0.4</codepolicyvalidation.version>
         <setupdb.version>2.0.2</setupdb.version>
@@ -165,9 +170,15 @@
                         <version>${maven.jacoco.version}</version>
                         <executions>
                             <execution>
-                                <id>prepare-agent</id>
                                 <goals>
                                     <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>report-aggregate</goal>
                                 </goals>
                             </execution>
                         </executions>
@@ -188,6 +199,7 @@
                     <plugin>
                         <groupId>org.sonarsource.scanner.maven</groupId>
                         <artifactId>sonar-maven-plugin</artifactId>
+                        <version>${sonar.version}</version>
                         <executions>
                             <execution>
                                 <id>sonar</id>
