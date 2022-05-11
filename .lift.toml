@@ -1,1 +1,1 @@
-ignoreRules = [ "JavaUtilDate", "MissingSummary", "JavaTimeDefaultTimeZone", "ThreadPriorityCheck" ]
+ignoreRules = [ "JavaUtilDate", "MissingSummary", "JavaTimeDefaultTimeZone", "ThreadPriorityCheck", "EqualsGetClass" ]
