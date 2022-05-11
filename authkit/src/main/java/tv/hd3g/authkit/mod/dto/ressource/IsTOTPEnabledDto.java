@@ -50,7 +50,7 @@ public class IsTOTPEnabledDto extends RepresentationModel<IsTOTPEnabledDto> {
 		if (!super.equals(obj)) {
 			return false;
 		}
-		if (!(obj instanceof IsTOTPEnabledDto)) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final var other = (IsTOTPEnabledDto) obj;

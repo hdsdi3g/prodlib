@@ -94,7 +94,7 @@ class AbstractFileSpecificIOTest {
 		verify(destination, times(2)).getFileSystem();
 		verify(fsSource, times(1)).getIOBufferSize();
 		verify(fsDest, times(1)).getIOBufferSize();
-		verify(observer, times(1)).beforeTransfert(eq(source), eq(destination));
+		verify(observer, times(1)).beforeTransfert(source, destination);
 		verify(observer, times(1)).afterTransfert(eq(source), eq(destination),
 		        eq(source.copiedFrom), eq(0L), any(Duration.class));
 	}
@@ -113,7 +113,7 @@ class AbstractFileSpecificIOTest {
 		assertEquals(1, source.copyCallbacks.size());
 
 		verify(destination, times(1)).getFileSystem();
-		verify(observer, times(1)).beforeTransfert(eq(source), eq(destination));
+		verify(observer, times(1)).beforeTransfert(source, destination);
 		verify(observer, times(1)).afterTransfert(eq(source), eq(destination),
 		        eq(source.copiedFrom), eq(0L), any(Duration.class));
 	}

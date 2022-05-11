@@ -59,7 +59,7 @@ public class BackgroundServiceIdDto extends RepresentationModel<BackgroundServic
 		if (!super.equals(obj)) {
 			return false;
 		}
-		if (!(obj instanceof BackgroundServiceIdDto)) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final var other = (BackgroundServiceIdDto) obj;

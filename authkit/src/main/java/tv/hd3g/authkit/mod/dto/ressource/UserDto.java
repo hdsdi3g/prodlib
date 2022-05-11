@@ -114,7 +114,7 @@ public class UserDto extends RepresentationModel<UserDto> {
 		if (!super.equals(obj)) {
 			return false;
 		}
-		if (!(obj instanceof UserDto)) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final var other = (UserDto) obj;

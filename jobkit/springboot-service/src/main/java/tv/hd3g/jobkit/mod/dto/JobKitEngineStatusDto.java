@@ -34,7 +34,7 @@ public class JobKitEngineStatusDto extends RepresentationModel<JobKitEngineStatu
 		if (!super.equals(obj)) {
 			return false;
 		}
-		if (!(obj instanceof JobKitEngineStatusDto)) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final var other = (JobKitEngineStatusDto) obj;

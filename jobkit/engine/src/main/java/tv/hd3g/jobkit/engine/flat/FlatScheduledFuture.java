@@ -47,7 +47,7 @@ class FlatScheduledFuture implements ScheduledFuture<Void> {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof FlatScheduledFuture)) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final var other = (FlatScheduledFuture) obj;

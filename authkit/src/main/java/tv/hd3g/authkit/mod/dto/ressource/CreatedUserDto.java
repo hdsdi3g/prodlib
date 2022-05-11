@@ -60,7 +60,7 @@ public class CreatedUserDto extends RepresentationModel<CreatedUserDto> {
 		if (!super.equals(obj)) {
 			return false;
 		}
-		if (!(obj instanceof CreatedUserDto)) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final var other = (CreatedUserDto) obj;

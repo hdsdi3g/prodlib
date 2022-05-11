@@ -283,7 +283,7 @@ public class BufferVault {
 	}
 
 	@Override
-	public int hashCode() {
+	public synchronized int hashCode() {
 		var result = 1;
 		for (var pos = 0; pos < size; pos++) {
 			result = 31 * result + datas[pos];
@@ -292,7 +292,7 @@ public class BufferVault {
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
+	public synchronized boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}

@@ -337,7 +337,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 			        anyLong(),
 			        eq(localFileCopy.length()));
 			verify(to, Mockito.times(1))
-			        .beforeTransfert(eq(localFileCopy), eq(f), eq(DISTANTTOLOCAL));
+			        .beforeTransfert(localFileCopy, f, DISTANTTOLOCAL);
 			verify(to, Mockito.times(1))
 			        .afterTransfert(eq(localFileCopy), eq(f), eq(DISTANTTOLOCAL), any(
 			                Duration.class));
@@ -366,7 +366,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 			        anyLong(),
 			        eq(localFileCopy.length()));
 			verify(to, Mockito.times(1))
-			        .beforeTransfert(eq(localFileCopy), eq(f), eq(LOCALTODISTANT));
+			        .beforeTransfert(localFileCopy, f, LOCALTODISTANT);
 			verify(to, Mockito.times(1))
 			        .afterTransfert(eq(localFileCopy), eq(f), eq(LOCALTODISTANT), any(Duration.class));
 		});
@@ -474,7 +474,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 			        assertEquals(stringContent.substring(0, (int) localFileCopy.length()),
 			                FileUtils.readFileToString(localFileCopy, defaultCharset()));
 			        verify(to, Mockito.times(1))
-			                .beforeTransfert(eq(localFileCopy), eq(f), eq(direction));
+			                .beforeTransfert(localFileCopy, f, direction);
 		        });
 		tests.put("testObserverStop_LOCALTODISTANT",
 		        f -> {
@@ -499,7 +499,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 			        assertEquals(stringContent.substring(0, (int) internalFile.length()),
 			                FileUtils.readFileToString(internalFile, defaultCharset()));
 			        verify(to, Mockito.times(1))
-			                .beforeTransfert(eq(localFileCopy), eq(f), eq(direction));
+			                .beforeTransfert(localFileCopy, f, direction);
 		        });
 		tests.put("testObserverFull_DISTANTTOLOCAL",
 		        f -> {
@@ -521,7 +521,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 			        assertEquals(stringContent.substring(0, expectedSize),
 			                FileUtils.readFileToString(localFileCopy, defaultCharset()));
 			        verify(to, Mockito.times(1))
-			                .beforeTransfert(eq(localFileCopy), eq(f), eq(direction));
+			                .beforeTransfert(localFileCopy, f, direction);
 		        });
 		tests.put("testObserverFull_LOCALTODISTANT",
 		        f -> {
@@ -545,7 +545,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 			        assertEquals(stringContent.substring(0, expectedSize),
 			                FileUtils.readFileToString(internalFile, defaultCharset()));
 			        verify(to, Mockito.times(1))
-			                .beforeTransfert(eq(localFileCopy), eq(f), eq(direction));
+			                .beforeTransfert(localFileCopy, f, direction);
 		        });
 
 		return tests.entrySet().stream().map(entry -> {
@@ -585,7 +585,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 
 			verify(copyCallback, atLeastOnce())
 			        .apply(longThat(l -> l > 0 && l <= copied));
-			verify(copyCallback, times(1)).apply(eq(copied));
+			verify(copyCallback, times(1)).apply(copied);
 
 			assertTrue(file.exists());
 			assertTrue(f.exists());
@@ -601,7 +601,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 
 			assertTrue(sourceDatas.length > copied);
 			verify(copyCallback, atLeastOnce()).apply(argThat(l -> l > 0 && l < copied));
-			verify(copyCallback, times(1)).apply(eq(copied));
+			verify(copyCallback, times(1)).apply(copied);
 
 			assertTrue(file.exists());
 			assertTrue(f.exists());
@@ -620,7 +620,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 
 			verify(copyCallback, atLeastOnce())
 			        .apply(ArgumentMatchers.longThat(l -> l > 0 && l <= copied));
-			verify(copyCallback, times(1)).apply(eq(copied));
+			verify(copyCallback, times(1)).apply(copied);
 
 			assertTrue(Arrays.equals(sourceDatas, outputStream.toByteArray()));
 		});
@@ -636,7 +636,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 
 			assertTrue(sourceDatas.length > copied);
 			verify(copyCallback, atLeastOnce()).apply(argThat(l -> l > 0 && l < copied));
-			verify(copyCallback, times(1)).apply(eq(copied));
+			verify(copyCallback, times(1)).apply(copied);
 
 			assertTrue(Arrays.equals(sourceDatas, 0, (int) copied,
 			        outputStream.toByteArray(), 0, (int) copied));

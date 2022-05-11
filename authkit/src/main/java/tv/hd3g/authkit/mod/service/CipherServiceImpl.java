@@ -56,7 +56,7 @@ public class CipherServiceImpl implements CipherService {
 	                         @Value("${authkit.cipher_ivsize:12}") final int ivSize,
 	                         @Value("${authkit.cipher_transformation:AES/GCM/NoPadding}") final String transformation,
 	                         @Value("${authkit.cipher_GCMParameterSpecLen:128}") final int gCMParameterSpecLen) throws GeneralSecurityException {
-		final byte[] secret = Base64.getDecoder().decode(base64secret.getBytes());//TODO add explicit UTF_8
+		final var secret = Base64.getDecoder().decode(base64secret.getBytes(UTF_8));
 		secretKey = new SecretKeySpec(secret, "AES");
 		try {
 			random = SecureRandom.getInstance("NATIVEPRNGNONBLOCKING");
@@ -75,7 +75,7 @@ public class CipherServiceImpl implements CipherService {
 		                + ", GCMParameterSpecLen=" + gCMParameterSpecLen);
 
 		try {
-			final var v = new String(internalUnCipher(internalCipher("check".getBytes())));//TODO add explicit UTF_8
+			final var v = new String(internalUnCipher(internalCipher("check".getBytes(UTF_8))));
 			if (v.equals("check") == false) {
 				throw new GeneralSecurityException("Invalid autotest result: " + v);
 			}

@@ -56,7 +56,7 @@ public class IsExternalAuthDto extends RepresentationModel<IsExternalAuthDto> {
 		if (!super.equals(obj)) {
 			return false;
 		}
-		if (!(obj instanceof IsExternalAuthDto)) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final var other = (IsExternalAuthDto) obj;

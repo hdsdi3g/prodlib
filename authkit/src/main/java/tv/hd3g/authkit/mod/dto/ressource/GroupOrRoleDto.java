@@ -67,7 +67,7 @@ public class GroupOrRoleDto extends RepresentationModel<GroupOrRoleDto> {
 		if (!super.equals(obj)) {
 			return false;
 		}
-		if (!(obj instanceof GroupOrRoleDto)) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final var other = (GroupOrRoleDto) obj;

@@ -99,7 +99,7 @@ public class SecurityRejectedRequestMappingExceptionResolver extends SimpleMappi
 				response.addCookie(cookieRedirect);
 			}
 
-			final var mav = new ModelAndView(authErrorViewName);//TODO correct SPRING_FILE_DISCLOSURE
+			final var mav = new ModelAndView(authErrorViewName);
 			mav.addObject("cause", statusCode.value());
 			mav.addObject("requestURL", request.getRequestURL().toString());
 			mav.addObject("isnotlogged", getUserTokenFromRequestAttribute(request).isEmpty());

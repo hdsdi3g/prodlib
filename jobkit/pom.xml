@@ -38,16 +38,6 @@
         <dependencies>
             <dependency>
                 <groupId>tv.hd3g</groupId>
-                <artifactId>selfautorestdoc</artifactId>
-                <version>9.0.0</version>
-            </dependency>
-            <dependency>
-                <groupId>tv.hd3g</groupId>
-                <artifactId>transfertfiles</artifactId>
-                <version>9.0.0</version>
-            </dependency>
-            <dependency>
-                <groupId>tv.hd3g</groupId>
                 <artifactId>processlauncher</artifactId>
                 <version>${processlauncher.version}</version>
             </dependency>

@@ -49,7 +49,7 @@ public class ItemListDto<T> extends RepresentationModel<ItemListDto<T>> {
 		if (!super.equals(obj)) {
 			return false;
 		}
-		if (!(obj instanceof ItemListDto)) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final ItemListDto<?> other = (ItemListDto<?>) obj;

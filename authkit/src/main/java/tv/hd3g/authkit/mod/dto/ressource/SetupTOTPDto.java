@@ -58,7 +58,7 @@ public class SetupTOTPDto extends RepresentationModel<SetupTOTPDto> {
 		if (!super.equals(obj)) {
 			return false;
 		}
-		if (!(obj instanceof SetupTOTPDto)) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final var other = (SetupTOTPDto) obj;

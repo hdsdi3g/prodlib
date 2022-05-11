@@ -87,7 +87,7 @@ public class OutputDto extends BaseRepresentationModel {
 		if (!super.equals(obj)) {
 			return false;
 		}
-		if (!(obj instanceof OutputDto)) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final var other = (OutputDto) obj;

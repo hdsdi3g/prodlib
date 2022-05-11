@@ -17,6 +17,7 @@
 package tv.hd3g.authkit.mod.service;
 
 import static io.jsonwebtoken.SignatureAlgorithm.HS512;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 import java.time.Duration;
@@ -67,7 +68,7 @@ public class SecuredTokenServiceImpl implements SecuredTokenService {
 	private final byte[] secret;
 
 	public SecuredTokenServiceImpl(@Value("${authkit.jwt_secret}") final String base64secret) {
-		secret = Base64.getDecoder().decode(base64secret.getBytes());//TODO add explicit UTF_8
+		secret = Base64.getDecoder().decode(base64secret.getBytes(UTF_8));
 	}
 
 	@Override

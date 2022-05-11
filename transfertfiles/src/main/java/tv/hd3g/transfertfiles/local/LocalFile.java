@@ -183,11 +183,15 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 	@Override
 	public void delete() {
 		log.debug("Delete local file \"{}\"", internalFile);
-		if (internalFile.delete() == false) {
+		try {
+			Files.delete(internalFile.toPath());
+		} catch (final IOException e) {
 			if (isDirectory()) {
-				throw new CannotDeleteException(this, true, new IOException("Can't delete directory"));
+				throw new CannotDeleteException(this, true,
+				        new IOException("Can't delete directory: " + e.getMessage()));
 			} else {
-				throw new CannotDeleteException(this, false, new IOException("Can't delete file"));
+				throw new CannotDeleteException(this, false,
+				        new IOException("Can't delete file: " + e.getMessage()));
 			}
 		}
 	}

@@ -136,7 +136,7 @@ public class UserPrivacyDto extends RepresentationModel<UserPrivacyDto> {
 		if (!super.equals(obj)) {
 			return false;
 		}
-		if (!(obj instanceof UserPrivacyDto)) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final var other = (UserPrivacyDto) obj;
