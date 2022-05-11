@@ -41,7 +41,7 @@ class ChangeMyPasswordDtoTest {
 
 	@Test
 	void testSetNewpassword() {
-		final Password password = Mockito.mock(Password.class);
+		final var password = Mockito.mock(Password.class);
 		changeMyPasswordDto.setNewpassword(password);
 		assertEquals(password, changeMyPasswordDto.getNewpassword());
 	}

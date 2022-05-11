@@ -43,7 +43,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
 import tv.hd3g.authkit.mod.entity.Credential;
@@ -77,7 +76,7 @@ public class TOTPServiceImpl implements TOTPService {
 	 */
 	@Override
 	public String makeSecret() {
-		final byte[] secret = new byte[64];
+		final var secret = new byte[64];
 		final var random = cipherService.getSecureRandom();
 		random.nextBytes(secret);
 		return base32.encodeAsString(secret);
@@ -101,9 +100,9 @@ public class TOTPServiceImpl implements TOTPService {
 	@Override
 	public String makeQRCode(final URI url) {
 		try {
-			final int size = 400;
-			final BitMatrix bitMatrix = new QRCodeWriter().encode(url.toString(), BarcodeFormat.QR_CODE, size, size);
-			final ByteArrayOutputStream byteArrayQRCodePNG = new ByteArrayOutputStream(0xFFF);
+			final var size = 400;
+			final var bitMatrix = new QRCodeWriter().encode(url.toString(), BarcodeFormat.QR_CODE, size, size);
+			final var byteArrayQRCodePNG = new ByteArrayOutputStream(0xFFF);
 			MatrixToImageWriter.writeToStream(bitMatrix, "png", byteArrayQRCodePNG);
 			return Base64.getEncoder().encodeToString(byteArrayQRCodePNG.toByteArray());
 		} catch (final IOException | WriterException e) {
@@ -180,9 +179,9 @@ public class TOTPServiceImpl implements TOTPService {
 	public static String makeCodeAtTime(final byte[] secret,
 	                                    final long timeMillis,
 	                                    final int timeStepSeconds) throws GeneralSecurityException {
-		final byte[] data = new byte[8];
-		long value = timeMillis / 1000 / timeStepSeconds;
-		for (int i = 7; value > 0; i--) {
+		final var data = new byte[8];
+		var value = timeMillis / 1000 / timeStepSeconds;
+		for (var i = 7; value > 0; i--) {
 			data[i] = (byte) (value & 0xFF);
 			value >>= 8;
 		}
@@ -190,12 +189,12 @@ public class TOTPServiceImpl implements TOTPService {
 		final var signKey = new SecretKeySpec(secret, "HmacSHA256");
 		final var mac = Mac.getInstance("HmacSHA256");
 		mac.init(signKey);
-		final byte[] hash = mac.doFinal(data);
+		final var hash = mac.doFinal(data);
 
-		final int offset = hash[hash.length - 1] & 0xF;
+		final var offset = hash[hash.length - 1] & 0xF;
 
-		long truncatedHash = 0;
-		for (int i = offset; i < offset + 4; ++i) {
+		var truncatedHash = 0L;
+		for (var i = offset; i < offset + 4; ++i) {
 			truncatedHash <<= 8;
 			truncatedHash |= hash[i] & 0xFF;
 		}

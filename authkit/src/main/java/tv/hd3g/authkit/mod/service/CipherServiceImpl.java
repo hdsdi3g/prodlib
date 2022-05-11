@@ -75,7 +75,7 @@ public class CipherServiceImpl implements CipherService {
 		                + ", GCMParameterSpecLen=" + gCMParameterSpecLen);
 
 		try {
-			final var v = new String(internalUnCipher(internalCipher("check".getBytes(UTF_8))));
+			final var v = new String(internalUnCipher(internalCipher("check".getBytes(UTF_8))), UTF_8);
 			if (v.equals("check") == false) {
 				throw new GeneralSecurityException("Invalid autotest result: " + v);
 			}
@@ -159,9 +159,9 @@ public class CipherServiceImpl implements CipherService {
 	}
 
 	public static final String byteToString(final byte[] b) {
-		final StringBuilder sb = new StringBuilder();
+		final var sb = new StringBuilder();
 		for (final byte element : b) {
-			final int v = element & 0xFF;
+			final var v = element & 0xFF;
 			if (v < 16) {
 				sb.append(0);
 			}
@@ -173,7 +173,7 @@ public class CipherServiceImpl implements CipherService {
 	@Override
 	public String computeSHA3FromString(final String text) {
 		try {
-			final MessageDigest md = MessageDigest.getInstance(SHA3_512);
+			final var md = MessageDigest.getInstance(SHA3_512);
 			md.update(text.getBytes(UTF_8));
 			return byteToString(md.digest());
 		} catch (final NoSuchAlgorithmException e) {

@@ -72,16 +72,16 @@ public class SendMailServiceImpl implements SendMailService {
 	}
 
 	private void internalSendEmail(final SendMailDto sendMailDto) throws MessagingException {
-		final Context ctx = new Context();
+		final var ctx = new Context();
 		ctx.setLocale(sendMailDto.getLang());
 		ctx.setVariables(sendMailDto.getTemplateVars());
 
-		final MimeMessage mimeMessage = mailSender.createMimeMessage();
+		final var mimeMessage = mailSender.createMimeMessage();
 
-		final MimeMessageHelper message = new MimeMessageHelper(mimeMessage,
+		final var message = new MimeMessageHelper(mimeMessage,
 		        MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
 
-		final String subjectContent = subjectTemplateEngine.process(sendMailDto.getTemplateName(), ctx)
+		final var subjectContent = subjectTemplateEngine.process(sendMailDto.getTemplateName(), ctx)
 		        .replace("\r\n", " ").replace("\n", " ").replace("    ", " ").replace("   ", " ").replace("  ", " ");
 		message.setSubject(subjectContent);
 
@@ -116,13 +116,13 @@ public class SendMailServiceImpl implements SendMailService {
 
 		setReferenceHeaders(sendMailDto, mimeMessage);
 
-		final String htmlContent = htmlTemplateEngine.process(sendMailDto.getTemplateName(), ctx);
+		final var htmlContent = htmlTemplateEngine.process(sendMailDto.getTemplateName(), ctx);
 		message.setText(htmlContent, true);
 
 		final var resources = sendMailDto.getResourceFiles();
 		if (resources != null) {
 			for (final var resource : resources) {
-				final ClassPathResource imageSource = new ClassPathResource("static/" + resource);
+				final var imageSource = new ClassPathResource("static/" + resource);
 				message.addInline(resource, imageSource);
 			}
 		}

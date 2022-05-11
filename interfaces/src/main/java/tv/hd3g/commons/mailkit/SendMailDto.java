@@ -50,7 +50,7 @@ public class SendMailDto {
 
 		private final int messagePriority;
 
-		private MessageGrade(final int messagePriority) {
+		MessageGrade(final int messagePriority) {
 			this.messagePriority = messagePriority;
 		}
 

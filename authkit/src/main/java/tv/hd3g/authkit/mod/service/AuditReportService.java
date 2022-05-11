@@ -101,7 +101,7 @@ public interface AuditReportService {
 
 		private final String cause;
 
-		private RejectLoginCause(final String cause) {
+		RejectLoginCause(final String cause) {
 			this.cause = cause;
 		}
 

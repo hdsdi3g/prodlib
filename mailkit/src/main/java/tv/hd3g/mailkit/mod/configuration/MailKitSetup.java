@@ -40,7 +40,7 @@ public class MailKitSetup {
 	}
 
 	private ITemplateResolver templateResolver(final String suffix, final TemplateMode mode) {
-		final ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
+		final var templateResolver = new ClassLoaderTemplateResolver();
 		templateResolver.setPrefix("/templates/");
 		templateResolver.setSuffix(suffix);
 		templateResolver.setTemplateMode(mode);
@@ -52,7 +52,7 @@ public class MailKitSetup {
 
 	@Bean(name = "htmlTemplateEngine")
 	public TemplateEngine htmlTemplateEngine() {
-		final TemplateEngine templateEngine = new TemplateEngine();
+		final var templateEngine = new TemplateEngine();
 		templateEngine.addTemplateResolver(templateResolver(".html", TemplateMode.HTML));
 		templateEngine.addMessageResolver(springMessageResolver);
 		return templateEngine;
@@ -60,7 +60,7 @@ public class MailKitSetup {
 
 	@Bean(name = "subjectTemplateEngine")
 	public TemplateEngine subjectTemplateEngine() {
-		final TemplateEngine templateEngine = new TemplateEngine();
+		final var templateEngine = new TemplateEngine();
 		templateEngine.addTemplateResolver(templateResolver(".txt", TemplateMode.TEXT));
 		templateEngine.addMessageResolver(springMessageResolver);
 		return templateEngine;

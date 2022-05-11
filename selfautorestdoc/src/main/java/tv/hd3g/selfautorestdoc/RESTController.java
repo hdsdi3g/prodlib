@@ -40,12 +40,13 @@ class RESTController {
 		this.controllerClass = Objects.requireNonNull(controllerClass, "\"controllerClass\" can't to be null");
 	}
 
-	private static boolean isAnnotationMapping(Annotation a){return a.annotationType() == RequestMapping.class ||
-	                                                                      a.annotationType() == PostMapping.class ||
-	                                                                      a.annotationType() == PatchMapping.class ||
-	                                                                      a.annotationType() == PutMapping.class ||
-	                                                                      a.annotationType() == DeleteMapping.class ||
-	                                                                      a.annotationType() == GetMapping.class;
+	private static boolean isAnnotationMapping(final Annotation a) {
+		return a.annotationType() == RequestMapping.class ||
+		       a.annotationType() == PostMapping.class ||
+		       a.annotationType() == PatchMapping.class ||
+		       a.annotationType() == PutMapping.class ||
+		       a.annotationType() == DeleteMapping.class ||
+		       a.annotationType() == GetMapping.class;
 	}
 
 	public RESTControllerAnalysis processAnalysis(final CtModel model) {

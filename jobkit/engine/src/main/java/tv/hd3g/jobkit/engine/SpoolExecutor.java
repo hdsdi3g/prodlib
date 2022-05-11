@@ -139,7 +139,7 @@ public class SpoolExecutor {
 				log.warn("Can't send event BeforeStart", e);
 			}
 
-			final long startTime = System.currentTimeMillis();
+			final var startTime = System.currentTimeMillis();
 			Exception error = null;
 			try {
 				log.debug("Start new command \"{}\" by \"{}\"", commandName, name);
@@ -152,7 +152,7 @@ public class SpoolExecutor {
 				        (System.currentTimeMillis() - startTime) / 1000f, e);
 			}
 
-			final long endTime = System.currentTimeMillis();
+			final var endTime = System.currentTimeMillis();
 			try {
 				if (error != null) {
 					event.afterFailedRun(commandName, endTime, endTime - startTime, executorReferer, error);

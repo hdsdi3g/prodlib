@@ -44,7 +44,7 @@ public class CIDRUtils {
 		if (cidr.contains("/") == false) {
 			throw new IllegalArgumentException("Missing CIDR: " + cidr);
 		}
-		final int index = cidr.indexOf('/');
+		final var index = cidr.indexOf('/');
 		if (cidr.lastIndexOf('/') != index) {
 			throw new IllegalArgumentException("Invalid IP/CIDR format: " + cidr);
 		}
@@ -70,16 +70,16 @@ public class CIDRUtils {
 			throw new IllegalArgumentException("Too big CIDR: " + cidr);
 		}
 
-		final BigInteger mask = new BigInteger(1, maskBuffer.array()).not().shiftRight(prefixLength);
+		final var mask = new BigInteger(1, maskBuffer.array()).not().shiftRight(prefixLength);
 
-		final ByteBuffer buffer = ByteBuffer.wrap(inetAddress.getAddress());
-		final BigInteger ipVal = new BigInteger(1, buffer.array());
+		final var buffer = ByteBuffer.wrap(inetAddress.getAddress());
+		final var ipVal = new BigInteger(1, buffer.array());
 
-		final BigInteger startIp = ipVal.and(mask);
-		final BigInteger endIp = startIp.add(mask.not());
+		final var startIp = ipVal.and(mask);
+		final var endIp = startIp.add(mask.not());
 
-		final byte[] startIpArr = toBytes(startIp.toByteArray(), targetSize);
-		final byte[] endIpArr = toBytes(endIp.toByteArray(), targetSize);
+		final var startIpArr = toBytes(startIp.toByteArray(), targetSize);
+		final var endIpArr = toBytes(endIp.toByteArray(), targetSize);
 
 		startAddress = InetAddress.getByAddress(startIpArr);
 		endAddress = InetAddress.getByAddress(endIpArr);
@@ -95,21 +95,21 @@ public class CIDRUtils {
 	}
 
 	private byte[] toBytes(final byte[] array, final int targetSize) {
-		int counter = 0;
+		var counter = 0;
 		final List<Byte> newArr = new ArrayList<>();
 		while (counter < targetSize && array.length - 1 - counter >= 0) {
 			newArr.add(0, array[array.length - 1 - counter]);
 			counter++;
 		}
 
-		final int size = newArr.size();
-		for (int i = 0; i < targetSize - size; i++) {
+		final var size = newArr.size();
+		for (var i = 0; i < targetSize - size; i++) {
 
 			newArr.add(0, (byte) 0);
 		}
 
-		final byte[] ret = new byte[newArr.size()];
-		for (int i = 0; i < newArr.size(); i++) {
+		final var ret = new byte[newArr.size()];
+		for (var i = 0; i < newArr.size(); i++) {
 			ret[i] = newArr.get(i);
 		}
 		return ret;
@@ -128,9 +128,9 @@ public class CIDRUtils {
 	}
 
 	public boolean isInRange(final InetAddress address) {
-		final BigInteger start = new BigInteger(1, startAddress.getAddress());
-		final BigInteger end = new BigInteger(1, endAddress.getAddress());
-		final BigInteger target = new BigInteger(1, address.getAddress());
+		final var start = new BigInteger(1, startAddress.getAddress());
+		final var end = new BigInteger(1, endAddress.getAddress());
+		final var target = new BigInteger(1, address.getAddress());
 		return start.compareTo(target) <= 0 && target.compareTo(end) <= 0;
 	}
 

@@ -109,12 +109,10 @@ class DtoAnalyser {
 				type = originalType;
 			}
 
-			if (stratumPos == 10) {
+			if ((stratumPos == 10) || ((structuralStratum != MAP) && ((structuralStratum != LIST) || (isTypeIsProtected(type) != false)))) {
 				subItems = null;
-			} else if ((structuralStratum == MAP) || (structuralStratum == LIST && isTypeIsProtected(type) == false)) {
-				subItems = getDtoContent(type, stratumPos + 1);
 			} else {
-				subItems = null;
+				subItems = getDtoContent(type, stratumPos + 1);
 			}
 		}
 

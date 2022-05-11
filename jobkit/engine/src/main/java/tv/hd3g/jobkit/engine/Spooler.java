@@ -30,7 +30,7 @@ public class Spooler {
 		shutdown = new AtomicBoolean(false);
 
 		threadFactory = r -> {
-			final Thread t = new Thread(r);
+			final var t = new Thread(r);
 			t.setPriority(Thread.MIN_PRIORITY);
 			t.setDaemon(false);
 			t.setName("SpoolExecutor #" + threadCount.getAndIncrement());

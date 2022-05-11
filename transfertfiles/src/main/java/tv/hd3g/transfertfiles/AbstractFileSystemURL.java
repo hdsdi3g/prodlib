@@ -71,7 +71,7 @@ public class AbstractFileSystemURL implements Closeable {
 	public AbstractFileSystemURL(final String ressourceURL) {
 		final var url = new URLAccess(ressourceURL);
 
-		final var protocol = url.getProtocol();
+		final var protocol = requireNonNull(url.getProtocol());
 		basePath = normalizePath(Optional.ofNullable(url.getPath()).orElse("/"));
 		final var host = resolveHostname(url);
 		final var query = requireNonNull(url.getOptionZone());
@@ -87,7 +87,7 @@ public class AbstractFileSystemURL implements Closeable {
 		        .filter(File::exists)
 		        .collect(toUnmodifiableList());
 
-		if (protocol.contentEquals("file")) {
+		if (protocol.contentEquals("file")) {// XXX
 			log.debug("Init URL LocalFileSystem: {}", this::toString);
 			fileSystem = new LocalFileSystem(new File(basePath));
 		} else if (protocol.contentEquals("sftp")) {

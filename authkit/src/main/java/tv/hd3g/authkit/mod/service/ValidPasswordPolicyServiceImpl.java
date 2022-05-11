@@ -114,8 +114,8 @@ public class ValidPasswordPolicyServiceImpl implements ValidPasswordPolicyServic
 	 */
 	public static List<String> split(final String text, final String what) {
 		final List<String> list = new ArrayList<>();
-		String value = text;
-		int p = -1;
+		var value = text;
+		var p = -1;
 		list.add(value);
 		while (value.indexOf(what) > -1 && value.indexOf(what) < value.length() - 1) {
 			p = value.indexOf(what);

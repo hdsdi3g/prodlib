@@ -36,7 +36,7 @@ public class SqlFileResourceHelper {
 	private final Map<String, String> sqlFiles;
 
 	public SqlFileResourceHelper() throws IOException {
-		final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+		final var resolver = new PathMatchingResourcePatternResolver();
 
 		class SqlFile {
 			private String name;
@@ -52,10 +52,10 @@ public class SqlFileResourceHelper {
 		}
 
 		sqlFiles = Arrays.stream(resolver.getResources("classpath*:sql/*.sql")).map(r -> {
-			final SqlFile sqlFile = new SqlFile();
+			final var sqlFile = new SqlFile();
 			sqlFile.name = r.getFilename();
 
-			try (BufferedReader br = new BufferedReader(
+			try (var br = new BufferedReader(
 			        new InputStreamReader(r.getInputStream(), UTF_8))) {
 				sqlFile.content = br.lines().filter(line -> {
 					final var l = line.trim();

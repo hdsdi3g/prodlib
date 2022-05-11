@@ -36,7 +36,7 @@ public abstract class HashCodeEqualsTest {// NOSONAR
 		for (final Object instance : instances) {
 			assertNotNull(instance);
 		}
-		for (int j = 1; j < instances.length; j++) {
+		for (var j = 1; j < instances.length; j++) {
 			assertEquals(instances[0].hashCode(), instances[j].hashCode());
 		}
 	}

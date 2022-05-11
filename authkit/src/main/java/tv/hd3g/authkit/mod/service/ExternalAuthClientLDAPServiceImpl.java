@@ -33,7 +33,6 @@ import java.util.stream.StreamSupport;
 import javax.naming.CommunicationException;
 import javax.naming.Context;
 import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.ldap.InitialLdapContext;
@@ -86,7 +85,7 @@ public class ExternalAuthClientLDAPServiceImpl implements ExternalAuthClientServ
 			throw new ExternalAuthErrorCantLoginException();
 		} else if (password == null || password.length() == 0) {
 			throw new NoPasswordUserCantLoginException();
-		} else if (StringUtils.isAlphanumeric(domain) == false || StringUtils.isAlphanumeric(login) == false){
+		} else if (StringUtils.isAlphanumeric(domain) == false || StringUtils.isAlphanumeric(login) == false) {
 			throw new IllegalArgumentException("Login or domain invalid");
 		}
 
@@ -95,7 +94,7 @@ public class ExternalAuthClientLDAPServiceImpl implements ExternalAuthClientServ
 			throw new IllegalArgumentException("Unsuported LDAP typ server: " + configuration.getType());
 		}
 
-		final Hashtable<String, String> props = new Hashtable<>();
+		final var props = new Hashtable<String, String>();
 		props.put(Context.SECURITY_PRINCIPAL, login + "@" + domain);
 		props.put(Context.SECURITY_CREDENTIALS, password.subSequence(0, password.length()).toString());
 		props.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -108,22 +107,22 @@ public class ExternalAuthClientLDAPServiceImpl implements ExternalAuthClientServ
 				throw new UnknownUserCantLoginException();
 			}
 
-			final SearchControls controls = new SearchControls();
+			final var controls = new SearchControls();
 			controls.setSearchScope(SUBTREE_SCOPE);
 			controls.setCountLimit(1);
 			controls.setTimeLimit(500);
 
 			final var answer = context.search(
-					toDC(domain),
+			        toDC(domain),
 			        configuration.getLdapSearchLogonQuery().replace("<ldapTenantName>", login),
 			        controls);
 			if (answer.hasMore() == false) {
 				log.error("Can't get LDAP entry for {}", login);
 				throw new UnknownUserCantLoginException();
 			}
-			final Attributes attr = answer.next().getAttributes();
+			final var attr = answer.next().getAttributes();
 
-			final Attribute user = attr.get(configuration.getLdapTenantName());
+			final var user = attr.get(configuration.getLdapTenantName());
 			if (user == null) {
 				log.error("Can't get LDAP user for {}", login);
 				throw new UnknownUserCantLoginException();

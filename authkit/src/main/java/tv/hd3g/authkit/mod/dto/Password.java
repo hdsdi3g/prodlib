@@ -38,7 +38,7 @@ public class Password implements CharSequence {
 			throw new IllegalArgumentException("Can't handle empty passwords");
 		}
 		this.value = new char[value.length()];
-		for (int i = 0; i < value.length(); i++) {
+		for (var i = 0; i < value.length(); i++) {
 			this.value[i] = value.charAt(i);
 		}
 	}
@@ -72,8 +72,8 @@ public class Password implements CharSequence {
 		if (value[start] == '\0') {
 			throw new IllegalStateException(REUSE_ERROR);
 		}
-		final StringBuilder sb = new StringBuilder(end - start);
-		for (int i = start; i < end; i++) {
+		final var sb = new StringBuilder(end - start);
+		for (var i = start; i < end; i++) {
 			sb.append(charAt(i));
 		}
 		return sb;
@@ -110,8 +110,8 @@ public class Password implements CharSequence {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
+		final var prime = 31;
+		var result = 1;
 		result = prime * result + Arrays.hashCode(value);
 		return result;
 	}
@@ -127,7 +127,7 @@ public class Password implements CharSequence {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final Password other = (Password) obj;
+		final var other = (Password) obj;
 		return Arrays.equals(value, other.value);
 	}
 
@@ -167,8 +167,8 @@ public class Password implements CharSequence {
 		rangeCheck(l.length, lFromIndex, lToIndex);
 		rangeCheck(r.length, rFromIndex, rToIndex);
 
-		final int aLength = lToIndex - lFromIndex;
-		final int bLength = rToIndex - rFromIndex;
+		final var aLength = lToIndex - lFromIndex;
+		final var bLength = rToIndex - rFromIndex;
 		if (aLength != bLength) {
 			return false;
 		}
@@ -177,11 +177,11 @@ public class Password implements CharSequence {
 		 * Expect short arrays sizes, don't manage ranges.
 		 */
 		final var l2 = Arrays.copyOf(l, l.length);
-		for (int pos = 0; pos < l2.length; pos++) {
+		for (var pos = 0; pos < l2.length; pos++) {
 			l2[pos] = Character.toUpperCase(l2[pos]);
 		}
 		final var r2 = Arrays.copyOf(r, r.length);
-		for (int pos = 0; pos < r2.length; pos++) {
+		for (var pos = 0; pos < r2.length; pos++) {
 			r2[pos] = Character.toUpperCase(r2[pos]);
 		}
 
@@ -205,7 +205,7 @@ public class Password implements CharSequence {
 		} else if (equalsInsensitive(value, term)) {
 			return true;
 		}
-		for (int pos = 0; pos < value.length - term.length + 1; pos++) {
+		for (var pos = 0; pos < value.length - term.length + 1; pos++) {
 			if (equalsInsensitive(value, pos, pos + term.length, term, 0, term.length)) {
 				return true;
 			}
@@ -243,8 +243,8 @@ public class Password implements CharSequence {
 			throw new PasswordTooSimpleException("Proposed password is a too generic term");
 		}
 		final var newLen = value.length - term.length;
-		final char[] valueToTest = new char[newLen];
-		for (int pos = 0; pos < newLen + 1; pos++) {
+		final var valueToTest = new char[newLen];
+		for (var pos = 0; pos < newLen + 1; pos++) {
 			if (equalsInsensitive(value, pos, pos + term.length, term, 0, term.length) == false) {
 				continue;
 			}
@@ -337,7 +337,7 @@ public class Password implements CharSequence {
 		if (value.length < minSize) {
 			throw new PasswordTooShortException("Proposed password is too short");
 		}
-		final char[] valueToTest = new char[value.length];
+		final var valueToTest = new char[value.length];
 		System.arraycopy(value, 0, valueToTest, 0, value.length);
 		checkSomeComplexity(minSize, mustHaveSpecialChars, valueToTest);
 	}

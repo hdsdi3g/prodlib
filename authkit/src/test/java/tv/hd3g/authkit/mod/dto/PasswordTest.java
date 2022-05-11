@@ -47,14 +47,14 @@ class PasswordTest extends HashCodeEqualsTest {
 
 	@Test
 	void toStringBeforeReset() {
-		final String rawValue = password.toString();
+		final var rawValue = password.toString();
 		assertEquals(StringUtils.repeat("*", passwordValue.length()), rawValue);
 	}
 
 	@Test
 	void toStringAfterReset() {
 		password.reset();
-		final String rawValue = password.toString();
+		final var rawValue = password.toString();
 		assertEquals(StringUtils.repeat("*", passwordValue.length()), rawValue);
 	}
 
@@ -82,7 +82,7 @@ class PasswordTest extends HashCodeEqualsTest {
 
 	@Test
 	void subSequenceBeforeReset() {
-		final CharSequence sub = password.subSequence(0, passwordValue.length());
+		final var sub = password.subSequence(0, passwordValue.length());
 		password.reset();
 		assertTrue(passwordValue.contentEquals(sub));
 	}
@@ -98,7 +98,7 @@ class PasswordTest extends HashCodeEqualsTest {
 	@Test
 	void duplicate() {
 		final var p2 = password.duplicate();
-		final CharSequence sub = p2.subSequence(0, p2.length());
+		final var sub = p2.subSequence(0, p2.length());
 		p2.reset();
 		assertTrue(passwordValue.contentEquals(sub));
 	}
