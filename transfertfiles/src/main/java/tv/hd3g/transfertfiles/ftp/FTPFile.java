@@ -301,7 +301,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 		cwdBeforeOperation(getFullPathNoEndSeparator(path));
 	}
 
-	private class StoppableListener implements CopyStreamListener {
+	private static class StoppableListener implements CopyStreamListener {
 		final String source;
 		final String dest;
 		final File localFile;
