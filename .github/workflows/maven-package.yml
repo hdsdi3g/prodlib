@@ -30,7 +30,12 @@ jobs:
         -Dmaven.source.skip=true
         -Pcoverage,sonar
         -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        -Dsonar.host.url=https://sonarcloud.io
+        -Dsonar.organization=hdsdi3g
+        -Dsonar.projectKey=hdsdi3g_prodlib
+        -Dsonar.java.coveragePlugin=jacoco
+        -Dsonar.dynamicAnalysis=reuseReports
+        -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco-aggregate/jacoco.xml
         --file pom.xml
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
