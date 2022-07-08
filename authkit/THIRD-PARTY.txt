@@ -134,6 +134,6 @@ Lists of 137 third-party dependencies.
      (The Apache Software License, Version 2.0) unbescape (org.unbescape:unbescape:1.1.6.RELEASE - http://www.unbescape.org)
      (The Apache Software License, Version 2.0) org.xmlunit:xmlunit-core (org.xmlunit:xmlunit-core:2.8.4 - https://www.xmlunit.org/)
      (Apache License, Version 2.0) SnakeYAML (org.yaml:snakeyaml:1.29 - http://www.snakeyaml.org)
-     (GNU Lesser General Public License, Version 3) SelfAutoRESTDoc (tv.hd3g:selfautorestdoc:9.0.1 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) SelfAutoRESTDoc (tv.hd3g:selfautorestdoc:9.0.2 - https://github.com/hdsdi3g/prodlib)
      (GNU Lesser General Public License, Version 3) CodePolicyValidation (tv.hd3g.commons:codepolicyvalidation:1.0.4 - https://github.com/hdsdi3g/codepolicyvalidation)
-     (GNU Lesser General Public License, Version 3) Commons Interfaces (tv.hd3g.commons:interfaces:9.0.1 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) Commons Interfaces (tv.hd3g.commons:interfaces:9.0.2 - https://github.com/hdsdi3g/prodlib)
