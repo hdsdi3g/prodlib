@@ -28,6 +28,7 @@ import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -87,7 +88,19 @@ public class AbstractFileSystemURL implements Closeable {
 		        .filter(File::exists)
 		        .collect(toUnmodifiableList());
 
-		if (protocol.contentEquals("file")) {// XXX
+		log.trace("Parsed URL: {}", Map.of(
+		        "protocol", Optional.ofNullable(protocol).orElse("null"),
+		        "basePath", Optional.ofNullable(basePath).orElse("null"),
+		        "host", Optional.ofNullable(host).map(Object::toString).orElse("null"),
+		        "query", Optional.ofNullable(query).map(Object::toString).orElse("null"),
+		        "username", Optional.ofNullable(username).orElse("null"),
+		        "protectedRessourceURL", Optional.ofNullable(protectedRessourceURL).orElse("null"),
+		        "port", port,
+		        "passive", passive,
+		        "ignoreInvalidCertificates", ignoreInvalidCertificates,
+		        "keys", Optional.ofNullable(keys).map(Object::toString).orElse("null")));
+
+		if (protocol.contentEquals("file")) {
 			log.debug("Init URL LocalFileSystem: {}", this::toString);
 			fileSystem = new LocalFileSystem(new File(basePath));
 		} else if (protocol.contentEquals("sftp")) {

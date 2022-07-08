@@ -64,8 +64,10 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 		super(fileSystem, relativePath);
 		if (fileSystem.isAbsoluteBasePath()) {
 			sftpAbsolutePath = absolutePath;
-		} else {
+		} else if (absolutePath.isEmpty() == false) {
 			sftpAbsolutePath = absolutePath.substring(1);
+		} else {
+			sftpAbsolutePath = "";
 		}
 		this.sftpClient = sftpClient;
 	}
