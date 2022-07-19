@@ -28,7 +28,8 @@
         <module>authkit</module>
         <module>mailkit</module>
         <module>jobkit</module>
-        <module>transfertfiles</module>
+	<module>transfertfiles</module>
+        <module>csvkit</module>
     </modules>
 
     <properties>
@@ -53,6 +54,7 @@
         <jsonwebtoken.version>0.11.2</jsonwebtoken.version>
         <argon2.version>2.7</argon2.version>
         <zxing.version>3.5.0</zxing.version>
+        <opencsv.version>5.6</opencsv.version>
         <log4j2.version>2.17.2</log4j2.version>
         <maven.gpg.version>3.0.1</maven.gpg.version>
         <gpg.skip>true</gpg.skip>
