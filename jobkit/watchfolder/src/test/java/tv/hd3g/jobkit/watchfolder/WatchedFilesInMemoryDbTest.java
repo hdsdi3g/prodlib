@@ -69,8 +69,8 @@ class WatchedFilesInMemoryDbTest {
 		FileUtils.forceMkdir(workingFile);
 
 		observedFolder.setLabel("test");
-		observedFolder.setAllowedExtentions(Set.of("ok"));
-		observedFolder.setBlockedExtentions(Set.of("no"));
+		observedFolder.setAllowedExtentions(Set.of("ok", "ok.long"));
+		observedFolder.setBlockedExtentions(Set.of("no", "no.long"));
 		observedFolder.setIgnoreRelativePaths(Set.of("never/here"));
 		observedFolder.setIgnoreFiles(Set.of("desktop.ini", ".DS_Store", "ignoreme.ok"));
 
@@ -84,18 +84,20 @@ class WatchedFilesInMemoryDbTest {
 		var w = watchedFilesDb.update(fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 0);
 
-		write("thisfine.ok", "thisnotfine.no", "/whysubdir/thisfine.ok", "ignoreme.ok");
+		write("thisfine.ok", "thisfine.ok.long", "thisnotfine.no",
+		        "thisnotfine.no.long", "/whysubdir/thisfine.ok", "ignoreme.ok");
 
 		w = watchedFilesDb.update(fs);
-		assertWatchedFiles(w, Set.of(), Set.of(), 1);
+		assertWatchedFiles(w, Set.of(), Set.of(), 2);
 
 		w = watchedFilesDb.update(fs);
-		assertWatchedFiles(w, Set.of("thisfine.ok"), Set.of(), 1);
+		assertWatchedFiles(w, Set.of("thisfine.ok", "thisfine.ok.long"), Set.of(), 2);
 
 		w = watchedFilesDb.update(fs);
-		assertWatchedFiles(w, Set.of(), Set.of(), 1);
+		assertWatchedFiles(w, Set.of(), Set.of(), 2);
 
 		delete("thisfine.ok");
+		delete("thisfine.ok.long");
 		w = watchedFilesDb.update(fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 0);
 	}
@@ -360,22 +362,23 @@ class WatchedFilesInMemoryDbTest {
 	void testReset() {
 		watchedFilesDb.setup(observedFolder, FILES_ONLY);
 
-		write("thisfine.ok", "thisnotfine.no", "/whysubdir/thisfine.ok", "ignoreme.ok");
+		write("thisfine.ok", "thisfine.ok.long", "thisnotfine.no", "thisnotfine.no.long",
+		        "/whysubdir/thisfine.ok", "ignoreme.ok");
 		var w = watchedFilesDb.update(fs);
-		assertWatchedFiles(w, Set.of(), Set.of(), 1);
+		assertWatchedFiles(w, Set.of(), Set.of(), 2);
 		w = watchedFilesDb.update(fs);
-		assertWatchedFiles(w, Set.of("thisfine.ok"), Set.of(), 1);
+		assertWatchedFiles(w, Set.of("thisfine.ok", "thisfine.ok.long"), Set.of(), 2);
 
 		watchedFilesDb.reset(w.getFounded());
 
 		w = watchedFilesDb.update(fs);
-		assertWatchedFiles(w, Set.of(), Set.of(), 1);
+		assertWatchedFiles(w, Set.of(), Set.of(), 2);
 		w = watchedFilesDb.update(fs);
-		assertWatchedFiles(w, Set.of("thisfine.ok"), Set.of(), 1);
+		assertWatchedFiles(w, Set.of("thisfine.ok", "thisfine.ok.long"), Set.of(), 2);
 		w = watchedFilesDb.update(fs);
-		assertWatchedFiles(w, Set.of(), Set.of(), 1);
+		assertWatchedFiles(w, Set.of(), Set.of(), 2);
 		w = watchedFilesDb.update(fs);
-		assertWatchedFiles(w, Set.of(), Set.of(), 1);
+		assertWatchedFiles(w, Set.of(), Set.of(), 2);
 	}
 
 }

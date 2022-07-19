@@ -49,8 +49,8 @@ class ObservedFolderTest {
 	void init() {
 		targetFolder = new File("").getAbsolutePath();
 		label = "lbl-" + String.valueOf(Math.abs(System.nanoTime()));
-		allowedExtentions = Set.of(".ok", "gO");
-		blockedExtentions = Set.of("no", ".nEver");
+		allowedExtentions = Set.of(".ok", "gO", ".a.b", "c.d", "e.f.g");
+		blockedExtentions = Set.of("no", ".nEver", ".Na.Nb", "Nc.Nd", "Ne.Nf.Ng");
 		ignoreRelativePaths = Set.of("/never/here", "nope\\dir");
 		ignoreFiles = Set.of("desktop.ini", ".DS_Store");
 		minFixedStateTime = Duration.ofSeconds(1);
@@ -68,8 +68,8 @@ class ObservedFolderTest {
 		observedFolder.setLabel(label);
 		observedFolder.postConfiguration();
 
-		assertEquals(Set.of("ok", "go"), observedFolder.getAllowedExtentions());
-		assertEquals(Set.of("no", "never"), observedFolder.getBlockedExtentions());
+		assertEquals(Set.of("ok", "go", "a.b", "c.d", "e.f.g"), observedFolder.getAllowedExtentions());
+		assertEquals(Set.of("no", "never", "na.nb", "nc.nd", "ne.nf.ng"), observedFolder.getBlockedExtentions());
 		assertEquals(Set.of("/never/here", "/nope/dir"), observedFolder.getIgnoreRelativePaths());
 		assertEquals(Set.of("desktop.ini", ".ds_store"), observedFolder.getIgnoreFiles());
 	}

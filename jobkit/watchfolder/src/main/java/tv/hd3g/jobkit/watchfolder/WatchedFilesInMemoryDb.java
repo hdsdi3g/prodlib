@@ -19,7 +19,6 @@ package tv.hd3g.jobkit.watchfolder;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
-import static org.apache.commons.io.FilenameUtils.getExtension;
 import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.FILES_DIRS;
 
 import java.io.IOException;
@@ -181,7 +180,7 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 			        if (f.isDirectory()) {
 				        return true;
 			        } else if (allowedExtentions.isEmpty() == false) {
-				        return allowedExtentions.contains(getExtension(f.getName()).toLowerCase());
+				        return containExtension(f.getName(), allowedExtentions);
 			        }
 			        return true;
 		        })
@@ -189,7 +188,7 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 			        if (f.isDirectory()) {
 				        return true;
 			        }
-			        return blockedExtentions.contains(getExtension(f.getName()).toLowerCase()) == false;
+			        return containExtension(f.getName(), blockedExtentions) == false;
 		        })
 		        .filter(f -> {
 			        if (ignoreRelativePaths.isEmpty()) {
@@ -215,4 +214,8 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 		}
 	}
 
+	boolean containExtension(final String baseFileName, final Set<String> candidates) {
+		return candidates.stream()
+		        .anyMatch(c -> baseFileName.toLowerCase().endsWith("." + c));
+	}
 }
