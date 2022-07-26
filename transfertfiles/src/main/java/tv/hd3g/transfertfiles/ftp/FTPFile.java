@@ -382,7 +382,6 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 						        "Source file is a directory, can't copy from it"));
 					}
 					sizeToTransfert.set(sourceFileRef.getSize());
-					cwdToParentPath();
 
 					try (var outputstream = new StoppableOutputStream(new BufferedOutputStream(
 					        new FileOutputStream(localFile), localBufferSize))) {
