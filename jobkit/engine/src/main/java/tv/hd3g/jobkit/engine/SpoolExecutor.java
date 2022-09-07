@@ -164,8 +164,11 @@ public class SpoolExecutor {
 			}
 
 			try {
+				final var startTimeAfterRun = System.currentTimeMillis();
 				log.debug("Start to run afterRunCommand for  \"{}\" by \"{}\"", commandName, name);
 				afterRunCommand.accept(error);
+				log.debug("Ends correcly afterRunCommand \"{}\" by \"{}\", after {} sec", commandName, name,
+				        (System.currentTimeMillis() - startTimeAfterRun) / 1000f);
 			} catch (final Exception e) {
 				log.error("Fail to run afterRunCommand for  \"{}\" by \"{}\"", commandName, name, e);
 			}

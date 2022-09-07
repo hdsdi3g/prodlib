@@ -161,7 +161,7 @@ public class Watchfolders {
 		service.setTimedInterval(timeBetweenScans);
 		service.setRetryAfterTimeFactor(10);
 		service.setPriority(0);
-		jobKitEngine.runOneShot("Start watchfolder scans for " + getWFName(), spoolEvents, 0,
+		jobKitEngine.runOneShot("Start (enable) watchfolder scans for " + getWFName(), spoolEvents, 0,
 		        () -> {
 			        eventActivity.onStartScans(observedFolders);
 			        service.enable();
