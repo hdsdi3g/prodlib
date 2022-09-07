@@ -74,4 +74,11 @@ class FlatBackgroundService extends BackgroundService {
 		return this;
 	}
 
+	@Override
+	public synchronized void runFirstOnStartup() {
+		/**
+		 * Not needed, not implemented
+		 */
+	}
+
 }

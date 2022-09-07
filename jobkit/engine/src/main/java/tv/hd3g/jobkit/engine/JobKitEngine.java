@@ -115,4 +115,7 @@ public class JobKitEngine implements JobTrait {
 		return new JobKitEngineStatus(spoolerStatus, backgroundServicesStatus);
 	}
 
+	public void onApplicationReadyRunBackgroundServices() {
+		backgroundServices.forEach(BackgroundService::runFirstOnStartup);
+	}
 }

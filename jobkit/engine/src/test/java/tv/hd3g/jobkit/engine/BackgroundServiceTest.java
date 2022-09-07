@@ -1,6 +1,7 @@
 package tv.hd3g.jobkit.engine;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -388,6 +389,75 @@ class BackgroundServiceTest {
 		assertEquals(1d, statusOn.getRetryAfterTimeFactor());
 		assertEquals(0, statusOn.getSequentialErrorCount());
 		assertNotNull(statusOn.getTask());
+	}
+
+	@Test
+	void testRunFirstOnStartup_enabled_long_time() {
+		final var timedInterval = TimeUnit.DAYS.toMillis(Math.abs(random.nextInt()) + 1);
+		when(nextRunReference.getDelay(SECONDS)).thenReturn(10000L);
+
+		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
+		        .then(invocation -> nextRunReference);
+
+		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
+
+		verify(scheduledExecutor, times(1))
+		        .schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
+		assertFalse(backgroundService.isHasFirstStarted());
+
+		backgroundService.runFirstOnStartup();
+		assertFalse(backgroundService.isHasFirstStarted());
+
+		verify(scheduledExecutor, times(1))
+		        .schedule(scheduleCommandCaptor.capture(), eq(1L), eq(MILLISECONDS));
+
+		assertFalse(backgroundService.isHasFirstStarted());
+		scheduleCommandCaptor.getValue().run();
+		assertTrue(backgroundService.isHasFirstStarted());
+
+		verify(spoolExecutor, times(1))
+		        .addToQueue(commandCaptor.capture(), eq(name), eq(0), afterRunCommandCaptor.capture());
+		commandCaptor.getValue().run();
+		afterRunCommandCaptor.getValue().accept(null);
+		assertTrue(backgroundService.isHasFirstStarted());
+
+		verify(scheduledExecutor, times(2))
+		        .schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
+
+		assertTrue(backgroundService.isHasFirstStarted());
+		backgroundService.runFirstOnStartup();
+		assertTrue(backgroundService.isHasFirstStarted());
+
+		Mockito.verifyNoMoreInteractions(scheduledExecutor);
+	}
+
+	@Test
+	void testRunFirstOnStartup_disabled() {
+		backgroundService.setTimedInterval(timedInterval, MILLISECONDS);
+
+		backgroundService.runFirstOnStartup();
+		assertFalse(backgroundService.isHasFirstStarted());
+
+		Mockito.verifyNoInteractions(scheduledExecutor);
+	}
+
+	@Test
+	void testRunFirstOnStartup_enabled_short_time() {
+		final var timedInterval = 20L;
+		when(nextRunReference.getDelay(SECONDS)).thenReturn(0L);
+
+		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
+		        .then(invocation -> nextRunReference);
+
+		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
+
+		verify(scheduledExecutor, times(1))
+		        .schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
+
+		backgroundService.runFirstOnStartup();
+		assertFalse(backgroundService.isHasFirstStarted());
+
+		Mockito.verifyNoMoreInteractions(scheduledExecutor);
 	}
 
 }

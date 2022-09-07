@@ -1,5 +1,7 @@
 package tv.hd3g.jobkit.engine;
 
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -82,7 +84,7 @@ class JobKitEngineTest {
 		assertNotNull(s);
 		assertFalse(s.isEnabled());
 		assertEquals(0, s.getPriority());
-		assertEquals(0, s.getTimedInterval(TimeUnit.MILLISECONDS));
+		assertEquals(0, s.getTimedInterval(MILLISECONDS));
 	}
 
 	@Test
@@ -90,11 +92,11 @@ class JobKitEngineTest {
 		final var i = new AtomicInteger();
 		task = () -> i.getAndIncrement();
 
-		final var s = jobKitEngine.startService(name, spoolName, 1, TimeUnit.MILLISECONDS, task);
+		final var s = jobKitEngine.startService(name, spoolName, 1, MILLISECONDS, task);
 		assertNotNull(s);
 		assertTrue(s.isEnabled());
 		assertEquals(0, s.getPriority());
-		assertEquals(1, s.getTimedInterval(TimeUnit.MILLISECONDS));
+		assertEquals(1, s.getTimedInterval(MILLISECONDS));
 
 		CompletableFuture.runAsync(() -> {
 			while (i.get() == 0) {
@@ -112,7 +114,7 @@ class JobKitEngineTest {
 		assertNotNull(s);
 		assertTrue(s.isEnabled());
 		assertEquals(0, s.getPriority());
-		assertEquals(1, s.getTimedInterval(TimeUnit.MILLISECONDS));
+		assertEquals(1, s.getTimedInterval(MILLISECONDS));
 
 		CompletableFuture.runAsync(() -> {
 			while (i.get() == 0) {
@@ -152,6 +154,44 @@ class JobKitEngineTest {
 		assertEquals(0, status.getSpoolerStatus().getCreatedThreadsCount());
 		assertNotNull(status.getBackgroundServicesStatus());
 		assertEquals(0, status.getBackgroundServicesStatus().size());
+	}
+
+	@Test
+	void testOnApplicationReadyRunBackgroundServices_enabled() throws Exception {
+		final var i = new AtomicInteger();
+		task = () -> i.getAndIncrement();
+
+		final var s = jobKitEngine.startService(name, spoolName, Duration.ofDays(1), task);
+		final var retry = s.getRetryAfterTimeFactor();
+
+		jobKitEngine.onApplicationReadyRunBackgroundServices();
+		assertEquals(1, s.getTimedInterval(DAYS));
+
+		CompletableFuture.runAsync(() -> {
+			while (i.get() == 0) {
+				Thread.onSpinWait();
+			}
+		}).get(500, MILLISECONDS);
+
+		assertEquals(1, i.get());
+		assertEquals(retry, s.getRetryAfterTimeFactor());
+		assertEquals(1, s.getTimedInterval(DAYS));
+		assertTrue(s.isEnabled());
+	}
+
+	@Test
+	void testOnApplicationReadyRunBackgroundServices_disabled() throws Exception {
+		final var i = new AtomicInteger();
+		task = () -> i.getAndIncrement();
+
+		final var s = jobKitEngine.createService(name, spoolName, task);
+
+		jobKitEngine.onApplicationReadyRunBackgroundServices();
+
+		Thread.sleep(10);// NOSONAR S2925
+
+		assertEquals(0, i.get());
+		assertFalse(s.isEnabled());
 	}
 
 }

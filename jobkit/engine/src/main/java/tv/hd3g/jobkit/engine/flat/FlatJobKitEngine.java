@@ -122,4 +122,10 @@ public class FlatJobKitEngine extends JobKitEngine {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public void onApplicationReadyRunBackgroundServices() {
+		/**
+		 * Not needed, not implemented
+		 */
+	}
 }

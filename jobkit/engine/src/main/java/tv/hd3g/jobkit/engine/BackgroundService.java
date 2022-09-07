@@ -1,6 +1,7 @@
 package tv.hd3g.jobkit.engine;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.time.Duration;
 import java.util.Date;
@@ -32,6 +33,7 @@ public class BackgroundService {
 	private int priority;
 	private double retryAfterTimeFactor;
 	private final AtomicInteger sequentialErrorCount;
+	private boolean hasFirstStarted;
 
 	public BackgroundService(final String name,
 	                         final String spoolName,
@@ -45,6 +47,7 @@ public class BackgroundService {
 		this.scheduledExecutor = scheduledExecutor;
 		this.event = event;
 		this.task = task;
+		hasFirstStarted = false;
 		enabled = false;
 		priority = 0;
 		retryAfterTimeFactor = 1;
@@ -70,6 +73,7 @@ public class BackgroundService {
 		}
 		event.scheduleNextBackgroundServiceTask(name, spoolName, priority, interval);
 		nextRunReference = scheduledExecutor.schedule(() -> {
+			hasFirstStarted = true;
 			event.nextBackgroundServiceTask(name, spoolName, priority);
 			spooler.getExecutor(spoolName).addToQueue(task, name, priority, lastExecException -> {
 				if (enabled == false) {
@@ -254,6 +258,29 @@ public class BackgroundService {
 
 		return new BackgroundServiceStatus(name, spoolName, nextRunReferenceDelay, previousScheduledDate,
 		        this, sequentialErrorCount.get(), sTask);
+	}
+
+	public synchronized boolean isHasFirstStarted() {
+		return hasFirstStarted;
+	}
+
+	public synchronized void runFirstOnStartup() {
+		if (enabled == false) {
+			log.trace("Want to run first start service \"{}\" ({}), but it's disabled", name, spoolName);
+			return;
+		} else if (hasFirstStarted) {
+			log.debug("Want to run first start service \"{}\" ({}), but it has already been started", name, spoolName);
+			return;
+		}
+		if (nextRunReference != null) {
+			if (nextRunReference.getDelay(SECONDS) < 2) {
+				return;
+			}
+			nextRunReference.cancel(false);
+			nextRunReference = null;
+		}
+		log.info("Run first start service \"{}\" ({})", name, spoolName);
+		planNextExec(1);
 	}
 
 }
