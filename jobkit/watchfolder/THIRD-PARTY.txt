@@ -1,8 +1,8 @@
 
 Lists of 49 third-party dependencies.
-     (The Apache Software License, Version 2.0) Jackson-annotations (com.fasterxml.jackson.core:jackson-annotations:2.13.2 - http://github.com/FasterXML/jackson)
-     (The Apache Software License, Version 2.0) Jackson-core (com.fasterxml.jackson.core:jackson-core:2.13.2 - https://github.com/FasterXML/jackson-core)
-     (The Apache Software License, Version 2.0) jackson-databind (com.fasterxml.jackson.core:jackson-databind:2.13.2.1 - http://github.com/FasterXML/jackson)
+     (The Apache Software License, Version 2.0) Jackson-annotations (com.fasterxml.jackson.core:jackson-annotations:2.13.3 - http://github.com/FasterXML/jackson)
+     (The Apache Software License, Version 2.0) Jackson-core (com.fasterxml.jackson.core:jackson-core:2.13.3 - https://github.com/FasterXML/jackson-core)
+     (The Apache Software License, Version 2.0) jackson-databind (com.fasterxml.jackson.core:jackson-databind:2.13.3 - http://github.com/FasterXML/jackson)
      (The Apache Software License, Version 2.0) Generex (com.github.mifmif:generex:1.0.2 - https://github.com/mifmif/Generex/tree/master)
      (The Apache License, Version 2.0) asn-one (com.hierynomus:asn-one:0.6.0 - https://github.com/hierynomus/asn-one)
      (The Apache License, Version 2.0) sshj (com.hierynomus:sshj:0.33.0 - https://github.com/hierynomus/sshj)
@@ -45,7 +45,7 @@ Lists of 49 third-party dependencies.
      (The Apache License, Version 2.0) org.opentest4j:opentest4j (org.opentest4j:opentest4j:1.2.0 - https://github.com/ota4j-team/opentest4j)
      (MIT License) SLF4J API Module (org.slf4j:slf4j-api:1.7.36 - http://www.slf4j.org)
      (Public Domain) XZ for Java (org.tukaani:xz:1.8 - https://tukaani.org/xz/java.html)
-     (GNU Lesser General Public License, Version 3) JobKit Engine (tv.hd3g:jobkit-engine:9.1.2 - https://github.com/hdsdi3g/prodlib)
-     (GNU Lesser General Public License, Version 3) TransfertFiles (tv.hd3g:transfertfiles:9.1.2 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) JobKit Engine (tv.hd3g:jobkit-engine:9.2.0 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) TransfertFiles (tv.hd3g:transfertfiles:9.2.0 - https://github.com/hdsdi3g/prodlib)
      (GNU Lesser General Public License, Version 3) CodePolicyValidation (tv.hd3g.commons:codepolicyvalidation:1.0.4 - https://github.com/hdsdi3g/codepolicyvalidation)
-     (GNU Lesser General Public License, Version 3) Commons Interfaces (tv.hd3g.commons:interfaces:9.1.2 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) Commons Interfaces (tv.hd3g.commons:interfaces:9.2.0 - https://github.com/hdsdi3g/prodlib)
