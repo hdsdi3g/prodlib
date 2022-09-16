@@ -1,5 +1,7 @@
 # All ProdLib projects upgrades needs
 
+## 9.3.0
+
 No break changes in actual configurations.
 
 Manage updated files for Watchfolder #32
