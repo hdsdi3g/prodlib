@@ -20,10 +20,12 @@ import static java.time.Duration.ZERO;
 import static java.time.Duration.ofDays;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.DIRS_ONLY;
 import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.FILES_DIRS;
 import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.FILES_ONLY;
@@ -55,7 +57,7 @@ class WatchedFileInMemoryDbTest {
 
 		when(firstDetectionFile.isDirectory()).thenReturn(false);
 		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_DIRS, ofDays(1));
-		verify(firstDetectionFile, Mockito.times(1)).isDirectory();
+		verify(firstDetectionFile, times(1)).isDirectory();
 	}
 
 	@AfterEach
@@ -70,12 +72,13 @@ class WatchedFileInMemoryDbTest {
 
 		assertEquals(f, f.update(seeAgainFile));
 
-		verify(firstDetectionFile, Mockito.times(1)).lastModified();
-		verify(seeAgainFile, Mockito.times(1)).lastModified();
+		verify(firstDetectionFile, times(1)).lastModified();
+		verify(seeAgainFile, times(1)).lastModified();
 
-		assertFalse(f.isQualified());
+		assertFalse(f.isTimeQualified());
 		assertFalse(f.canBeCallbacked());
 		assertTrue(f.isNotYetMarkedAsDone());
+		assertFalse(f.isDoneButChanged());
 		assertEquals(seeAgainFile, f.getLastFile());
 	}
 
@@ -88,14 +91,15 @@ class WatchedFileInMemoryDbTest {
 
 		assertEquals(f, f.update(seeAgainFile));
 
-		verify(firstDetectionFile, Mockito.times(1)).lastModified();
-		verify(seeAgainFile, Mockito.times(1)).lastModified();
-		verify(firstDetectionFile, Mockito.times(1)).length();
-		verify(seeAgainFile, Mockito.times(1)).length();
+		verify(firstDetectionFile, times(1)).lastModified();
+		verify(seeAgainFile, times(1)).lastModified();
+		verify(firstDetectionFile, times(1)).length();
+		verify(seeAgainFile, times(1)).length();
 
-		assertFalse(f.isQualified());
+		assertFalse(f.isTimeQualified());
 		assertFalse(f.canBeCallbacked());
 		assertTrue(f.isNotYetMarkedAsDone());
+		assertFalse(f.isDoneButChanged());
 		assertEquals(seeAgainFile, f.getLastFile());
 	}
 
@@ -107,19 +111,20 @@ class WatchedFileInMemoryDbTest {
 
 		assertEquals(f, f.update(seeAgainFile));
 
-		verify(firstDetectionFile, Mockito.times(1)).lastModified();
-		verify(seeAgainFile, Mockito.times(1)).lastModified();
+		verify(firstDetectionFile, times(1)).lastModified();
+		verify(seeAgainFile, times(1)).lastModified();
 
-		assertFalse(f.isQualified());
+		assertFalse(f.isTimeQualified());
 		assertFalse(f.canBeCallbacked());
 		assertTrue(f.isNotYetMarkedAsDone());
+		assertFalse(f.isDoneButChanged());
 		assertEquals(seeAgainFile, f.getLastFile());
 
 		verify(firstDetectionFile, atLeastOnce()).isDirectory();
 	}
 
 	@Test
-	void testUpdate_notUpdated_OutTime() {
+	void testUpdate_notUpdated_OutTime() throws InterruptedException {
 		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_DIRS, ZERO);
 
 		when(firstDetectionFile.lastModified()).thenReturn(1L);
@@ -129,14 +134,16 @@ class WatchedFileInMemoryDbTest {
 
 		assertEquals(f, f.update(seeAgainFile));
 
-		verify(firstDetectionFile, Mockito.times(1)).lastModified();
-		verify(seeAgainFile, Mockito.times(1)).lastModified();
-		verify(firstDetectionFile, Mockito.times(1)).length();
-		verify(seeAgainFile, Mockito.times(1)).length();
+		verify(firstDetectionFile, times(1)).lastModified();
+		verify(seeAgainFile, times(1)).lastModified();
+		verify(firstDetectionFile, times(1)).length();
+		verify(seeAgainFile, times(1)).length();
 
-		assertTrue(f.isQualified());
+		Thread.sleep(5);// NOSONAR 2925
+		assertTrue(f.isTimeQualified());
 		assertTrue(f.canBeCallbacked());
 		assertTrue(f.isNotYetMarkedAsDone());
+		assertFalse(f.isDoneButChanged());
 		assertEquals(seeAgainFile, f.getLastFile());
 
 		verify(firstDetectionFile, atLeastOnce()).isDirectory();
@@ -146,10 +153,54 @@ class WatchedFileInMemoryDbTest {
 	void testUpdate_afterDone() {
 		f.setMarkedAsDone();
 		assertEquals(f, f.update(seeAgainFile));
-		assertFalse(f.isQualified());
+		assertFalse(f.isTimeQualified());
 		assertFalse(f.canBeCallbacked());
 		assertFalse(f.isNotYetMarkedAsDone());
-		assertEquals(firstDetectionFile, f.getLastFile());
+		/**
+		 * Done, but changed
+		 */
+		assertFalse(f.isDoneButChanged());
+		assertEquals(seeAgainFile, f.getLastFile());
+
+		verify(firstDetectionFile, times(1)).lastModified();
+		verify(firstDetectionFile, times(1)).length();
+		verify(seeAgainFile, times(1)).lastModified();
+		verify(seeAgainFile, times(1)).length();
+	}
+
+	@Test
+	void testChangeFile_afterDone() throws InterruptedException {
+		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_DIRS, ZERO);
+		f.setMarkedAsDone();
+
+		when(firstDetectionFile.length()).thenReturn(1L);
+		when(seeAgainFile.length()).thenReturn(2L);
+
+		assertEquals(f, f.update(seeAgainFile));
+
+		when(firstDetectionFile.length()).thenReturn(2L);
+		when(seeAgainFile.length()).thenReturn(2L);
+		when(firstDetectionFile.lastModified()).thenReturn(1L);
+		when(seeAgainFile.lastModified()).thenReturn(1L);
+
+		assertEquals(f, f.update(seeAgainFile));
+
+		Thread.sleep(5);// NOSONAR 2925
+		assertTrue(f.isTimeQualified());
+		assertTrue(f.canBeCallbacked());
+		assertFalse(f.isNotYetMarkedAsDone());
+
+		assertTrue(f.isDoneButChanged());
+		assertEquals(f, f.resetDoneButChanged());
+		assertFalse(f.isDoneButChanged());
+
+		assertEquals(seeAgainFile, f.getLastFile());
+
+		verify(firstDetectionFile, atLeastOnce()).isDirectory();
+		verify(firstDetectionFile, atLeastOnce()).lastModified();
+		verify(firstDetectionFile, atLeastOnce()).length();
+		verify(seeAgainFile, atLeastOnce()).lastModified();
+		verify(seeAgainFile, atLeastOnce()).length();
 	}
 
 	@Test
@@ -159,9 +210,10 @@ class WatchedFileInMemoryDbTest {
 		verify(firstDetectionFile, Mockito.times(2)).isDirectory();
 
 		assertEquals(f, f.update(seeAgainFile));
-		assertTrue(f.isQualified());
+		assertTrue(f.isTimeQualified());
 		assertTrue(f.canBeCallbacked());
 		assertTrue(f.isNotYetMarkedAsDone());
+		assertFalse(f.isDoneButChanged());
 		assertEquals(seeAgainFile, f.getLastFile());
 
 		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_ONLY, ofDays(1));
@@ -178,9 +230,10 @@ class WatchedFileInMemoryDbTest {
 
 		f.setMarkedAsDone();
 		assertEquals(f, f.update(seeAgainFile));
-		assertTrue(f.isQualified());
+		assertTrue(f.isTimeQualified());
 		assertTrue(f.canBeCallbacked());
 		assertFalse(f.isNotYetMarkedAsDone());
+		assertFalse(f.isDoneButChanged());
 		assertEquals(firstDetectionFile, f.getLastFile());
 	}
 
@@ -195,35 +248,36 @@ class WatchedFileInMemoryDbTest {
 
 		assertEquals(f, f.update(seeAgainFile));
 
-		verify(firstDetectionFile, Mockito.times(1)).lastModified();
-		verify(seeAgainFile, Mockito.times(1)).lastModified();
-		verify(firstDetectionFile, Mockito.times(1)).length();
-		verify(seeAgainFile, Mockito.times(1)).length();
+		verify(firstDetectionFile, times(1)).lastModified();
+		verify(seeAgainFile, times(1)).lastModified();
+		verify(firstDetectionFile, times(1)).length();
+		verify(seeAgainFile, times(1)).length();
 
-		assertFalse(f.isQualified());
+		assertFalse(f.isTimeQualified());
 		assertFalse(f.canBeCallbacked());
 		assertTrue(f.isNotYetMarkedAsDone());
+		assertFalse(f.isDoneButChanged());
 		assertEquals(seeAgainFile, f.getLastFile());
 
 		verify(firstDetectionFile, atLeastOnce()).isDirectory();
 	}
 
 	@Test
-	void testIsQualified() {
-		assertFalse(f.isQualified());
+	void testIsTimeQualified() {
+		assertFalse(f.isTimeQualified());
 	}
 
 	@Test
 	void testCanBePickup() {
 		/** file + FILES_DIRS */
-		assertTrue(f.canBePickup());
+		assertTrue(f.canBePickupFromType());
 
 		/** file */
 		f = new WatchedFileInMemoryDb(firstDetectionFile, DIRS_ONLY, ZERO);
-		assertFalse(f.canBePickup());
+		assertFalse(f.canBePickupFromType());
 
 		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_ONLY, ZERO);
-		assertTrue(f.canBePickup());
+		assertTrue(f.canBePickupFromType());
 
 		/**
 		 * dir
@@ -231,10 +285,10 @@ class WatchedFileInMemoryDbTest {
 		when(firstDetectionFile.isDirectory()).thenReturn(true);
 
 		f = new WatchedFileInMemoryDb(firstDetectionFile, DIRS_ONLY, ZERO);
-		assertTrue(f.canBePickup());
+		assertTrue(f.canBePickupFromType());
 
 		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_ONLY, ZERO);
-		assertFalse(f.canBePickup());
+		assertFalse(f.canBePickupFromType());
 
 		verify(firstDetectionFile, atLeastOnce()).isDirectory();
 	}
@@ -255,6 +309,22 @@ class WatchedFileInMemoryDbTest {
 		assertTrue(f.absentInSet(Set.of()));
 		assertFalse(f.absentInSet(Set.of(firstDetectionFile)));
 		assertTrue(f.absentInSet(Set.of(seeAgainFile)));
+	}
+
+	@Test
+	void testToString() {
+		assertNotNull(f.toString());
+	}
+
+	@Test
+	void testDoneButChanged() {
+		assertFalse(f.isDoneButChanged());
+	}
+
+	@Test
+	void testResetDoneButChanged() {
+		assertEquals(f, f.resetDoneButChanged());
+		assertFalse(f.isDoneButChanged());
 	}
 
 }

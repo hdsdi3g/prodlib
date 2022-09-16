@@ -16,6 +16,7 @@
  */
 package tv.hd3g.jobkit.watchfolder;
 
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
@@ -101,11 +102,23 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 		log.trace("List updateFounded={}", updateFounded);
 
 		/**
+		 * get updated
+		 */
+		final var updatedChangedFounded = updateFounded.stream()
+		        .filter(not(WatchedFileInMemoryDb::isNotYetMarkedAsDone))// == MarkedAsDone
+		        .filter(WatchedFileInMemoryDb::canBeCallbacked)
+		        .filter(WatchedFileInMemoryDb::isDoneButChanged)
+		        .map(WatchedFileInMemoryDb::resetDoneButChanged)
+		        .map(WatchedFileInMemoryDb::getLastFile)
+		        .collect(toUnmodifiableSet());
+		log.trace("List updatedChangedFounded={}", updatedChangedFounded);
+
+		/**
 		 * get qualified, set them marked
 		 */
 		final var qualifyFounded = updateFounded.stream()
 		        .filter(WatchedFileInMemoryDb::isNotYetMarkedAsDone)
-		        .filter(WatchedFileInMemoryDb::isQualified)
+		        .filter(WatchedFileInMemoryDb::isTimeQualified)
 		        .map(WatchedFileInMemoryDb::setMarkedAsDone)
 		        .collect(toUnmodifiableList());
 		log.trace("List qualifyFounded={}", qualifyFounded);
@@ -125,7 +138,7 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 		        .collect(toUnmodifiableList());
 
 		final var lostedAndCallbacked = losted.stream()
-		        .filter(WatchedFileInMemoryDb::canBePickup)
+		        .filter(WatchedFileInMemoryDb::canBePickupFromType)
 		        .map(WatchedFileInMemoryDb::getLastFile)
 		        .collect(toUnmodifiableSet());
 
@@ -149,13 +162,13 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 			size = allWatchedFiles.size();
 		} else {
 			size = (int) allWatchedFiles.values().stream()
-			        .filter(WatchedFileInMemoryDb::canBePickup)
+			        .filter(WatchedFileInMemoryDb::canBePickupFromType)
 			        .count();
 		}
 
 		log.debug("Scan result for {}: {} founded, {} lost, {} total",
 		        observedFolder.getLabel(), qualifiedAndCallbacked.size(), lostedAndCallbacked.size(), size);
-		return new WatchedFiles(qualifiedAndCallbacked, lostedAndCallbacked, size);
+		return new WatchedFiles(qualifiedAndCallbacked, lostedAndCallbacked, updatedChangedFounded, size);
 	}
 
 	/**

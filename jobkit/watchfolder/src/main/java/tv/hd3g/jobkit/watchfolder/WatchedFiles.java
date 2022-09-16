@@ -26,18 +26,22 @@ public class WatchedFiles {
 
 	private final Set<CachedFileAttributes> founded;
 	private final Set<CachedFileAttributes> losted;
+	private final Set<CachedFileAttributes> updated;
 	private final int totalFiles;
 
 	/**
 	 * @param founded file/dir added on scanned folder
 	 * @param losted file/dir removed before validation on scanned folder
+	 * @param updated file/dir updated (date/size change) after be founded
 	 * @return totalFiles total file/dir count on scanned folder (valided)
 	 */
 	public WatchedFiles(final Set<CachedFileAttributes> founded,
 	                    final Set<CachedFileAttributes> losted,
+	                    final Set<CachedFileAttributes> updated,
 	                    final int totalFiles) {
 		this.founded = founded;
 		this.losted = losted;
+		this.updated = updated;
 		this.totalFiles = totalFiles;
 	}
 
@@ -47,6 +51,10 @@ public class WatchedFiles {
 
 	public Set<CachedFileAttributes> getLosted() {
 		return losted;
+	}
+
+	public Set<CachedFileAttributes> getUpdated() {
+		return updated;
 	}
 
 	public int getTotalFiles() {
@@ -60,6 +68,8 @@ public class WatchedFiles {
 		builder.append(founded.stream().map(CachedFileAttributes::getPath).collect(joining(", ")));
 		builder.append(", losted=");
 		builder.append(losted.stream().map(CachedFileAttributes::getPath).collect(joining(", ")));
+		builder.append(", updated=");
+		builder.append(updated.stream().map(CachedFileAttributes::getPath).collect(joining(", ")));
 		builder.append(", totalFiles=");
 		builder.append(totalFiles);
 		builder.append("]");

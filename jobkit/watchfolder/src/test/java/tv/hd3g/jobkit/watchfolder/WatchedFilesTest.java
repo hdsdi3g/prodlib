@@ -34,6 +34,8 @@ class WatchedFilesTest {
 	Set<CachedFileAttributes> founded;
 	@Mock
 	Set<CachedFileAttributes> losted;
+	@Mock
+	Set<CachedFileAttributes> updated;
 	int totalFiles;
 
 	WatchedFiles watchedFiles;
@@ -42,7 +44,7 @@ class WatchedFilesTest {
 	void init() throws Exception {
 		MockitoAnnotations.openMocks(this).close();
 		totalFiles = new Random().nextInt();
-		watchedFiles = new WatchedFiles(founded, losted, totalFiles);
+		watchedFiles = new WatchedFiles(founded, losted, updated, totalFiles);
 	}
 
 	@Test
@@ -53,6 +55,11 @@ class WatchedFilesTest {
 	@Test
 	void testGetLosted() {
 		assertEquals(losted, watchedFiles.getLosted());
+	}
+
+	@Test
+	void testGetUpdated() {
+		assertEquals(updated, watchedFiles.getUpdated());
 	}
 
 	@Test

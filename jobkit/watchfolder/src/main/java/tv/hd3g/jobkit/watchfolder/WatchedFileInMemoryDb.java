@@ -36,6 +36,7 @@ class WatchedFileInMemoryDb {
 	private long lastWatched;
 	private boolean markedAsDone;
 	private boolean lastIsSame;
+	private boolean doneButChanged;
 
 	WatchedFileInMemoryDb(final CachedFileAttributes firstDetectionFile,
 	                      final WatchFolderPickupType pickUp,
@@ -44,6 +45,7 @@ class WatchedFileInMemoryDb {
 		isDirectory = firstDetectionFile.isDirectory();
 		lastWatched = System.currentTimeMillis();
 		lastIsSame = false;
+		doneButChanged = false;
 		pickUpFiles = pickUp.isPickUpFiles();
 		pickUpDirs = pickUp.isPickUpDirs();
 		this.minFixedStateTime = minFixedStateTime;
@@ -61,39 +63,45 @@ class WatchedFileInMemoryDb {
 		if (markedAsDone) {
 			sb.append("markedAsDone ");
 		}
+		if (doneButChanged) {
+			sb.append("doneButChanged");
+		}
 		if (lastIsSame) {
-			sb.append("lastIsSame");
+			sb.append("lastIsSame ");
 		}
 		return sb.toString().trim() + "}";
 	}
 
 	WatchedFileInMemoryDb update(final CachedFileAttributes seeAgainFile) {
-		if (markedAsDone) {
-			return this;
-		} else if (isDirectory) {
-			lastFile = seeAgainFile;
+		if (isDirectory) {
+			if (markedAsDone == false) {
+				lastFile = seeAgainFile;
+			}
 		} else {
 			lastIsSame = lastFile.lastModified() == seeAgainFile.lastModified()
 			             && lastFile.length() == seeAgainFile.length();
 			if (lastIsSame == false) {
 				lastWatched = System.currentTimeMillis();
+				if (markedAsDone) {
+					doneButChanged = true;
+				}
 			}
 			lastFile = seeAgainFile;
 		}
 		return this;
 	}
 
-	boolean isQualified() {
+	boolean isTimeQualified() {
 		final var notTooRecent = lastWatched < System.currentTimeMillis() - minFixedStateTime.toMillis();
 		return isDirectory
 		       || lastIsSame && notTooRecent;
 	}
 
 	boolean canBeCallbacked() {
-		return isQualified() && canBePickup();
+		return isTimeQualified() && canBePickupFromType();
 	}
 
-	boolean canBePickup() {
+	boolean canBePickupFromType() {
 		return isDirectory && pickUpDirs == true || isDirectory == false && pickUpFiles == true;
 	}
 
@@ -104,6 +112,15 @@ class WatchedFileInMemoryDb {
 
 	boolean isNotYetMarkedAsDone() {
 		return markedAsDone == false;
+	}
+
+	boolean isDoneButChanged() {
+		return doneButChanged;
+	}
+
+	WatchedFileInMemoryDb resetDoneButChanged() {
+		doneButChanged = false;
+		return this;
 	}
 
 	CachedFileAttributes getLastFile() {
