@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades needs
 
+## 10.0.0
+
+Switch from Java 11 (LTS) to Java 17 (LTS) #39
+
 ## 9.3.0
 
 No break changes in actual configurations.
