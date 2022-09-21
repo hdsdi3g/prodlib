@@ -28,14 +28,16 @@
         <module>authkit</module>
         <module>mailkit</module>
         <module>jobkit</module>
-	<module>transfertfiles</module>
+        <module>transfertfiles</module>
         <module>csvkit</module>
     </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>11</maven.compiler.release>
-        <java.version>11</java.version>
+        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>17</java.version>
 
         <mockito.version>4.4.0</mockito.version>
         <datafaker.version>1.3.0</datafaker.version>
@@ -54,8 +56,8 @@
         <jsonwebtoken.version>0.11.2</jsonwebtoken.version>
         <argon2.version>2.7</argon2.version>
         <zxing.version>3.5.0</zxing.version>
-	<opencsv.version>5.6</opencsv.version>
-	<spoon.version>10.1.1</spoon.version>
+        <opencsv.version>5.6</opencsv.version>
+        <spoon.version>10.1.1</spoon.version>
         <log4j2.version>2.17.2</log4j2.version>
         <maven.gpg.version>3.0.1</maven.gpg.version>
         <gpg.skip>true</gpg.skip>
