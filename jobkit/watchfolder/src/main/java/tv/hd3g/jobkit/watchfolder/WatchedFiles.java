@@ -17,49 +17,25 @@
 package tv.hd3g.jobkit.watchfolder;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 import java.util.Set;
+import java.util.stream.Stream;
 
+import tv.hd3g.transfertfiles.AbstractFile;
+import tv.hd3g.transfertfiles.AbstractFileSystem;
 import tv.hd3g.transfertfiles.CachedFileAttributes;
 
-public class WatchedFiles {
-
-	private final Set<CachedFileAttributes> founded;
-	private final Set<CachedFileAttributes> losted;
-	private final Set<CachedFileAttributes> updated;
-	private final int totalFiles;
-
-	/**
-	 * @param founded file/dir added on scanned folder
-	 * @param losted file/dir removed before validation on scanned folder
-	 * @param updated file/dir updated (date/size change) after be founded
-	 * @return totalFiles total file/dir count on scanned folder (valided)
-	 */
-	public WatchedFiles(final Set<CachedFileAttributes> founded,
-	                    final Set<CachedFileAttributes> losted,
-	                    final Set<CachedFileAttributes> updated,
-	                    final int totalFiles) {
-		this.founded = founded;
-		this.losted = losted;
-		this.updated = updated;
-		this.totalFiles = totalFiles;
-	}
-
-	public Set<CachedFileAttributes> getFounded() {
-		return founded;
-	}
-
-	public Set<CachedFileAttributes> getLosted() {
-		return losted;
-	}
-
-	public Set<CachedFileAttributes> getUpdated() {
-		return updated;
-	}
-
-	public int getTotalFiles() {
-		return totalFiles;
-	}
+/**
+ * @param founded file/dir added on scanned folder
+ * @param losted file/dir removed before validation on scanned folder
+ * @param updated file/dir updated (date/size change) after be founded
+ * @param totalFiles total file/dir count on scanned folder (valided)
+ */
+public record WatchedFiles(Set<CachedFileAttributes> founded,
+						   Set<CachedFileAttributes> losted,
+						   Set<CachedFileAttributes> updated,
+						   int totalFiles) {
 
 	@Override
 	public String toString() {
@@ -74,6 +50,21 @@ public class WatchedFiles {
 		builder.append(totalFiles);
 		builder.append("]");
 		return builder.toString();
+	}
+
+	public Set<CachedFileAttributes> foundedAndUpdated() {
+		return Stream.concat(founded.stream(), updated.stream())
+				.distinct()
+				.collect(toUnmodifiableSet());
+	}
+
+	public Set<AbstractFileSystem<?>> getFoundedAndUpdatedFS() { // NOSONAR S1452
+		return foundedAndUpdated().stream()
+				.map(CachedFileAttributes::getAbstractFile)
+				.map(AbstractFile::getFileSystem)
+				.distinct()
+				.collect(toUnmodifiableSet());
+
 	}
 
 }

@@ -1,18 +1,15 @@
 package tv.hd3g.jobkit.engine;
 
-import static java.util.Optional.ofNullable;
-
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import tv.hd3g.jobkit.engine.status.SpoolExecutorStatus;
 
 public class SpoolExecutor {
 
@@ -20,35 +17,36 @@ public class SpoolExecutor {
 
 	private final String name;
 	private final ExecutionEvent event;
-	private final ThreadFactory threadFactory;
+	private final AtomicLong threadCount;
 
 	private Thread currentOperation;
-	private String currentOperationName;
 	private final Comparator<SpoolJob> queueComparator;
 	private final PriorityBlockingQueue<SpoolJob> queue;
 	private final AtomicBoolean shutdown;
+	private final SupervisableEvents supervisableEvents;
 
-	public SpoolExecutor(final String name, final ExecutionEvent event, final ThreadFactory threadFactory) {
+	public SpoolExecutor(final String name,
+						 final ExecutionEvent event,
+						 final AtomicLong threadCount,
+						 final SupervisableEvents supervisableEvents) {
 		this.name = name;
 		this.event = event;
-		this.threadFactory = threadFactory;
+		this.threadCount = threadCount;
 		queueComparator = (l, r) -> Integer.compare(r.priority, l.priority);
 		queue = new PriorityBlockingQueue<>(1, queueComparator);
 		shutdown = new AtomicBoolean(false);
+		this.supervisableEvents = supervisableEvents;
 	}
 
-	public boolean addToQueue(final Runnable command,
-	                          final String name,
-	                          final int priority,
-	                          final Consumer<Exception> afterRunCommand) {
+	public boolean addToQueue(final RunnableWithException command,
+							  final String name,
+							  final int priority,
+							  final Consumer<Exception> afterRunCommand) {
 		if (shutdown.get()) {
 			log.error("Can't add to queue new command \"{}\" by \"{}\": the spool is shutdown", name, this.name);
 			return false;
 		}
-
-		if (queue.offer(new SpoolJob(command, name, priority, afterRunCommand, this)) == false) {
-			throw new IllegalStateException("Can't submit a new task in queue");
-		}
+		queue.add(new SpoolJob(command, name, priority, afterRunCommand, this));
 		log.debug("Add new command \"{}\" by \"{}\" with P{}", name, this.name, priority);
 		runNext();
 		return true;
@@ -73,11 +71,9 @@ public class SpoolExecutor {
 			final var next = queue.poll();
 			if (next == null) {
 				currentOperation = null;
-				currentOperationName = null;
 				return;
 			}
-			currentOperation = threadFactory.newThread(next);
-			currentOperationName = next.commandName;
+			currentOperation = next;
 			currentOperation.start();
 		}
 	}
@@ -111,77 +107,107 @@ public class SpoolExecutor {
 		log.debug("{} is now closed", name);
 	}
 
-	private class SpoolJob implements Runnable, SpoolJobStatus {
+	private class SpoolJob extends Thread implements SpoolJobStatus {
 
-		final Runnable command;
+		final RunnableWithException command;
 		final String commandName;
 		final int priority;
 		final Consumer<Exception> afterRunCommand;
 		final SpoolExecutor executorReferer;
+		AtomicReference<Supervisable> supervisableReference;
 
-		SpoolJob(final Runnable command,
-		         final String commandName,
-		         final int priority,
-		         final Consumer<Exception> afterRunCommand,
-		         final SpoolExecutor executorReferer) {
+		SpoolJob(final RunnableWithException command,
+				 final String commandName,
+				 final int priority,
+				 final Consumer<Exception> afterRunCommand,
+				 final SpoolExecutor executorReferer) {
+			super("SpoolExecutor #" + threadCount.getAndIncrement());
+			setPriority(MIN_PRIORITY);
+			setDaemon(false);
+
 			this.command = command;
 			this.commandName = commandName;
 			this.priority = priority;
 			this.afterRunCommand = afterRunCommand;
 			this.executorReferer = executorReferer;
+			supervisableReference = new AtomicReference<>();
+		}
+
+		private Supervisable createSupervisable(final String jobName) {
+			final var s = new Supervisable(name, jobName, supervisableEvents);
+			supervisableReference.set(s);
+			return s;
 		}
 
 		@Override
 		public void run() {
+			var currentSupervisable = createSupervisable(commandName + " beforeRunJob");
 			try {
+				supervisableReference.set(currentSupervisable);
+				currentSupervisable.start();
 				event.beforeStart(commandName, System.currentTimeMillis(), executorReferer);
+				currentSupervisable.end();
 			} catch (final Exception e) {
 				log.warn("Can't send event BeforeStart", e);
+				currentSupervisable.end(e);
 			}
 
+			currentSupervisable = createSupervisable(commandName);
 			final var startTime = System.currentTimeMillis();
 			Exception error = null;
 			try {
 				log.debug("Start new command \"{}\" by \"{}\"", commandName, name);
+				currentSupervisable.start();
 				command.run();
+				currentSupervisable.end();
 				log.debug("Ends correcly command \"{}\" by \"{}\", after {} sec", commandName, name,
-				        (System.currentTimeMillis() - startTime) / 1000f);
+						(System.currentTimeMillis() - startTime) / 1000f);
 			} catch (final Exception e) {
 				error = e;
 				log.warn("Command \"{}\" by \"{}\", failed after {} sec", commandName, name,
-				        (System.currentTimeMillis() - startTime) / 1000f, e);
+						(System.currentTimeMillis() - startTime) / 1000f, e);
+				currentSupervisable.end(e);
 			}
 
 			final var endTime = System.currentTimeMillis();
+			currentSupervisable = createSupervisable(commandName + " afterRunJob");
 			try {
+				currentSupervisable.start();
 				if (error != null) {
 					event.afterFailedRun(commandName, endTime, endTime - startTime, executorReferer, error);
 				} else {
 					event.afterRunCorrectly(commandName, endTime, endTime - startTime, executorReferer);
 				}
+				currentSupervisable.end();
 			} catch (final Exception e) {
+				currentSupervisable.end(e);
 				log.warn("Can't send event afterRun", e);
 			}
 
+			currentSupervisable = createSupervisable(commandName + " endsJob");
 			try {
 				final var startTimeAfterRun = System.currentTimeMillis();
 				log.debug("Start to run afterRunCommand for  \"{}\" by \"{}\"", commandName, name);
+				currentSupervisable.start();
 				afterRunCommand.accept(error);
+				currentSupervisable.end();
 				log.debug("Ends correcly afterRunCommand \"{}\" by \"{}\", after {} sec", commandName, name,
-				        (System.currentTimeMillis() - startTimeAfterRun) / 1000f);
+						(System.currentTimeMillis() - startTimeAfterRun) / 1000f);
 			} catch (final Exception e) {
+				currentSupervisable.end(e);
 				log.error("Fail to run afterRunCommand for  \"{}\" by \"{}\"", commandName, name, e);
 			}
 
+			supervisableReference.set(null);
+
 			synchronized (queue) {
 				currentOperation = null;
-				currentOperationName = null;
 			}
 			runNext();
 		}
 
 		@Override
-		public String getName() {
+		public String getJobName() {
 			return commandName;
 		}
 
@@ -191,22 +217,17 @@ public class SpoolExecutor {
 		}
 
 		@Override
-		public int getPriority() {
+		public int getJobPriority() {
 			return priority;
 		}
 
-	}
-
-	public SpoolExecutorStatus getLastStatus() {
-		synchronized (queue) {
-			return new SpoolExecutorStatus(name,
-			        currentOperationName,
-			        ofNullable(currentOperation).map(Thread::getId).orElse(-1l),
-			        ofNullable(currentOperation).map(Thread::getState).orElse(null),
-			        ofNullable(currentOperation).map(Thread::getName).orElse(null),
-			        queue.stream().sorted(queueComparator).collect(Collectors.toUnmodifiableList()),
-			        shutdown.get());
+		@Override
+		public Supervisable getSupervisable() {
+			return Optional.ofNullable(supervisableReference.get())
+					.orElseThrow(() -> new IllegalThreadStateException(
+							"Thread don't expose now a Supervisable: it's not run."));
 		}
+
 	}
 
 }

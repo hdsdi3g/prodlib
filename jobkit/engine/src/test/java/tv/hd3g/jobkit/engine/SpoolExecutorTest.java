@@ -1,33 +1,38 @@
 package tv.hd3g.jobkit.engine;
 
-import static java.lang.Thread.State.RUNNABLE;
-import static java.lang.Thread.State.TIMED_WAITING;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.longThat;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import net.datafaker.Faker;
 
 class SpoolExecutorTest {
 
@@ -35,13 +40,16 @@ class SpoolExecutorTest {
 
 	@Mock
 	private ExecutionEvent event;
+	@Mock
+	SupervisableEvents sEvent;
+	@Captor
+	ArgumentCaptor<Optional<Exception>> oExceptionCaptor;
 
 	String name;
 	String spoolExecutorName;
 	String threadName;
-	long threadId;
-	ThreadFactory threadFactory;
 	SpoolExecutor spoolExecutor;
+	AtomicLong threadCount;
 
 	@BeforeEach
 	void init() throws Exception {
@@ -49,15 +57,14 @@ class SpoolExecutorTest {
 		name = "InternalTest " + String.valueOf(System.nanoTime());
 
 		spoolExecutorName = "Internal test Spool executor";
-		threadName = "TestSpoolExecutor" + String.valueOf(System.nanoTime());
-		threadFactory = r -> {
-			final var t = new Thread(r);
-			t.setDaemon(false);
-			t.setName(threadName);
-			threadId = t.getId();
-			return t;
-		};
-		spoolExecutor = new SpoolExecutor(spoolExecutorName, event, threadFactory);
+		threadName = "SpoolExecutor #0";
+		threadCount = new AtomicLong();
+		spoolExecutor = new SpoolExecutor(spoolExecutorName, event, threadCount, sEvent);
+	}
+
+	@AfterEach
+	void ends() {
+		Mockito.verifyNoMoreInteractions(sEvent);
 	}
 
 	@Test
@@ -68,7 +75,7 @@ class SpoolExecutorTest {
 
 		assertTrue(spoolExecutor.addToQueue(() -> {
 			try {
-				smChkVerifyEvent.await(100, MILLISECONDS);
+				smChkVerifyEvent.await(10, SECONDS);
 			} catch (final InterruptedException e1) {
 				throw new IllegalStateException(e1);
 			}
@@ -79,28 +86,30 @@ class SpoolExecutorTest {
 
 		Thread.sleep(2);// NOSONAR
 		verify(event, times(1)).beforeStart(
-		        eq(name),
-		        longThat(m -> m < System.currentTimeMillis()),
-		        eq(spoolExecutor));
+				eq(name),
+				longThat(m -> m < System.currentTimeMillis()),
+				eq(spoolExecutor));
 		verifyTotalAfterRunCorrectly(0);
 		verifyTotalAfterFailedRun(0);
 		smChkVerifyEvent.countDown();
 
-		assertTrue(smCmd.await(100, MILLISECONDS));
+		assertTrue(smCmd.await(10, SECONDS));
 
 		Thread.sleep(2);// NOSONAR
 		verify(event, times(1)).afterRunCorrectly(eq(name),
-		        longThat(m -> m < System.currentTimeMillis()),
-		        longThat(m -> m < 100l),
-		        eq(spoolExecutor));
+				longThat(m -> m < System.currentTimeMillis()),
+				longThat(m -> m < 100l),
+				eq(spoolExecutor));
 		verifyTotalAfterFailedRun(0);
 
-		assertTrue(smAfter.await(100, MILLISECONDS));
+		assertTrue(smAfter.await(10, SECONDS));
 
 		verifyTotalBeforeStart(1);
 		verifyTotalAfterRunCorrectly(1);
 		verifyTotalAfterFailedRun(0);
-		verify(event, times(0)).shutdownSpooler();
+		verify(event, times(0)).shutdownSpooler(any(Supervisable.class));
+
+		checkSupervisableEventOnEnd(3, true);
 	}
 
 	@Test
@@ -117,26 +126,27 @@ class SpoolExecutorTest {
 				captured.set(e);
 				smAfter.countDown();
 			}));
-			assertTrue(smAfter.await(100, MILLISECONDS));
+			assertTrue(smAfter.await(10, SECONDS));
 			assertNotNull(captured.get());
 			assertEquals(String.valueOf(_pos), captured.get().getMessage());
 		}
 
 		Thread.sleep(2);// NOSONAR
 		verify(event, times(total)).beforeStart(
-		        eq(name),
-		        longThat(m -> m < System.currentTimeMillis()),
-		        eq(spoolExecutor));
+				eq(name),
+				longThat(m -> m < System.currentTimeMillis()),
+				eq(spoolExecutor));
 		verifyTotalAfterRunCorrectly(0);
 		verifyTotalAfterFailedRun(total);
 		verify(event, times(total)).afterFailedRun(
-		        eq(name),
-		        longThat(m -> m < System.currentTimeMillis()),
-		        longThat(m -> m < 100l),
-		        eq(spoolExecutor),
-		        any(IllegalArgumentException.class));
+				eq(name),
+				longThat(m -> m < System.currentTimeMillis()),
+				longThat(m -> m < 100l),
+				eq(spoolExecutor),
+				any(IllegalArgumentException.class));
 
-		verify(event, times(0)).shutdownSpooler();
+		verify(event, times(0)).shutdownSpooler(any(Supervisable.class));
+		verify(sEvent, times(total * 4)).onEnd(any(), any());
 	}
 
 	@Test
@@ -153,8 +163,10 @@ class SpoolExecutorTest {
 				smAfter.countDown();
 			}));
 		}
-		assertTrue(smAfter.await(500, MILLISECONDS));
+		assertTrue(smAfter.await(10, SECONDS));
 		assertEquals(total, count.get());
+
+		checkSupervisableEventOnEnd(total * 3, true);
 	}
 
 	@Test
@@ -169,9 +181,11 @@ class SpoolExecutorTest {
 			}, name, 0, e -> {
 				smAfter.countDown();
 			}));
-			assertTrue(smAfter.await(100, MILLISECONDS));
+			assertTrue(smAfter.await(10, SECONDS));
 		}
 		assertEquals(total, count.get());
+
+		checkSupervisableEventOnEnd(total * 3, true);
 	}
 
 	@Test
@@ -183,7 +197,7 @@ class SpoolExecutorTest {
 		}, name, 0, e -> {
 			throw new IllegalArgumentException("This is a test error, this is normal if you see it in log message...");
 		}));
-		assertTrue(smCmd0.await(500, MILLISECONDS));
+		assertTrue(smCmd0.await(10, SECONDS));
 
 		final var smCmd1 = new CountDownLatch(2);
 		assertTrue(spoolExecutor.addToQueue(() -> {
@@ -191,7 +205,9 @@ class SpoolExecutorTest {
 		}, name, 0, e -> {
 			smCmd1.countDown();
 		}));
-		assertTrue(smCmd1.await(500, MILLISECONDS));
+		assertTrue(smCmd1.await(10, SECONDS));
+
+		verify(sEvent, atLeast(7)).onEnd(any(), any());
 	}
 
 	@Test
@@ -204,7 +220,7 @@ class SpoolExecutorTest {
 		spoolExecutor.addToQueue(() -> {
 			smCmd0.countDown();
 			try {
-				reverseCmd.await(500, MILLISECONDS);
+				reverseCmd.await(10, SECONDS);
 			} catch (final InterruptedException e1) {
 				throw new IllegalStateException(e1);
 			}
@@ -212,18 +228,20 @@ class SpoolExecutorTest {
 			smCmd1.countDown();
 		});
 
-		smCmd0.await(100, MILLISECONDS);
+		assertTrue(smCmd0.await(10, SECONDS));
 		spoolExecutor.addToQueue(() -> {
 		}, name, 0, e -> {
 		});
 		assertEquals(1, spoolExecutor.getQueueSize());
 		reverseCmd.countDown();
 
-		smCmd1.await(100, MILLISECONDS);
+		assertTrue(smCmd1.await(10, SECONDS));
 		Thread.sleep(50);// NOSONAR
 		assertEquals(0, spoolExecutor.getQueueSize());
 
-		verify(event, times(0)).shutdownSpooler();
+		verify(event, times(0)).shutdownSpooler(any(Supervisable.class));
+
+		checkSupervisableEventOnEnd(7, true);
 	}
 
 	@Test
@@ -236,19 +254,21 @@ class SpoolExecutorTest {
 		spoolExecutor.addToQueue(() -> {
 			smCmd0.countDown();
 			try {
-				reverseCmd.await(500, MILLISECONDS);
+				reverseCmd.await(10, SECONDS);
 			} catch (final InterruptedException e1) {
 				throw new IllegalStateException(e1);
 			}
 		}, name, 0, e -> {
 			smCmd1.countDown();
 		});
-		smCmd0.await(100, MILLISECONDS);
+		assertTrue(smCmd0.await(10, SECONDS));
 		assertTrue(spoolExecutor.isRunning());
 		reverseCmd.countDown();
-		smCmd1.await(100, MILLISECONDS);
+		assertTrue(smCmd1.await(10, SECONDS));
 		Thread.sleep(50);// NOSONAR
 		assertFalse(spoolExecutor.isRunning());
+
+		checkSupervisableEventOnEnd(3, true);
 	}
 
 	@Test
@@ -260,9 +280,9 @@ class SpoolExecutorTest {
 			smCmd.countDown();
 		}, name, 0, e -> {
 		}));
-		assertFalse(smCmd.await(100, MILLISECONDS));
+		assertFalse(smCmd.await(10, MILLISECONDS));
 
-		verify(event, times(0)).shutdownSpooler();
+		verify(event, times(0)).shutdownSpooler(any(Supervisable.class));
 	}
 
 	@Test
@@ -284,109 +304,8 @@ class SpoolExecutorTest {
 		spoolExecutor.waitToClose();
 		assertEquals(2, count.get());
 
-		verify(event, times(0)).shutdownSpooler();
-	}
-
-	@Test
-	void testGetLastStatus() throws InterruptedException {
-		/**
-		 * No one run
-		 */
-		var lastStatus = spoolExecutor.getLastStatus();
-		assertNotNull(lastStatus);
-		assertEquals(spoolExecutorName, lastStatus.getSpoolName());
-		assertNull(lastStatus.getCurrentOperationName());
-		assertNull(lastStatus.getCurrentThreadState());
-		assertNull(lastStatus.getCurrentThreadName());
-		assertEquals(-1l, lastStatus.getCurrentThreadId());
-		assertNotNull(lastStatus.getQueue());
-		assertEquals(0, lastStatus.getQueue().size());
-		assertFalse(lastStatus.isShutdown());
-
-		final var lockJob0Run = new CountDownLatch(1);
-		final var lockJob0AfterRun = new CountDownLatch(1);
-		final var lockJob1Run = new CountDownLatch(1);
-		spoolExecutor.addToQueue(() -> {
-			try {
-				lockJob0Run.await(100, MILLISECONDS);
-			} catch (final InterruptedException e1) {
-				throw new IllegalStateException(e1);
-			}
-		}, name, 0, e -> {
-			try {
-				lockJob0AfterRun.await(100, MILLISECONDS);
-			} catch (final InterruptedException e1) {
-				throw new IllegalStateException(e1);
-			}
-		});
-
-		spoolExecutor.addToQueue(() -> {
-			try {
-				lockJob1Run.await(500, MILLISECONDS);
-			} catch (final InterruptedException e1) {
-				throw new IllegalStateException(e1);
-			}
-		}, name + "-2", 0, e -> {
-		});
-
-		/**
-		 * During the first run
-		 */
-		lastStatus = spoolExecutor.getLastStatus();
-		assertNotNull(lastStatus);
-		assertEquals(spoolExecutorName, lastStatus.getSpoolName());
-		assertEquals(name, lastStatus.getCurrentOperationName());
-		assertTrue(lastStatus.getCurrentThreadState() == RUNNABLE
-		           || lastStatus.getCurrentThreadState() == TIMED_WAITING);
-		assertEquals(threadName, lastStatus.getCurrentThreadName());
-		assertEquals(threadId, lastStatus.getCurrentThreadId());
-		assertEquals(1, lastStatus.getQueue().size());
-		assertFalse(lastStatus.isShutdown());
-
-		lockJob0Run.countDown();
-		Thread.sleep(50);// NOSONAR
-
-		/**
-		 * After the first run
-		 */
-		lastStatus = spoolExecutor.getLastStatus();
-		assertNotNull(lastStatus);
-		assertEquals(spoolExecutorName, lastStatus.getSpoolName());
-		assertEquals(name, lastStatus.getCurrentOperationName());
-		assertEquals(TIMED_WAITING, lastStatus.getCurrentThreadState());
-		assertEquals(threadName, lastStatus.getCurrentThreadName());
-		assertEquals(threadId, lastStatus.getCurrentThreadId());
-		assertEquals(1, lastStatus.getQueue().size());
-		assertFalse(lastStatus.isShutdown());
-
-		lockJob0AfterRun.countDown();
-		Thread.sleep(50);// NOSONAR
-
-		/**
-		 * During the second run
-		 */
-		lastStatus = spoolExecutor.getLastStatus();
-		assertEquals(0, lastStatus.getQueue().size());
-
-		lockJob1Run.countDown();
-		Thread.sleep(50);// NOSONAR
-
-		/**
-		 * All done
-		 */
-		lastStatus = spoolExecutor.getLastStatus();
-		assertNotNull(lastStatus);
-		assertEquals(spoolExecutorName, lastStatus.getSpoolName());
-		assertNull(lastStatus.getCurrentOperationName());
-		assertNull(lastStatus.getCurrentThreadState());
-		assertNull(lastStatus.getCurrentThreadName());
-		assertEquals(-1l, lastStatus.getCurrentThreadId());
-		assertEquals(0, lastStatus.getQueue().size());
-		assertFalse(lastStatus.isShutdown());
-
-		spoolExecutor.shutdown();
-		lastStatus = spoolExecutor.getLastStatus();
-		assertTrue(lastStatus.isShutdown());
+		verify(event, times(0)).shutdownSpooler(any(Supervisable.class));
+		verify(sEvent, times(4)).onEnd(any(), eq(Optional.empty()));
 	}
 
 	@Test
@@ -399,11 +318,11 @@ class SpoolExecutorTest {
 
 		class PJob {
 			volatile long startTime;
-			final Runnable command = () -> {
+			final RunnableWithException command = () -> {
 				startTime = System.currentTimeMillis() - startDate;
 				try {
 					Thread.sleep(2);// NOSONAR
-					latchFeed.await(1, SECONDS);
+					latchFeed.await(10, SECONDS);
 				} catch (final InterruptedException e) {// NOSONAR
 				}
 				latchCheck.countDown();
@@ -415,46 +334,106 @@ class SpoolExecutorTest {
 		}
 
 		final var allPjobs = IntStream.range(0, count)
-		        .mapToObj(i -> new PJob())
-		        .collect(Collectors
-		                .toUnmodifiableList());
+				.mapToObj(i -> new PJob())
+				.collect(Collectors
+						.toUnmodifiableList());
 		allPjobs.forEach(j -> spoolExecutor.addToQueue(j.command, j.name, j.priority, j.afterRunCommand));
 
 		latchFeed.countDown();
-		latchCheck.await(10, SECONDS);
+		assertTrue(latchCheck.await(10, SECONDS));
 
 		/**
 		 * skip 1 because the first pushed will be always random.
 		 * During the first sleep, the others will be added, and correcly sorted.
 		 */
 		final var dateSort = allPjobs.stream()
-		        .skip(1)
-		        .sorted((l, r) -> Long.compare(l.startTime, r.startTime))
-		        .map(j -> j.name + "_t" + j.startTime + "_P" + j.priority)
-		        .collect(Collectors.toUnmodifiableList());
+				.skip(1)
+				.sorted((l, r) -> Long.compare(l.startTime, r.startTime))
+				.map(j -> j.name + "_t" + j.startTime + "_P" + j.priority)
+				.collect(Collectors.toUnmodifiableList());
 
 		final var prioSort = allPjobs.stream()
-		        .skip(1)
-		        .sorted((l, r) -> Integer.compare(r.priority, l.priority))
-		        .map(j -> j.name + "_t" + j.startTime + "_P" + j.priority)
-		        .collect(Collectors.toUnmodifiableList());
+				.skip(1)
+				.sorted((l, r) -> Integer.compare(r.priority, l.priority))
+				.map(j -> j.name + "_t" + j.startTime + "_P" + j.priority)
+				.collect(Collectors.toUnmodifiableList());
 
 		assertEquals(prioSort, dateSort);
+
+		checkSupervisableEventOnEnd(count * 3, true);
+	}
+
+	private void checkSupervisableEventOnEnd(final int count, final boolean normalyDone) {
+		verify(sEvent, atLeast(count)).onEnd(any(), oExceptionCaptor.capture());
+		for (final Optional<Exception> oE : oExceptionCaptor.getAllValues()) {
+			if (normalyDone) {
+				assertFalse(oE.isPresent());
+			} else {
+				assertTrue(oE.isPresent());
+				assertEquals(IllegalArgumentException.class, oE.get().getClass());
+			}
+		}
 	}
 
 	private void verifyTotalBeforeStart(final int count) {
 		verify(event, times(count)).beforeStart(any(String.class),
-		        any(long.class), any(SpoolExecutor.class));
+				any(long.class), any(SpoolExecutor.class));
 	}
 
 	private void verifyTotalAfterRunCorrectly(final int count) {
 		verify(event, times(count)).afterRunCorrectly(any(String.class),
-		        any(long.class), any(long.class), any(SpoolExecutor.class));
+				any(long.class), any(long.class), any(SpoolExecutor.class));
 	}
 
 	private void verifyTotalAfterFailedRun(final int count) {
 		verify(event, times(count)).afterFailedRun(any(String.class), any(long.class), any(long.class),
-		        any(SpoolExecutor.class), any(Exception.class));
+				any(SpoolExecutor.class), any(Exception.class));
+	}
+
+	@Test
+	void testAddToQueue_beforeStartError() throws InterruptedException {
+		final var error = new RuntimeException(Faker.instance().darkSoul().covenants());
+		Mockito.doThrow(error).when(event)
+				.beforeStart(any(String.class), any(long.class), eq(spoolExecutor));
+
+		final var sm = new CountDownLatch(2);
+		assertTrue(spoolExecutor.addToQueue(() -> {
+			sm.countDown();
+		}, name, 0, e -> {
+			sm.countDown();
+		}));
+		assertTrue(sm.await(10, SECONDS));
+
+		verify(sEvent, atLeast(3)).onEnd(any(), oExceptionCaptor.capture());
+
+		final var results = oExceptionCaptor.getAllValues();
+
+		assertEquals(error, results.get(0).get());
+		assertFalse(results.get(1).isPresent());
+		assertFalse(results.get(2).isPresent());
+	}
+
+	@Test
+	void testAddToQueue_afterStartError() throws InterruptedException {
+		final var error = new RuntimeException(Faker.instance().darkSoul().covenants());
+		Mockito.doThrow(error).when(event)
+				.afterRunCorrectly(any(String.class), any(long.class), any(long.class), eq(spoolExecutor));
+
+		final var sm = new CountDownLatch(2);
+		assertTrue(spoolExecutor.addToQueue(() -> {
+			sm.countDown();
+		}, name, 0, e -> {
+			sm.countDown();
+		}));
+		assertTrue(sm.await(10, SECONDS));
+
+		verify(sEvent, atLeast(3)).onEnd(any(), oExceptionCaptor.capture());
+
+		final var results = oExceptionCaptor.getAllValues();
+
+		assertFalse(results.get(0).isPresent());
+		assertFalse(results.get(1).isPresent());
+		assertEquals(error, results.get(2).get());
 	}
 
 }

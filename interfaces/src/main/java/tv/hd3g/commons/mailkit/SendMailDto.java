@@ -45,6 +45,7 @@ public class SendMailDto {
 	public enum MessageGrade {
 		EVENT_NOTICE(3),
 		MARKETING(3),
+		URGENT(2),
 		SECURITY(1),
 		TEST(4);
 
@@ -60,12 +61,12 @@ public class SendMailDto {
 	}
 
 	public SendMailDto(final String templateName,
-	                   final Locale lang,
-	                   final Map<String, Object> templateVars,
-	                   final String senderAddr,
-	                   final List<String> recipientsAddr,
-	                   final List<String> recipientsCCAddr,
-	                   final List<String> recipientsBCCAddr) {
+					   final Locale lang,
+					   final Map<String, Object> templateVars,
+					   final String senderAddr,
+					   final List<String> recipientsAddr,
+					   final List<String> recipientsCCAddr,
+					   final List<String> recipientsBCCAddr) {
 		this.templateName = Objects.requireNonNull(templateName);
 		this.lang = Objects.requireNonNull(lang);
 		this.templateVars = Objects.requireNonNull(templateVars);
@@ -76,14 +77,14 @@ public class SendMailDto {
 	}
 
 	public SendMailDto(final String templateName,
-	                   final Locale lang,
-	                   final Map<String, Object> templateVars,
-	                   final String senderAddr,
-	                   final String... recipientsAddr) {
+					   final Locale lang,
+					   final Map<String, Object> templateVars,
+					   final String senderAddr,
+					   final String... recipientsAddr) {
 		this(templateName, lang, templateVars, senderAddr,
-		        List.of(Objects.requireNonNull(recipientsAddr)),
-		        List.of(),
-		        List.of());
+				List.of(Objects.requireNonNull(recipientsAddr)),
+				List.of(),
+				List.of());
 	}
 
 	public void setReplyToAddr(final String replyToAddr) {

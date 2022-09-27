@@ -16,19 +16,11 @@
  */
 package tv.hd3g.mailkit;
 
-import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.ResourceBundleMessageSource;
 
 @Configuration
-@ComponentScan(basePackages = { "tv.hd3g.mailkit" })
+@ComponentScan(basePackages = { "tv.hd3g.mailkit", "tv.hd3g.jobkit.mod" })
 public class Setup {
-
-	@Bean
-	public MessageSource messageSource() {
-		return new ResourceBundleMessageSource();
-	}
 
 }

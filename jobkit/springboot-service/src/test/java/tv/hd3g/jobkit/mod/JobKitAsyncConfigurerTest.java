@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import tv.hd3g.jobkit.engine.JobKitEngine;
+import tv.hd3g.jobkit.engine.RunnableWithException;
 
 class JobKitAsyncConfigurerTest {
 
@@ -42,14 +43,15 @@ class JobKitAsyncConfigurerTest {
 		final var executor = jobKitAsyncConfigurer.getAsyncExecutor();
 		assertNotNull(executor);
 
-		when(jobKitEngine.runOneShot(anyString(), anyString(), anyInt(), any(Runnable.class), any()))
+		when(jobKitEngine.runOneShot(anyString(), anyString(), anyInt(), any(RunnableWithException.class), any()))
 		        .thenReturn(true);
 
 		final var task = mock(Runnable.class);
 		executor.execute(task);
 
 		verify(jobKitEngine, times(1)).runOneShot(
-		        startsWith("SpringBoot Async"), eq(POOL_NAME), eq(0), eq(task), any());
+		        startsWith("SpringBoot Async"), eq(POOL_NAME), eq(0),
+		        any(RunnableWithException.class), any());
 	}
 
 	@Test

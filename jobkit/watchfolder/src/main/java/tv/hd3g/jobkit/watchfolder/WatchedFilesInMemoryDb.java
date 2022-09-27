@@ -18,7 +18,6 @@ package tv.hd3g.jobkit.watchfolder;
 
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.FILES_DIRS;
 
@@ -79,7 +78,7 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 			maxDeep = 0;
 		}
 		log.debug("Setup WFDB for {}, pickUp: {}, minFixedStateTime: {}, maxDeep: {}",
-		        observedFolder.getLabel(), pickUp, minFixedStateTime, maxDeep);
+				observedFolder.getLabel(), pickUp, minFixedStateTime, maxDeep);
 	}
 
 	@Override
@@ -96,78 +95,78 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 		 * update all founded
 		 */
 		final var updateFounded = detected.stream()
-		        .filter(allWatchedFiles::containsKey)
-		        .map(f -> allWatchedFiles.get(f).update(f))
-		        .collect(toUnmodifiableList());
+				.filter(allWatchedFiles::containsKey)
+				.map(f -> allWatchedFiles.get(f).update(f))
+				.toList();
 		log.trace("List updateFounded={}", updateFounded);
 
 		/**
 		 * get updated
 		 */
 		final var updatedChangedFounded = updateFounded.stream()
-		        .filter(not(WatchedFileInMemoryDb::isNotYetMarkedAsDone))// == MarkedAsDone
-		        .filter(WatchedFileInMemoryDb::canBeCallbacked)
-		        .filter(WatchedFileInMemoryDb::isDoneButChanged)
-		        .map(WatchedFileInMemoryDb::resetDoneButChanged)
-		        .map(WatchedFileInMemoryDb::getLastFile)
-		        .collect(toUnmodifiableSet());
+				.filter(not(WatchedFileInMemoryDb::isNotYetMarkedAsDone))// == MarkedAsDone
+				.filter(WatchedFileInMemoryDb::canBeCallbacked)
+				.filter(WatchedFileInMemoryDb::isDoneButChanged)
+				.map(WatchedFileInMemoryDb::resetDoneButChanged)
+				.map(WatchedFileInMemoryDb::getLastFile)
+				.collect(toUnmodifiableSet());
 		log.trace("List updatedChangedFounded={}", updatedChangedFounded);
 
 		/**
 		 * get qualified, set them marked
 		 */
 		final var qualifyFounded = updateFounded.stream()
-		        .filter(WatchedFileInMemoryDb::isNotYetMarkedAsDone)
-		        .filter(WatchedFileInMemoryDb::isTimeQualified)
-		        .map(WatchedFileInMemoryDb::setMarkedAsDone)
-		        .collect(toUnmodifiableList());
+				.filter(WatchedFileInMemoryDb::isNotYetMarkedAsDone)
+				.filter(WatchedFileInMemoryDb::isTimeQualified)
+				.map(WatchedFileInMemoryDb::setMarkedAsDone)
+				.toList();
 		log.trace("List qualifyFounded={}", qualifyFounded);
 
 		/**
 		 * get only them can be callbacked
 		 */
 		final var qualifiedAndCallbacked = qualifyFounded.stream()
-		        .filter(WatchedFileInMemoryDb::canBeCallbacked)
-		        .map(WatchedFileInMemoryDb::getLastFile)
-		        .collect(toUnmodifiableSet());
+				.filter(WatchedFileInMemoryDb::canBeCallbacked)
+				.map(WatchedFileInMemoryDb::getLastFile)
+				.collect(toUnmodifiableSet());
 		log.trace("List qualifiedAndCallbacked={}", qualifiedAndCallbacked);
 
 		final var losted = allWatchedFiles.values().stream()
-		        .filter(WatchedFileInMemoryDb::isNotYetMarkedAsDone)
-		        .filter(w -> w.absentInSet(detected))
-		        .collect(toUnmodifiableList());
+				.filter(WatchedFileInMemoryDb::isNotYetMarkedAsDone)
+				.filter(w -> w.absentInSet(detected))
+				.toList();
 
 		final var lostedAndCallbacked = losted.stream()
-		        .filter(WatchedFileInMemoryDb::canBePickupFromType)
-		        .map(WatchedFileInMemoryDb::getLastFile)
-		        .collect(toUnmodifiableSet());
+				.filter(WatchedFileInMemoryDb::canBePickupFromType)
+				.map(WatchedFileInMemoryDb::getLastFile)
+				.collect(toUnmodifiableSet());
 
 		/**
 		 * Add new files
 		 */
 		detected.stream()
-		        .filter(Predicate.not(allWatchedFiles::containsKey))
-		        .forEach(f -> allWatchedFiles.put(f, new WatchedFileInMemoryDb(f, pickUp, minFixedStateTime)));
+				.filter(Predicate.not(allWatchedFiles::containsKey))
+				.forEach(f -> allWatchedFiles.put(f, new WatchedFileInMemoryDb(f, pickUp, minFixedStateTime)));
 
 		/**
 		 * Clean deleted files
 		 */
 		allWatchedFiles.keySet().stream()
-		        .filter(Predicate.not(detected::contains))
-		        .collect(toUnmodifiableList())
-		        .forEach(allWatchedFiles::remove);
+				.filter(Predicate.not(detected::contains))
+				.toList()
+				.forEach(allWatchedFiles::remove);
 
 		int size;
 		if (pickUp == FILES_DIRS) {
 			size = allWatchedFiles.size();
 		} else {
 			size = (int) allWatchedFiles.values().stream()
-			        .filter(WatchedFileInMemoryDb::canBePickupFromType)
-			        .count();
+					.filter(WatchedFileInMemoryDb::canBePickupFromType)
+					.count();
 		}
 
 		log.debug("Scan result for {}: {} founded, {} lost, {} total",
-		        observedFolder.getLabel(), qualifiedAndCallbacked.size(), lostedAndCallbacked.size(), size);
+				observedFolder.getLabel(), qualifiedAndCallbacked.size(), lostedAndCallbacked.size(), size);
 		return new WatchedFiles(qualifiedAndCallbacked, lostedAndCallbacked, updatedChangedFounded, size);
 	}
 
@@ -175,8 +174,8 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 	 * Recursive
 	 */
 	private void actualScan(final AbstractFile aSource,
-	                        final int deep,
-	                        final Set<CachedFileAttributes> detected) {
+							final int deep,
+							final Set<CachedFileAttributes> detected) {
 		final var ignoreFiles = observedFolder.getIgnoreFiles();
 		final var allowedHidden = observedFolder.isAllowedHidden();
 		final var allowedLinks = observedFolder.isAllowedLinks();
@@ -185,50 +184,50 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 		final var ignoreRelativePaths = observedFolder.getIgnoreRelativePaths();
 
 		final var result = aSource.toCachedList()
-		        .peek(f -> log.trace("Detect file={}", f))// NOSONAR S3864
-		        .filter(f -> ignoreFiles.contains(f.getName().toLowerCase()) == false)
-		        .filter(f -> (allowedHidden == false && (f.isHidden() || f.getName().startsWith("."))) == false)
-		        .filter(f -> (allowedLinks == false && f.isLink()) == false)
-		        .filter(f -> {
-			        if (f.isDirectory()) {
-				        return true;
-			        } else if (allowedExtentions.isEmpty() == false) {
-				        return containExtension(f.getName(), allowedExtentions);
-			        }
-			        return true;
-		        })
-		        .filter(f -> {
-			        if (f.isDirectory()) {
-				        return true;
-			        }
-			        return containExtension(f.getName(), blockedExtentions) == false;
-		        })
-		        .filter(f -> {
-			        if (ignoreRelativePaths.isEmpty()) {
-				        return true;
-			        }
-			        return ignoreRelativePaths.contains(f.getPath()) == false;
-		        })
-		        .filter(f -> f.isDirectory() || f.isSpecial() == false)
-		        .collect(toUnmodifiableList());
+				.peek(f -> log.trace("Detect file={}", f))// NOSONAR S3864
+				.filter(f -> ignoreFiles.contains(f.getName().toLowerCase()) == false)
+				.filter(f -> (allowedHidden == false && (f.isHidden() || f.getName().startsWith("."))) == false)
+				.filter(f -> (allowedLinks == false && f.isLink()) == false)
+				.filter(f -> {
+					if (f.isDirectory()) {
+						return true;
+					} else if (allowedExtentions.isEmpty() == false) {
+						return containExtension(f.getName(), allowedExtentions);
+					}
+					return true;
+				})
+				.filter(f -> {
+					if (f.isDirectory()) {
+						return true;
+					}
+					return containExtension(f.getName(), blockedExtentions) == false;
+				})
+				.filter(f -> {
+					if (ignoreRelativePaths.isEmpty()) {
+						return true;
+					}
+					return ignoreRelativePaths.contains(f.getPath()) == false;
+				})
+				.filter(f -> f.isDirectory() || f.isSpecial() == false)
+				.toList();
 
 		detected.addAll(result);
 
 		log.debug(() -> "Scanned files/dirs for \"" + aSource.getPath() + "\" (deep " + deep + "): "
-		                + result.stream()
-		                        .map(CachedFileAttributes::getName)
-		                        .sorted()
-		                        .collect(joining(", "))
-		                + " on \"" + aSource.getFileSystem().toString() + "\"");
+						+ result.stream()
+								.map(CachedFileAttributes::getName)
+								.sorted()
+								.collect(joining(", "))
+						+ " on \"" + aSource.getFileSystem().toString() + "\"");
 		if (deep > 0) {
 			result.stream()
-			        .filter(CachedFileAttributes::isDirectory)
-			        .forEach(f -> actualScan(f.getAbstractFile(), deep - 1, detected));
+					.filter(CachedFileAttributes::isDirectory)
+					.forEach(f -> actualScan(f.getAbstractFile(), deep - 1, detected));
 		}
 	}
 
 	boolean containExtension(final String baseFileName, final Set<String> candidates) {
 		return candidates.stream()
-		        .anyMatch(c -> baseFileName.toLowerCase().endsWith("." + c));
+				.anyMatch(c -> baseFileName.toLowerCase().endsWith("." + c));
 	}
 }

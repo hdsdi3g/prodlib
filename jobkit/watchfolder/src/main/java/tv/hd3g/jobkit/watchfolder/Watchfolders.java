@@ -17,7 +17,6 @@
 package tv.hd3g.jobkit.watchfolder;
 
 import static java.time.temporal.ChronoUnit.MILLIS;
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static java.util.stream.Collectors.toUnmodifiableMap;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
 
@@ -55,12 +54,12 @@ public class Watchfolders {
 	private BackgroundService service;
 
 	public Watchfolders(final List<? extends ObservedFolder> observedFolders,
-	                    final FolderActivity eventActivity,
-	                    final Duration timeBetweenScans,
-	                    final JobKitEngine jobKitEngine,
-	                    final String spoolScans,
-	                    final String spoolEvents,
-	                    final Supplier<WatchedFilesDb> watchedFilesDbBuilder) {
+						final FolderActivity eventActivity,
+						final Duration timeBetweenScans,
+						final JobKitEngine jobKitEngine,
+						final String spoolScans,
+						final String spoolEvents,
+						final Supplier<WatchedFilesDb> watchedFilesDbBuilder) {
 		this.observedFolders = Objects.requireNonNull(observedFolders);
 		this.eventActivity = Objects.requireNonNull(eventActivity);
 		this.timeBetweenScans = Objects.requireNonNull(timeBetweenScans);
@@ -75,13 +74,13 @@ public class Watchfolders {
 		}
 
 		wfDBForFolder = observedFolders.stream()
-		        .collect(toUnmodifiableMap(observedFolder -> observedFolder,
-		                observedFolder -> {
-			                final var watchedFilesDb = watchedFilesDbBuilder.get();
-			                final var pickUp = eventActivity.getPickUpType(observedFolder);
-			                watchedFilesDb.setup(observedFolder, pickUp);
-			                return watchedFilesDb;
-		                }));
+				.collect(toUnmodifiableMap(observedFolder -> observedFolder,
+						observedFolder -> {
+							final var watchedFilesDb = watchedFilesDbBuilder.get();
+							final var pickUp = eventActivity.getPickUpType(observedFolder);
+							watchedFilesDb.setup(observedFolder, pickUp);
+							return watchedFilesDb;
+						}));
 	}
 
 	final Consumer<Exception> justLogAfterBadUserRun = e -> {
@@ -96,29 +95,29 @@ public class Watchfolders {
 
 			log.trace("Start Watchfolder scan for {} :: {}", label, fs);
 			jobKitEngine.runOneShot("Watchfolder start dir scan for " + label, spoolEvents, 0,
-			        () -> eventActivity.onBeforeScan(folder), justLogAfterBadUserRun);
+					() -> eventActivity.onBeforeScan(folder), justLogAfterBadUserRun);
 			final var startTime = System.currentTimeMillis();
 			final var scanResult = wfDBForFolder.get(folder).update(fs);
 			final var scanTime = Duration.of(System.currentTimeMillis() - startTime, MILLIS);
 
 			jobKitEngine.runOneShot("On event on watchfolder scan for " + getWFName(), spoolEvents, 0,
-			        () -> eventActivity.onAfterScan(folder, scanTime, scanResult),
-			        e -> {
-				        if (e == null) {
-					        return;
-				        }
-				        final var policy = eventActivity.retryScanPolicyOnUserError(folder, scanResult, e);
-				        final var founded = scanResult.getFounded();
-				        if (founded.isEmpty() == false) {
-					        log.error("Can't process user event of onAfterScan ({} founded), policy is {}",
-					                founded.size(), policy, e);
-					        if (policy == RETRY_FOUNDED_FILE) {
-						        wfDBForFolder.get(folder).reset(founded);
-					        }
-				        } else {
-					        log.error("Can't process user event of onAfterScan", e);
-				        }
-			        });
+					() -> eventActivity.onAfterScan(folder, scanTime, scanResult),
+					e -> {
+						if (e == null) {
+							return;
+						}
+						final var policy = eventActivity.retryScanPolicyOnUserError(folder, scanResult, e);
+						final var founded = scanResult.founded();
+						if (founded.isEmpty() == false) {
+							log.error("Can't process user event of onAfterScan ({} founded), policy is {}",
+									founded.size(), policy, e);
+							if (policy == RETRY_FOUNDED_FILE) {
+								wfDBForFolder.get(folder).reset(founded);
+							}
+						} else {
+							log.error("Can't process user event of onAfterScan", e);
+						}
+					});
 			log.trace("Ends Watchfolder scan for {} :: {}", label, fs);
 		} catch (final IOException e) {
 			throw new UncheckedIOException(e);
@@ -127,8 +126,8 @@ public class Watchfolders {
 
 	private String getWFName() {
 		return observedFolders.stream()
-		        .map(ObservedFolder::getLabel)
-		        .collect(Collectors.joining(", "));
+				.map(ObservedFolder::getLabel)
+				.collect(Collectors.joining(", "));
 	}
 
 	public synchronized void startScans() {
@@ -140,32 +139,32 @@ public class Watchfolders {
 			final var startTime = System.currentTimeMillis();
 
 			final var newInError = observedFolders.stream()
-			        .filter(Predicate.not(onErrorObservedFolders::containsKey))
-			        .filter(oF -> {
-				        try {
-					        internalScan(oF);
-					        return false;
-				        } catch (final UncheckedIOException e) {
-					        log.error("Problem during scan with {}, cancel scans for it", oF.getLabel(), e);
-					        jobKitEngine.runOneShot("Problem during scan with watchfolder " + oF.getLabel(),
-					                spoolEvents, 0,
-					                () -> eventActivity.onScanErrorFolder(oF, e), justLogAfterBadUserRun);
-					        return true;
-				        }
-			        }).collect(toUnmodifiableList());
+					.filter(Predicate.not(onErrorObservedFolders::containsKey))
+					.filter(oF -> {
+						try {
+							internalScan(oF);
+							return false;
+						} catch (final UncheckedIOException e) {
+							log.error("Problem during scan with {}, cancel scans for it", oF.getLabel(), e);
+							jobKitEngine.runOneShot("Problem during scan with watchfolder " + oF.getLabel(),
+									spoolEvents, 0,
+									() -> eventActivity.onScanErrorFolder(oF, e), justLogAfterBadUserRun);
+							return true;
+						}
+					}).toList();
 
 			log.trace("Ends full Watchfolders scans for {} ({} ms) - {} in error",
-			        getWFName(), System.currentTimeMillis() - startTime, newInError.size());
+					getWFName(), System.currentTimeMillis() - startTime, newInError.size());
 			retryInError(newInError);
 		});
 		service.setTimedInterval(timeBetweenScans);
 		service.setRetryAfterTimeFactor(10);
 		service.setPriority(0);
 		jobKitEngine.runOneShot("Start (enable) watchfolder scans for " + getWFName(), spoolEvents, 0,
-		        () -> {
-			        eventActivity.onStartScans(observedFolders);
-			        service.enable();
-		        }, justLogAfterBadUserRun);
+				() -> {
+					eventActivity.onStartScans(observedFolders);
+					service.enable();
+				}, justLogAfterBadUserRun);
 	}
 
 	/**
@@ -180,35 +179,33 @@ public class Watchfolders {
 			return;
 		}
 		jobKitEngine.runOneShot("Stop watchfolder scans for " + getWFName(), spoolEvents, 0,
-		        () -> {
-			        service.disable();
-			        eventActivity.onStopScans(observedFolders);
-		        },
-		        e -> {
-			        if (e != null) {
-				        log.error("Can't send onStopScans event", e);
-			        }
-			        service.disable();
-		        });
+				() -> {
+					service.disable();
+					eventActivity.onStopScans(observedFolders);
+				},
+				e -> {
+					if (e != null) {
+						log.error("Can't send onStopScans event", e);
+					}
+					service.disable();
+				});
 		service = null;
 	}
 
 	private BackgroundService retryInError(final ObservedFolder newInError) {
 		return jobKitEngine.createService("Retry for watchfolder in error "
-		                                  + getWFName() + " > " + newInError.getLabel(),
-		        spoolScans,
-		        () -> {
-			        final var label = newInError.getLabel();
-			        log.info("Retry to establish a connection to {}...", label);
-			        try (var fs = newInError.createFileSystem()) {
-				        fs.getRootPath().toCachedList().count();// NOSONAR S2201
-			        } catch (final IOException e) {
-				        throw new UncheckedIOException(e);
-			        }
-			        log.info("Connection is ok. Back to normal for {}", label);
-			        Optional.ofNullable(onErrorObservedFolders.remove(newInError))
-			                .ifPresent(BackgroundService::disable);
-		        });
+										  + getWFName() + " > " + newInError.getLabel(),
+				spoolScans,
+				() -> {
+					final var label = newInError.getLabel();
+					log.info("Retry to establish a connection to {}...", label);
+					try (var fs = newInError.createFileSystem()) {
+						fs.getRootPath().toCachedList().count();// NOSONAR S2201
+					}
+					log.info("Connection is ok. Back to normal for {}", label);
+					Optional.ofNullable(onErrorObservedFolders.remove(newInError))
+							.ifPresent(BackgroundService::disable);
+				});
 	}
 
 	private void retryInError(final List<? extends ObservedFolder> newInError) {

@@ -2,6 +2,7 @@ package tv.hd3g.jobkit.engine;
 
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -26,8 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import tv.hd3g.jobkit.engine.status.BackgroundServiceStatus;
-
 class JobKitEngineTest {
 
 	static ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
@@ -38,7 +37,7 @@ class JobKitEngineTest {
 	@Mock
 	BackgroundServiceEvent backgroundServiceEvent;
 	@Mock
-	Runnable task;
+	RunnableWithException task;
 	@Mock
 	Consumer<Exception> afterRunCommand;
 
@@ -67,7 +66,7 @@ class JobKitEngineTest {
 	}
 
 	@Test
-	void testRunOneShot() {
+	void testRunOneShot() throws Exception {
 		assertTrue(jobKitEngine.runOneShot(name, spoolName, 0, task, afterRunCommand));
 
 		while (spooler.getRunningQueuesCount() > 0) {
@@ -131,29 +130,13 @@ class JobKitEngineTest {
 	@Test
 	void testShutdown() {
 		jobKitEngine.startService(name, spoolName, 1, TimeUnit.DAYS, task);
-		jobKitEngine.shutdown();
-		assertTrue(jobKitEngine.getLastStatus().getSpoolerStatus().isShutdown());
-		assertTrue(jobKitEngine.getLastStatus().getBackgroundServicesStatus().stream()
-		        .noneMatch(BackgroundServiceStatus::isEnabled));
+		assertDoesNotThrow(() -> jobKitEngine.shutdown());
 	}
 
 	@Test
 	void testWaitToClose() {
 		jobKitEngine.startService(name, spoolName, 1, TimeUnit.DAYS, task);
-		jobKitEngine.waitToClose();
-		assertTrue(jobKitEngine.getLastStatus().getSpoolerStatus().isShutdown());
-		assertTrue(jobKitEngine.getLastStatus().getBackgroundServicesStatus().stream()
-		        .noneMatch(BackgroundServiceStatus::isEnabled));
-	}
-
-	@Test
-	void testGetLastStatus() {
-		final var status = jobKitEngine.getLastStatus();
-		assertNotNull(status);
-		assertNotNull(status.getSpoolerStatus());
-		assertEquals(0, status.getSpoolerStatus().getCreatedThreadsCount());
-		assertNotNull(status.getBackgroundServicesStatus());
-		assertEquals(0, status.getBackgroundServicesStatus().size());
+		assertDoesNotThrow(() -> jobKitEngine.waitToClose());
 	}
 
 	@Test

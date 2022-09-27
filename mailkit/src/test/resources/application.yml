@@ -5,8 +5,10 @@ spring:
     main:
         banner-mode: "off"
         log-startup-info: false
+        allow-bean-definition-overriding: true
+        web-application-type: none
     mail:
-        host: localhost
+        host: 255.255.255.255
         protocol: smtp
         port: 25 # SMTP server port
         defaultEncoding: UTF-8
@@ -21,13 +23,19 @@ spring:
         #            timeout: 5000
         #            connectiontimeout: 5000
 mailkit:
-    applifecycle:
-        hostname: myhost
-        mailAddrAdmin: admin@mail
-        mailSender: send@mail
-#    sendtoFile: target/mailkit
-#    sendtoFileWipeOnStart: true
-#    sendtoFileAutomaticExt: true
-
-server:
-    port: 0
+    env:
+        appName: MyApp
+        instanceName: myhost
+        vendorName: My Provider
+    senderAddr: send@mail
+#    saveMissingMessages: target/mailkit
+#    replyToAddr: reply@mail
+#    groupDev:
+#        addrList: [dev@mail]
+#        lang: fr-fr
+#    groupAdmin: 
+#        addrList: [adm@mail]
+#        lang: fr-fr
+#    groupSecurity: 
+#        addrList: [sec@mail]
+#        lang: fr-fr

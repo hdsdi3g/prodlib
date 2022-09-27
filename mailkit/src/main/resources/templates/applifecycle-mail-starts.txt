@@ -1,1 +1,0 @@
-[(#{mailkit.applifecycle.starts(${appName}, ${hostname})})]

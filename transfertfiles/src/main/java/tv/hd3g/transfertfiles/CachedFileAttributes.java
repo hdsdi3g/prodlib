@@ -20,6 +20,14 @@ import java.util.Objects;
 
 import org.apache.commons.io.FilenameUtils;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import tv.hd3g.transfertfiles.json.TransfertFilesSerializer.CachedFileAttributeSerializer;
+import tv.hd3g.transfertfiles.json.TransfertFilesSerializer.CachedFileAttributesDeserializer;
+
+@JsonSerialize(using = CachedFileAttributeSerializer.class)
+@JsonDeserialize(using = CachedFileAttributesDeserializer.class)
 public class CachedFileAttributes {
 
 	private final AbstractFile abstractFile;
@@ -36,13 +44,13 @@ public class CachedFileAttributes {
 	 * Attributes and AbstractFile attributes shoud be the same values (at the least on the creation).
 	 */
 	public CachedFileAttributes(final AbstractFile abstractFile,
-	                            final long length,
-	                            final long lastModified,
-	                            final boolean exists,
-	                            final boolean directory,
-	                            final boolean file,
-	                            final boolean link,
-	                            final boolean special) {
+								final long length,
+								final long lastModified,
+								final boolean exists,
+								final boolean directory,
+								final boolean file,
+								final boolean link,
+								final boolean special) {
 		this.abstractFile = Objects.requireNonNull(abstractFile);
 		path = abstractFile.getPath();
 		this.length = length;

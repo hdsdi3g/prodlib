@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.NoSuchFileException;
 import java.time.Duration;
@@ -48,7 +49,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import tv.hd3g.jobkit.engine.flat.FlatJobKitEngine;
+import tv.hd3g.jobkit.engine.FlatJobKitEngine;
 import tv.hd3g.transfertfiles.AbstractFileSystemURL;
 import tv.hd3g.transfertfiles.CachedFileAttributes;
 
@@ -78,8 +79,8 @@ class WatchfoldersTest {
 
 		when(folderActivity.getPickUpType(observedFolder)).thenReturn(pickUp);
 		when(folderActivity.retryScanPolicyOnUserError(any(ObservedFolder.class),
-		        eq(watchedFiles), any(Exception.class)))
-		                .thenReturn(RETRY_FOUNDED_FILE);
+				eq(watchedFiles), any(Exception.class)))
+						.thenReturn(RETRY_FOUNDED_FILE);
 		when(watchedFilesDb.update(any(AbstractFileSystemURL.class))).thenReturn(watchedFiles);
 	}
 
@@ -90,9 +91,9 @@ class WatchfoldersTest {
 	}
 
 	@Test
-	void testMissingActiveFolder_duringRun() {
+	void testMissingActiveFolder_duringRun() throws IOException {
 		watchfolders = new Watchfolders(List.of(observedFolder), folderActivity,
-		        Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
+				Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
 
 		verify(folderActivity, times(0)).onScanErrorFolder(any(ObservedFolder.class), any(Exception.class));
 
@@ -104,14 +105,14 @@ class WatchfoldersTest {
 
 		assertFalse(jobKitEngine.isEmptyActiveServicesList());
 		verify(folderActivity, times(1)).onScanErrorFolder(eq(observedFolder),
-		        argThat(f -> f.getCause() instanceof NoSuchFileException));
+				argThat(f -> f.getCause() instanceof NoSuchFileException));
 
-		assertThrows(UncheckedIOException.class, () -> jobKitEngine.runAllServicesOnce());
+		assertThrows(IllegalStateException.class, () -> jobKitEngine.runAllServicesOnce());
 
 		assertFalse(jobKitEngine.isEmptyActiveServicesList());
 		verify(folderActivity, times(1)).onScanErrorFolder(eq(observedFolder), any(Exception.class));
 
-		assertThrows(UncheckedIOException.class, () -> jobKitEngine.runAllServicesOnce());
+		assertThrows(IllegalStateException.class, () -> jobKitEngine.runAllServicesOnce());
 
 		/**
 		 * Back to normal
@@ -128,9 +129,9 @@ class WatchfoldersTest {
 	}
 
 	@Test
-	void testStartStopScans() {// NOSONAR 5961
+	void testStartStopScans() throws IOException {// NOSONAR 5961
 		watchfolders = new Watchfolders(List.of(observedFolder), folderActivity,
-		        Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
+				Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
 		assertTrue(jobKitEngine.isEmptyActiveServicesList());
 
 		watchfolders.startScans();
@@ -181,9 +182,9 @@ class WatchfoldersTest {
 	}
 
 	@Test
-	void testGetService() {
+	void testGetService() throws IOException {
 		watchfolders = new Watchfolders(List.of(observedFolder), folderActivity,
-		        Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
+				Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
 		assertNull(watchfolders.getService());
 
 		watchfolders.startScans();
@@ -197,15 +198,15 @@ class WatchfoldersTest {
 	}
 
 	@Test
-	void test_OnFolderActivity_Error() {
+	void test_OnFolderActivity_Error() throws IOException {
 		final var cfa = Mockito.mock(CachedFileAttributes.class);
 		watchfolders = new Watchfolders(List.of(observedFolder), folderActivity,
-		        Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
+				Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
 
 		watchfolders.startScans();
 
 		doThrow(UncheckedIOException.class)
-		        .when(folderActivity).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
+				.when(folderActivity).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
 
 		jobKitEngine.runAllServicesOnce();
 
@@ -214,7 +215,7 @@ class WatchfoldersTest {
 		verify(watchedFilesDb, times(1)).update(any(AbstractFileSystemURL.class));
 		verify(watchedFilesDb, times(0)).reset(any());
 		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-		verify(watchedFiles, times(1)).getFounded();
+		verify(watchedFiles, times(1)).founded();
 
 		jobKitEngine.runAllServicesOnce();
 
@@ -223,9 +224,9 @@ class WatchfoldersTest {
 		verify(watchedFilesDb, times(2)).update(any(AbstractFileSystemURL.class));
 		verify(watchedFilesDb, times(0)).reset(any());
 		verify(folderActivity, times(2)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-		verify(watchedFiles, times(2)).getFounded();
+		verify(watchedFiles, times(2)).founded();
 
-		when(watchedFiles.getFounded()).thenReturn(Set.of(cfa));
+		when(watchedFiles.founded()).thenReturn(Set.of(cfa));
 		jobKitEngine.runAllServicesOnce();
 
 		assertFalse(jobKitEngine.isEmptyActiveServicesList());
@@ -233,7 +234,7 @@ class WatchfoldersTest {
 		verify(watchedFilesDb, times(3)).update(any(AbstractFileSystemURL.class));
 		verify(watchedFilesDb, times(1)).reset(Set.of(cfa));
 		verify(folderActivity, times(3)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-		verify(watchedFiles, times(3)).getFounded();
+		verify(watchedFiles, times(3)).founded();
 
 		reset(folderActivity);
 		when(folderActivity.getPickUpType(observedFolder)).thenReturn(pickUp);
@@ -244,7 +245,7 @@ class WatchfoldersTest {
 		verify(watchedFilesDb, times(4)).update(any(AbstractFileSystemURL.class));
 		verify(watchedFilesDb, times(1)).reset(Set.of(cfa));
 		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-		verify(watchedFiles, times(3)).getFounded();
+		verify(watchedFiles, times(3)).founded();
 
 		verifyNoInteractions(cfa);
 	}

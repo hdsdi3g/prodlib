@@ -17,15 +17,25 @@
 package tv.hd3g.jobkit.watchfolder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import tv.hd3g.transfertfiles.AbstractFile;
+import tv.hd3g.transfertfiles.AbstractFileSystem;
 import tv.hd3g.transfertfiles.CachedFileAttributes;
 
 class WatchedFilesTest {
@@ -38,6 +48,17 @@ class WatchedFilesTest {
 	Set<CachedFileAttributes> updated;
 	int totalFiles;
 
+	@Mock
+	CachedFileAttributes cfa0;
+	@Mock
+	CachedFileAttributes cfa1;
+	@Mock
+	CachedFileAttributes cfa2;
+	@Mock
+	AbstractFile abstractFile;
+	@Mock
+	AbstractFileSystem<AbstractFile> abstractFileSystem;
+
 	WatchedFiles watchedFiles;
 
 	@BeforeEach
@@ -48,22 +69,49 @@ class WatchedFilesTest {
 	}
 
 	@Test
-	void testGetFounded() {
-		assertEquals(founded, watchedFiles.getFounded());
+	void testToString() {
+		assertNotNull(watchedFiles.toString());
+
+		verify(founded, times(1)).stream();
+		verify(losted, times(1)).stream();
+		verify(updated, times(1)).stream();
+	}
+
+	@AfterEach
+	void end() {
+		Mockito.verifyNoMoreInteractions(founded, losted, updated, abstractFile, abstractFileSystem);
 	}
 
 	@Test
-	void testGetLosted() {
-		assertEquals(losted, watchedFiles.getLosted());
+	void testFoundedAndUpdated() {
+		when(founded.stream()).thenReturn(Stream.of(cfa0, cfa1));
+		when(updated.stream()).thenReturn(Stream.of(cfa1, cfa2));
+
+		final var result = watchedFiles.foundedAndUpdated();
+		assertEquals(3, result.size());
+		assertTrue(result.contains(cfa0));
+		assertTrue(result.contains(cfa1));
+		assertTrue(result.contains(cfa2));
+
+		verify(founded, times(1)).stream();
+		verify(updated, times(1)).stream();
 	}
 
 	@Test
-	void testGetUpdated() {
-		assertEquals(updated, watchedFiles.getUpdated());
+	void testGetFoundedAndUpdatedFS() {
+		when(founded.stream()).thenReturn(Stream.of(cfa0));
+		when(updated.stream()).thenReturn(Stream.of());
+		when(cfa0.getAbstractFile()).thenReturn(abstractFile);
+		when((AbstractFileSystem<AbstractFile>) abstractFile.getFileSystem()).thenReturn(abstractFileSystem);
+
+		final var result = watchedFiles.getFoundedAndUpdatedFS();
+		assertEquals(1, result.size());
+		assertTrue(result.contains(abstractFileSystem));
+
+		verify(founded, times(1)).stream();
+		verify(updated, times(1)).stream();
+		verify(cfa0, times(1)).getAbstractFile();
+		verify(abstractFile, times(1)).getFileSystem();
 	}
 
-	@Test
-	void testGetTotalFiles() {
-		assertEquals(totalFiles, watchedFiles.getTotalFiles());
-	}
 }

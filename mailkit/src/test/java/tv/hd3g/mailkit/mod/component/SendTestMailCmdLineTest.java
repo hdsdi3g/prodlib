@@ -17,18 +17,17 @@ import org.mockito.internal.util.MockUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import tv.hd3g.commons.mailkit.SendMailDto;
 import tv.hd3g.commons.mailkit.SendMailDto.MessageGrade;
 import tv.hd3g.commons.mailkit.SendMailService;
 
 @SpringBootTest
-@ActiveProfiles({ "mockSendMailService" })
 class SendTestMailCmdLineTest {
 
-	@Autowired
-	private SendMailService sendMailService;
+	@MockBean
+	SendMailService sendMailService;
 	@Autowired
 	SendTestMailCmdLine sendTestMailCmdLine;
 

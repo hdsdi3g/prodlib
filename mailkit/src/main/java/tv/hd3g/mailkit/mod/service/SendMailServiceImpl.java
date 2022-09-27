@@ -16,7 +16,6 @@
  */
 package tv.hd3g.mailkit.mod.service;
 
-import java.io.File;
 import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
@@ -25,7 +24,6 @@ import javax.mail.internet.MimeMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -37,7 +35,7 @@ import tv.hd3g.commons.mailkit.SendMailDto;
 import tv.hd3g.commons.mailkit.SendMailService;
 
 /**
- * File attachement and mail resources are not yet tested.
+ * File attachement and mail resources are not tested.
  * See https://github.com/dotSwapna/dotEmail.github.io/tree/master/src/main
  */
 @Service
@@ -51,10 +49,6 @@ public class SendMailServiceImpl implements SendMailService {
 	private TemplateEngine htmlTemplateEngine;
 	@Autowired
 	private TemplateEngine subjectTemplateEngine;
-	@Autowired
-	private SendMailToFileService sendMailToFileService;
-	@Value("${mailkit.sendtoFile:#{null}}")
-	private File sendtoFile;
 
 	@Override
 	public void sendEmail(final SendMailDto sendMailDto) {
@@ -79,10 +73,10 @@ public class SendMailServiceImpl implements SendMailService {
 		final var mimeMessage = mailSender.createMimeMessage();
 
 		final var message = new MimeMessageHelper(mimeMessage,
-		        MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+				MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
 
 		final var subjectContent = subjectTemplateEngine.process(sendMailDto.getTemplateName(), ctx)
-		        .replace("\r\n", " ").replace("\n", " ").replace("    ", " ").replace("   ", " ").replace("  ", " ");
+				.replace("\r\n", " ").replace("\n", " ").replace("    ", " ").replace("   ", " ").replace("  ", " ");
 		message.setSubject(subjectContent);
 
 		message.setFrom(sendMailDto.getSenderAddr());
@@ -127,23 +121,15 @@ public class SendMailServiceImpl implements SendMailService {
 			}
 		}
 
-		if (sendtoFile == null) {
-			mailSender.send(mimeMessage);
-			log.info("Send a mail to {}: \"{}\"",
-			        () -> recipients.stream().collect(Collectors.joining(", ")),
-			        () -> subjectContent);
-		} else {
-			sendMailToFileService.write(mimeMessage);
-			log.info("Write a mail to {}: \"{}\", in {}",
-			        () -> recipients.stream().collect(Collectors.joining(", ")),
-			        () -> subjectContent,
-			        () -> sendtoFile);
-		}
+		mailSender.send(mimeMessage);
+		log.info("Send a mail to {}: \"{}\"",
+				() -> recipients.stream().collect(Collectors.joining(", ")),
+				() -> subjectContent);
 		htmlTemplateEngine.clearTemplateCache();
 	}
 
 	private void setCcBccRecipients(final SendMailDto sendMailDto,
-	                                final MimeMessageHelper message) throws MessagingException {
+									final MimeMessageHelper message) throws MessagingException {
 		final var recipientsCC = sendMailDto.getRecipientsCCAddr();
 		if (recipientsCC.size() == 1) {
 			message.setCc(recipientsCC.get(0));
@@ -160,7 +146,7 @@ public class SendMailServiceImpl implements SendMailService {
 	}
 
 	private void setReferenceHeaders(final SendMailDto sendMailDto,
-	                                 final MimeMessage mimeMessage) throws MessagingException {
+									 final MimeMessage mimeMessage) throws MessagingException {
 		if (sendMailDto.getExternalReference() != null) {
 			mimeMessage.setHeader("X-ExternalReference", sendMailDto.getExternalReference());
 		}

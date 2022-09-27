@@ -85,7 +85,7 @@ class WatchedFilesInMemoryDbTest {
 		assertWatchedFiles(w, Set.of(), Set.of(), 0);
 
 		write("thisfine.ok", "thisfine.ok.long", "thisnotfine.no",
-		        "thisnotfine.no.long", "/whysubdir/thisfine.ok", "ignoreme.ok");
+				"thisnotfine.no.long", "/whysubdir/thisfine.ok", "ignoreme.ok");
 
 		w = watchedFilesDb.update(fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 2);
@@ -178,8 +178,8 @@ class WatchedFilesInMemoryDbTest {
 
 		w = watchedFilesDb.update(fs);
 		assertWatchedFiles(w,
-		        Set.of("thisfine.ok", "/oksubdir/thisfine.ok", "/sub/sub/dir/anotherfine.ok"),
-		        Set.of(), 3);
+				Set.of("thisfine.ok", "/oksubdir/thisfine.ok", "/sub/sub/dir/anotherfine.ok"),
+				Set.of(), 3);
 	}
 
 	@Test
@@ -195,8 +195,8 @@ class WatchedFilesInMemoryDbTest {
 
 		w = watchedFilesDb.update(fs);
 		assertWatchedFiles(w,
-		        Set.of("/oksubdir", "/sub", "/sub/sub", "/sub/sub/dir"),
-		        Set.of(), 4);
+				Set.of("/oksubdir", "/sub", "/sub/sub", "/sub/sub/dir"),
+				Set.of(), 4);
 	}
 
 	@Test
@@ -212,9 +212,9 @@ class WatchedFilesInMemoryDbTest {
 
 		w = watchedFilesDb.update(fs);
 		assertWatchedFiles(w,
-		        Set.of("/oksubdir", "/sub", "/sub/sub", "/sub/sub/dir",
-		                "thisfine.ok", "/oksubdir/thisfine.ok", "/sub/sub/dir/anotherfine.ok"),
-		        Set.of(), 4 + 3);
+				Set.of("/oksubdir", "/sub", "/sub/sub", "/sub/sub/dir",
+						"thisfine.ok", "/oksubdir/thisfine.ok", "/sub/sub/dir/anotherfine.ok"),
+				Set.of(), 4 + 3);
 	}
 
 	@Test
@@ -277,8 +277,8 @@ class WatchedFilesInMemoryDbTest {
 
 	private Set<File> toAbsolutePath(final Collection<String> relativePaths) {
 		return relativePaths.stream()
-		        .map(this::toAbsolutePath)
-		        .collect(toUnmodifiableSet());
+				.map(this::toAbsolutePath)
+				.collect(toUnmodifiableSet());
 	}
 
 	private void write(final String... relativePath) {
@@ -309,17 +309,17 @@ class WatchedFilesInMemoryDbTest {
 	}
 
 	private void assertWatchedFiles(final WatchedFiles watchedFiles,
-	                                final Set<String> founded,
-	                                final Set<String> losted,
-	                                final int totalFiles) {
+									final Set<String> founded,
+									final Set<String> losted,
+									final int totalFiles) {
 		assertNotNull(watchedFiles);
 		final var currentRootDir = workingFile.getName();
-		assertEquals(toAbsolutePath(founded), revealRealFiles(watchedFiles.getFounded()),
-		        "Search founded; root dir: " + currentRootDir);
-		assertEquals(toAbsolutePath(losted), revealRealFiles(watchedFiles.getLosted()),
-		        "Search losted; root dir: " + currentRootDir);
-		assertEquals(totalFiles, watchedFiles.getTotalFiles(),
-		        "Search totalFiles; root dir: " + currentRootDir);
+		assertEquals(toAbsolutePath(founded), revealRealFiles(watchedFiles.founded()),
+				"Search founded; root dir: " + currentRootDir);
+		assertEquals(toAbsolutePath(losted), revealRealFiles(watchedFiles.losted()),
+				"Search losted; root dir: " + currentRootDir);
+		assertEquals(totalFiles, watchedFiles.totalFiles(),
+				"Search totalFiles; root dir: " + currentRootDir);
 
 		try {
 			Thread.sleep(1);// NOSONAR S2925
@@ -329,10 +329,10 @@ class WatchedFilesInMemoryDbTest {
 
 	private Set<File> revealRealFiles(final Set<CachedFileAttributes> fileAttr) {
 		return fileAttr.stream()
-		        .map(CachedFileAttributes::getAbstractFile)
-		        .map(af -> (LocalFile) af)
-		        .map(LocalFile::getInternalFile)
-		        .collect(toUnmodifiableSet());
+				.map(CachedFileAttributes::getAbstractFile)
+				.map(af -> (LocalFile) af)
+				.map(LocalFile::getInternalFile)
+				.collect(toUnmodifiableSet());
 	}
 
 	@Test
@@ -363,13 +363,13 @@ class WatchedFilesInMemoryDbTest {
 		watchedFilesDb.setup(observedFolder, FILES_ONLY);
 
 		write("thisfine.ok", "thisfine.ok.long", "thisnotfine.no", "thisnotfine.no.long",
-		        "/whysubdir/thisfine.ok", "ignoreme.ok");
+				"/whysubdir/thisfine.ok", "ignoreme.ok");
 		var w = watchedFilesDb.update(fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 2);
 		w = watchedFilesDb.update(fs);
 		assertWatchedFiles(w, Set.of("thisfine.ok", "thisfine.ok.long"), Set.of(), 2);
 
-		watchedFilesDb.reset(w.getFounded());
+		watchedFilesDb.reset(w.founded());
 
 		w = watchedFilesDb.update(fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 2);

@@ -28,11 +28,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Data;
 import tv.hd3g.transfertfiles.AbstractFile;
 import tv.hd3g.transfertfiles.AbstractFileSystemURL;
 
+@Data
 public class ObservedFolder {
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String targetFolder;
 	private String label;
 	private Set<String> allowedExtentions;
@@ -58,7 +63,7 @@ public class ObservedFolder {
 			AbstractFileSystemURL checkParse;
 			if (targetFolderF.exists()) {
 				final var newTargetFolder = "file://localhost" + normalizePath(targetFolderF.getCanonicalFile()
-				        .getAbsolutePath());
+						.getAbsolutePath());
 				checkParse = new AbstractFileSystemURL(newTargetFolder);
 				targetFolder = newTargetFolder;
 			} else {
@@ -74,25 +79,25 @@ public class ObservedFolder {
 		}
 
 		allowedExtentions = Optional.ofNullable(allowedExtentions).orElse(Set.of()).stream()
-		        .map(removeFirstDot)
-		        .map(String::toLowerCase)
-		        .distinct()
-		        .collect(toUnmodifiableSet());
+				.map(removeFirstDot)
+				.map(String::toLowerCase)
+				.distinct()
+				.collect(toUnmodifiableSet());
 		blockedExtentions = Optional.ofNullable(blockedExtentions).orElse(Set.of()).stream()
-		        .map(removeFirstDot)
-		        .map(String::toLowerCase)
-		        .distinct()
-		        .collect(toUnmodifiableSet());
+				.map(removeFirstDot)
+				.map(String::toLowerCase)
+				.distinct()
+				.collect(toUnmodifiableSet());
 		ignoreRelativePaths = Optional.ofNullable(ignoreRelativePaths).orElse(Set.of()).stream()
-		        .map(path -> path.replace('\\', '/'))
-		        .map(AbstractFile::normalizePath)
-		        .distinct()
-		        .collect(toUnmodifiableSet());
+				.map(path -> path.replace('\\', '/'))
+				.map(AbstractFile::normalizePath)
+				.distinct()
+				.collect(toUnmodifiableSet());
 
 		ignoreFiles = Optional.ofNullable(ignoreFiles).orElse(Set.of()).stream()
-		        .map(String::toLowerCase)
-		        .distinct()
-		        .collect(toUnmodifiableSet());
+				.map(String::toLowerCase)
+				.distinct()
+				.collect(toUnmodifiableSet());
 		minFixedStateTime = Optional.ofNullable(minFixedStateTime).orElse(Duration.ZERO);
 	}
 
@@ -101,87 +106,8 @@ public class ObservedFolder {
 		return label;
 	}
 
-	public void setLabel(final String label) {
-		this.label = label;
-	}
-
-	public String getLabel() {
-		return label;
-	}
-
-	public String getTargetFolder() {
-		return targetFolder;
-	}
-
 	public AbstractFileSystemURL createFileSystem() {
 		return new AbstractFileSystemURL(targetFolder);
 	}
 
-	public void setTargetFolder(final String targetFolder) {
-		this.targetFolder = targetFolder;
-	}
-
-	public Set<String> getAllowedExtentions() {
-		return allowedExtentions;
-	}
-
-	public void setAllowedExtentions(final Set<String> allowedExtentions) {
-		this.allowedExtentions = allowedExtentions;
-	}
-
-	public Set<String> getBlockedExtentions() {
-		return blockedExtentions;
-	}
-
-	public void setBlockedExtentions(final Set<String> blockedExtentions) {
-		this.blockedExtentions = blockedExtentions;
-	}
-
-	public Set<String> getIgnoreRelativePaths() {
-		return ignoreRelativePaths;
-	}
-
-	public void setIgnoreRelativePaths(final Set<String> ignoreRelativePaths) {
-		this.ignoreRelativePaths = ignoreRelativePaths;
-	}
-
-	public boolean isAllowedHidden() {
-		return allowedHidden;
-	}
-
-	public void setAllowedHidden(final boolean allowedHidden) {
-		this.allowedHidden = allowedHidden;
-	}
-
-	public boolean isAllowedLinks() {
-		return allowedLinks;
-	}
-
-	public void setAllowedLinks(final boolean allowedLinks) {
-		this.allowedLinks = allowedLinks;
-	}
-
-	public boolean isRecursive() {
-		return recursive;
-	}
-
-	public void setRecursive(final boolean recursive) {
-		this.recursive = recursive;
-	}
-
-	public Set<String> getIgnoreFiles() {
-		return ignoreFiles;
-	}
-
-	public void setIgnoreFiles(final Set<String> ignoreFiles) {
-		this.ignoreFiles = ignoreFiles;
-	}
-
-	public Duration getMinFixedStateTime() {
-		return minFixedStateTime;
-	}
-
-	public void setMinFixedStateTime(final Duration minFixedStateTime) {
-		this.minFixedStateTime = minFixedStateTime;
-	}
 }

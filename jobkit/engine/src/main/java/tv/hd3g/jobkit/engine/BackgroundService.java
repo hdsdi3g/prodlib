@@ -13,8 +13,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import tv.hd3g.jobkit.engine.status.BackgroundServiceStatus;
-
 public class BackgroundService {
 
 	private static Logger log = LogManager.getLogger();
@@ -24,23 +22,22 @@ public class BackgroundService {
 	private final Spooler spooler;
 	private final ScheduledExecutorService scheduledExecutor;
 	private final BackgroundServiceEvent event;
-	private final Runnable task;
+	private final RunnableWithException task;
 
 	private boolean enabled;
 	private ScheduledFuture<?> nextRunReference;
 	private long timedInterval;
-	private long previousScheduledDate;
 	private int priority;
 	private double retryAfterTimeFactor;
 	private final AtomicInteger sequentialErrorCount;
 	private boolean hasFirstStarted;
 
 	public BackgroundService(final String name,
-	                         final String spoolName,
-	                         final Spooler spooler,
-	                         final ScheduledExecutorService scheduledExecutor,
-	                         final BackgroundServiceEvent event,
-	                         final Runnable task) {
+							 final String spoolName,
+							 final Spooler spooler,
+							 final ScheduledExecutorService scheduledExecutor,
+							 final BackgroundServiceEvent event,
+							 final RunnableWithException task) {
 		this.name = name;
 		this.spoolName = spoolName;
 		this.spooler = spooler;
@@ -56,9 +53,9 @@ public class BackgroundService {
 
 	private void ifNextRunReferenceScheduled(final Runnable ifReady) {
 		if (nextRunReference != null
-		    && nextRunReference.isDone() == false
-		    && nextRunReference.isCancelled() == false
-		    && nextRunReference.getDelay(MILLISECONDS) >= 0) {
+			&& nextRunReference.isDone() == false
+			&& nextRunReference.isCancelled() == false
+			&& nextRunReference.getDelay(MILLISECONDS) >= 0) {
 			ifReady.run();
 		}
 	}
@@ -66,7 +63,7 @@ public class BackgroundService {
 	private synchronized void planNextExec(final long interval) {
 		ifNextRunReferenceScheduled(() -> {
 			throw new IllegalStateException("Beware, the nextRunReference for \"" + name + "\" is still active (in "
-			                                + nextRunReference.getDelay(TimeUnit.MILLISECONDS) + ")");
+											+ nextRunReference.getDelay(TimeUnit.MILLISECONDS) + ")");
 		});
 		if (enabled == false) {
 			throw new IllegalStateException("Beware, this service is not enabled (" + name + ")");
@@ -83,7 +80,7 @@ public class BackgroundService {
 				if (lastExecException != null) {
 					event.onPreviousRunWithError(name, spoolName, lastExecException);
 					nextInterval = Math.round(timedInterval
-					                          * Math.pow(retryAfterTimeFactor, sequentialErrorCount.incrementAndGet()));
+											  * Math.pow(retryAfterTimeFactor, sequentialErrorCount.incrementAndGet()));
 					planNextExec(nextInterval);
 				} else {
 					sequentialErrorCount.set(0);
@@ -91,11 +88,10 @@ public class BackgroundService {
 					planNextExec(nextInterval);
 				}
 				log.debug("Schedule for {} the next run to {} sec, the {}", name, nextInterval / 1000d,
-				        new Date(System.currentTimeMillis() + nextInterval));
+						new Date(System.currentTimeMillis() + nextInterval));
 				event.planNextExec(name, spoolName, nextInterval);
 			});
 		}, interval, TimeUnit.MILLISECONDS);
-		previousScheduledDate = System.currentTimeMillis();
 	}
 
 	private synchronized void refreshInternalState(final boolean newEnabled, final long newTimedInterval) {
@@ -116,7 +112,7 @@ public class BackgroundService {
 			 */
 			if (newTimedInterval != timedInterval) {
 				log.info("Change Service interval time \"{}\", from {} to {}", name, timedInterval,
-				        newTimedInterval);
+						newTimedInterval);
 				ifNextRunReferenceScheduled(() -> {
 					final var eta = timedInterval - nextRunReference.getDelay(TimeUnit.MILLISECONDS);
 					if (newTimedInterval > eta) {
@@ -238,26 +234,6 @@ public class BackgroundService {
 
 	public synchronized double getRetryAfterTimeFactor() {
 		return retryAfterTimeFactor;
-	}
-
-	public synchronized BackgroundServiceStatus getLastStatus() {
-		long nextRunReferenceDelay;
-		if (nextRunReference != null) {
-			nextRunReferenceDelay = nextRunReference.getDelay(MILLISECONDS);
-		} else {
-			nextRunReferenceDelay = -1;
-		}
-
-		final var taskClass = task.getClass().getName();
-		String sTask;
-		if (task.toString().contains(taskClass)) {
-			sTask = task.toString();
-		} else {
-			sTask = task.toString() + " [" + taskClass + "]";
-		}
-
-		return new BackgroundServiceStatus(name, spoolName, nextRunReferenceDelay, previousScheduledDate,
-		        this, sequentialErrorCount.get(), sTask);
 	}
 
 	public synchronized boolean isHasFirstStarted() {

@@ -18,7 +18,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import tv.hd3g.commons.mailkit.SendMailService;
 import tv.hd3g.jobkit.engine.JobKitEngine;
-import tv.hd3g.jobkit.mod.BackgroundServiceId;
 
 public class MockService {
 
@@ -42,12 +41,6 @@ public class MockService {
 		@Primary
 		public JobKitEngine jobKitEngine() {
 			return Mockito.mock(JobKitEngine.class);
-		}
-
-		@Bean
-		@Primary
-		public BackgroundServiceId jobBackgroundServiceId() {
-			return Mockito.mock(BackgroundServiceId.class);
 		}
 
 	}
@@ -85,15 +78,12 @@ public class MockService {
 		ScheduledExecutorService scheduledExecutorService;
 		@Autowired
 		JobKitEngine jobKitEngine;
-		@Autowired
-		BackgroundServiceId backgroundServiceId;
 
 		@Test
 		void test() {
 			assertTrue(MockUtil.isMock(sendMailService));
 			assertTrue(MockUtil.isMock(scheduledExecutorService));
 			assertTrue(MockUtil.isMock(jobKitEngine));
-			assertTrue(MockUtil.isMock(backgroundServiceId));
 		}
 	}
 

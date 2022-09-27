@@ -44,7 +44,7 @@ class BackgroundServiceEventTest {
 		latch = new CountDownLatch(1);
 		name = String.valueOf(System.nanoTime());
 		spoolName = String.valueOf(System.nanoTime());
-		spooler = new Spooler(new ExecutionEvent() {});
+		spooler = new Spooler(new ExecutionEvent() {}, new SupervisableEvents() {});
 		error = new AtomicReference<>();
 
 		service = new BackgroundService(name, spoolName, spooler, scheduledExecutorService, event, () -> {

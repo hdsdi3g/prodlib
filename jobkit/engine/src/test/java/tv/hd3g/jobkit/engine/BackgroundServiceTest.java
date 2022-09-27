@@ -42,14 +42,14 @@ class BackgroundServiceTest {
 	@Mock
 	BackgroundServiceEvent event;
 	@Mock
-	Runnable task;
+	RunnableWithException task;
 	@Mock
 	ScheduledFuture<Object> nextRunReference;
 	@Mock
 	SpoolExecutor spoolExecutor;
 
 	@Captor
-	ArgumentCaptor<Runnable> commandCaptor;
+	ArgumentCaptor<RunnableWithException> commandCaptor;
 	@Captor
 	ArgumentCaptor<Consumer<Exception>> afterRunCommandCaptor;
 	@Captor
@@ -69,7 +69,7 @@ class BackgroundServiceTest {
 		backgroundService = new BackgroundService(name, spoolName, spooler, scheduledExecutor, event, task);
 
 		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
-		        .then(invocation -> nextRunReference);
+				.then(invocation -> nextRunReference);
 		when(spooler.getExecutor(spoolName)).thenReturn(spoolExecutor);
 		when(nextRunReference.isDone()).thenReturn(false);
 		when(nextRunReference.isCancelled()).thenReturn(false);
@@ -113,7 +113,7 @@ class BackgroundServiceTest {
 		assertEquals(timedInterval, backgroundService.getTimedInterval(MILLISECONDS));
 
 		Mockito.verify(scheduledExecutor, Mockito.never())
-		        .schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+				.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
 	}
 
 	@Test
@@ -123,7 +123,7 @@ class BackgroundServiceTest {
 		assertEquals(timedInterval, backgroundService.getTimedInterval(MILLISECONDS));
 
 		Mockito.verify(scheduledExecutor, Mockito.never())
-		        .schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+				.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
 	}
 
 	@Test
@@ -149,7 +149,7 @@ class BackgroundServiceTest {
 	void testStartup() {
 		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
 		verify(scheduledExecutor, only())
-		        .schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
 
 		final var scheduledCommand = scheduleCommandCaptor.getValue();
 		assertNotNull(scheduledCommand);
@@ -159,14 +159,14 @@ class BackgroundServiceTest {
 
 		verify(spooler, only()).getExecutor(spoolName);
 		verify(spoolExecutor, only())
-		        .addToQueue(commandCaptor.capture(), eq(name), eq(0), afterRunCommandCaptor.capture());
+				.addToQueue(commandCaptor.capture(), eq(name), eq(0), afterRunCommandCaptor.capture());
 
 		assertEquals(task, commandCaptor.getValue());
 
 		afterRunCommandCaptor.getValue().accept(null);
 
 		verify(scheduledExecutor, Mockito.times(2))
-		        .schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
 
 		when(nextRunReference.isDone()).thenReturn(false);
 		final var value = afterRunCommandCaptor.getValue();
@@ -178,26 +178,26 @@ class BackgroundServiceTest {
 		timedInterval = 1000;
 		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable().setRetryAfterTimeFactor(10);
 		verify(scheduledExecutor, only())
-		        .schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
 		final var scheduledCommand = scheduleCommandCaptor.getValue();
 		assertNotNull(scheduledCommand);
 
 		scheduledCommand.run();
 
 		verify(spoolExecutor, only())
-		        .addToQueue(any(Runnable.class), eq(name), eq(0), afterRunCommandCaptor.capture());
+				.addToQueue(any(RunnableWithException.class), eq(name), eq(0), afterRunCommandCaptor.capture());
 
 		final var lastException = new Exception();
 		afterRunCommandCaptor.getValue().accept(lastException);
 
 		verify(scheduledExecutor, times(1))
-		        .schedule(scheduleCommandCaptor.capture(), eq(timedInterval * 10), eq(MILLISECONDS));
+				.schedule(scheduleCommandCaptor.capture(), eq(timedInterval * 10), eq(MILLISECONDS));
 
 		scheduleCommandCaptor.getValue().run();
 		afterRunCommandCaptor.getValue().accept(lastException);
 
 		verify(scheduledExecutor, times(1))
-		        .schedule(scheduleCommandCaptor.capture(), eq(timedInterval * 100), eq(MILLISECONDS));
+				.schedule(scheduleCommandCaptor.capture(), eq(timedInterval * 100), eq(MILLISECONDS));
 	}
 
 	@Test
@@ -205,21 +205,21 @@ class BackgroundServiceTest {
 		timedInterval = 1000;
 		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable().setRetryAfterTimeFactor(10);
 		verify(scheduledExecutor, only())
-		        .schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
 
 		scheduleCommandCaptor.getValue().run();
 		verify(spoolExecutor, only())
-		        .addToQueue(any(Runnable.class), eq(name), eq(0), afterRunCommandCaptor.capture());
+				.addToQueue(any(RunnableWithException.class), eq(name), eq(0), afterRunCommandCaptor.capture());
 		afterRunCommandCaptor.getValue().accept(new Exception());
 
 		verify(scheduledExecutor, times(1))
-		        .schedule(scheduleCommandCaptor.capture(), eq(timedInterval * 10), eq(MILLISECONDS));
+				.schedule(scheduleCommandCaptor.capture(), eq(timedInterval * 10), eq(MILLISECONDS));
 
 		scheduleCommandCaptor.getValue().run();
 		afterRunCommandCaptor.getValue().accept(null);
 
 		verify(scheduledExecutor, times(2))
-		        .schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
 	}
 
 	@Test
@@ -227,7 +227,7 @@ class BackgroundServiceTest {
 		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
 
 		verify(scheduledExecutor, times(1))
-		        .schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
 
 		backgroundService.disable();
 
@@ -235,7 +235,7 @@ class BackgroundServiceTest {
 		assertEquals(timedInterval, backgroundService.getTimedInterval(TimeUnit.MILLISECONDS));
 
 		verify(scheduledExecutor, times(1))
-		        .schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
 		verify(nextRunReference, times(1)).cancel(false);
 	}
 
@@ -247,7 +247,7 @@ class BackgroundServiceTest {
 		assertEquals(timedInterval, backgroundService.getTimedInterval(TimeUnit.MILLISECONDS));
 
 		verify(scheduledExecutor, times(2))
-		        .schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
 		verify(nextRunReference, times(1)).cancel(false);
 	}
 
@@ -255,7 +255,7 @@ class BackgroundServiceTest {
 	void testStartup_changeTimedInterval() {
 		timedInterval = TimeUnit.HOURS.toMillis(1);
 		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
-		        .then(invocation -> nextRunReference);
+				.then(invocation -> nextRunReference);
 		when(nextRunReference.getDelay(MILLISECONDS)).thenReturn(timedInterval);
 
 		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
@@ -265,9 +265,9 @@ class BackgroundServiceTest {
 		assertEquals(timedInterval * 2l, backgroundService.getTimedInterval(TimeUnit.MILLISECONDS));
 
 		verify(scheduledExecutor, times(1))
-		        .schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
 		verify(scheduledExecutor, times(1))
-		        .schedule(any(Runnable.class), eq(timedInterval * 2l), eq(MILLISECONDS));
+				.schedule(any(Runnable.class), eq(timedInterval * 2l), eq(MILLISECONDS));
 		verify(nextRunReference, times(1)).cancel(false);
 	}
 
@@ -275,12 +275,12 @@ class BackgroundServiceTest {
 	void testStartup_changeTimedInterval_duringRun() {
 		timedInterval = TimeUnit.HOURS.toMillis(1);
 		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
-		        .then(invocation -> nextRunReference);
+				.then(invocation -> nextRunReference);
 		when(nextRunReference.getDelay(MILLISECONDS)).thenReturn(timedInterval);
 
 		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
 		verify(scheduledExecutor, times(1))
-		        .schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
 
 		final var scheduleCommand = scheduleCommandCaptor.getValue();
 		assertNotNull(scheduleCommand);
@@ -290,15 +290,15 @@ class BackgroundServiceTest {
 		backgroundService.setTimedInterval(timedInterval * 2l, MILLISECONDS);
 
 		verify(scheduledExecutor, only())
-		        .schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
 		verify(nextRunReference, never()).cancel(false);
 
 		verify(spoolExecutor, only())
-		        .addToQueue(any(Runnable.class), eq(name), eq(0), afterRunCommandCaptor.capture());
+				.addToQueue(any(RunnableWithException.class), eq(name), eq(0), afterRunCommandCaptor.capture());
 		afterRunCommandCaptor.getValue().accept(null);
 
 		verify(scheduledExecutor, times(1))
-		        .schedule(any(Runnable.class), eq(timedInterval * 2l), eq(MILLISECONDS));
+				.schedule(any(Runnable.class), eq(timedInterval * 2l), eq(MILLISECONDS));
 	}
 
 	@Test
@@ -307,14 +307,14 @@ class BackgroundServiceTest {
 		assertThrows(IllegalArgumentException.class, () -> backgroundService.setTimedInterval(0, MILLISECONDS));
 
 		verify(scheduledExecutor, times(1))
-		        .schedule(any(Runnable.class), anyLong(), eq(MILLISECONDS));
+				.schedule(any(Runnable.class), anyLong(), eq(MILLISECONDS));
 	}
 
 	@Test
 	void testStartup_disable_duringRun() {
 		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
 		verify(scheduledExecutor, times(1))
-		        .schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
 
 		final var scheduleCommand = scheduleCommandCaptor.getValue();
 		assertNotNull(scheduleCommand);
@@ -324,15 +324,15 @@ class BackgroundServiceTest {
 		backgroundService.disable();
 
 		verify(scheduledExecutor, only())
-		        .schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
 		verify(nextRunReference, never()).cancel(false);
 
 		verify(spoolExecutor, only())
-		        .addToQueue(any(Runnable.class), eq(name), eq(0), afterRunCommandCaptor.capture());
+				.addToQueue(any(RunnableWithException.class), eq(name), eq(0), afterRunCommandCaptor.capture());
 		afterRunCommandCaptor.getValue().accept(null);
 
 		verify(scheduledExecutor, times(1))
-		        .schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
 	}
 
 	@Test
@@ -351,78 +351,37 @@ class BackgroundServiceTest {
 	}
 
 	@Test
-	void testGetLastStatus() {
-		final var beforeAll = System.currentTimeMillis();
-		final var statusOff = backgroundService.getLastStatus();
-		assertNotNull(statusOff);
-
-		assertEquals(name, statusOff.getName());
-		assertEquals(spoolName, statusOff.getSpoolName());
-		assertEquals(false, statusOff.isEnabled());
-		assertEquals(-1, statusOff.getNextRunReferenceDelay());
-		assertEquals(0, statusOff.getTimedInterval());
-		assertEquals(0, statusOff.getPreviousScheduledDate());
-		assertEquals(0, statusOff.getPriority());
-		assertEquals(1d, statusOff.getRetryAfterTimeFactor());
-		assertEquals(0, statusOff.getSequentialErrorCount());
-		assertNotNull(statusOff.getTask());
-
-		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
-		verify(scheduledExecutor, only())
-		        .schedule(scheduleCommandCaptor.capture(), eq(timedInterval), eq(MILLISECONDS));
-		scheduleCommandCaptor.getValue().run();
-		when(nextRunReference.isDone()).thenReturn(true);
-		verify(spoolExecutor, only())
-		        .addToQueue(commandCaptor.capture(), eq(name), eq(0), afterRunCommandCaptor.capture());
-		afterRunCommandCaptor.getValue().accept(null);
-
-		final var statusOn = backgroundService.getLastStatus();
-		assertNotNull(statusOn);
-
-		assertEquals(name, statusOn.getName());
-		assertEquals(spoolName, statusOn.getSpoolName());
-		assertEquals(true, statusOn.isEnabled());
-		assertEquals(0, statusOn.getNextRunReferenceDelay());
-		assertEquals(timedInterval, statusOn.getTimedInterval());
-		assertTrue(beforeAll <= statusOn.getPreviousScheduledDate());
-		assertEquals(0, statusOn.getPriority());
-		assertEquals(1d, statusOn.getRetryAfterTimeFactor());
-		assertEquals(0, statusOn.getSequentialErrorCount());
-		assertNotNull(statusOn.getTask());
-	}
-
-	@Test
-	void testRunFirstOnStartup_enabled_long_time() {
+	void testRunFirstOnStartup_enabled_long_time() throws Exception {
 		final var timedInterval = TimeUnit.DAYS.toMillis(Math.abs(random.nextInt()) + 1);
 		when(nextRunReference.getDelay(SECONDS)).thenReturn(10000L);
 
 		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
-		        .then(invocation -> nextRunReference);
+				.then(invocation -> nextRunReference);
 
 		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
 
 		verify(scheduledExecutor, times(1))
-		        .schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
 		assertFalse(backgroundService.isHasFirstStarted());
 
 		backgroundService.runFirstOnStartup();
 		assertFalse(backgroundService.isHasFirstStarted());
 
 		verify(scheduledExecutor, times(1))
-		        .schedule(scheduleCommandCaptor.capture(), eq(1L), eq(MILLISECONDS));
+				.schedule(scheduleCommandCaptor.capture(), eq(1L), eq(MILLISECONDS));
 
 		assertFalse(backgroundService.isHasFirstStarted());
 		scheduleCommandCaptor.getValue().run();
 		assertTrue(backgroundService.isHasFirstStarted());
 
 		verify(spoolExecutor, times(1))
-		        .addToQueue(commandCaptor.capture(), eq(name), eq(0), afterRunCommandCaptor.capture());
+				.addToQueue(commandCaptor.capture(), eq(name), eq(0), afterRunCommandCaptor.capture());
 		commandCaptor.getValue().run();
 		afterRunCommandCaptor.getValue().accept(null);
 		assertTrue(backgroundService.isHasFirstStarted());
 
 		verify(scheduledExecutor, times(2))
-		        .schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
 
 		assertTrue(backgroundService.isHasFirstStarted());
 		backgroundService.runFirstOnStartup();
@@ -447,12 +406,12 @@ class BackgroundServiceTest {
 		when(nextRunReference.getDelay(SECONDS)).thenReturn(0L);
 
 		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
-		        .then(invocation -> nextRunReference);
+				.then(invocation -> nextRunReference);
 
 		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
 
 		verify(scheduledExecutor, times(1))
-		        .schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
+				.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
 
 		backgroundService.runFirstOnStartup();
 		assertFalse(backgroundService.isHasFirstStarted());

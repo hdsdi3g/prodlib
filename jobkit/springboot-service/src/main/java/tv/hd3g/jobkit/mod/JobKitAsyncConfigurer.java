@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import tv.hd3g.jobkit.engine.JobKitEngine;
+import tv.hd3g.jobkit.engine.RunnableWithException;
 
 @Configuration
 @EnableAsync
@@ -32,11 +33,15 @@ public class JobKitAsyncConfigurer implements AsyncConfigurer {
 		final var pattern = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss,S");
 		return task -> {
 			final var dateText = LocalDateTime.now().format(pattern);
-			final var sended = jobKitEngine.runOneShot("SpringBoot Async " + dateText, POOL_NAME, 0, task, e -> {
-				if (e != null) {
-					log.error("Can't execute SpringBootAsync task", e);
-				}
-			});
+			final var sended = jobKitEngine.runOneShot("SpringBoot Async " + dateText,
+			        POOL_NAME,
+			        0,
+			        RunnableWithException.fromRunnable(task),
+			        e -> {
+				        if (e != null) {
+					        log.error("Can't execute SpringBootAsync task", e);
+				        }
+			        });
 			if (sended == false) {
 				log.error("Can't queue new @async executor task, jobKitEngine refuse new jobs");
 			}

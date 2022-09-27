@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.spring5.messageresolver.SpringMessageResolver;
 
 import tv.hd3g.mailkit.mod.configuration.MailKitSetup;
 
@@ -19,10 +20,12 @@ class MailKitSetupTest {
 	TemplateEngine htmlTemplateEngine;
 	@Autowired
 	TemplateEngine subjectTemplateEngine;
+	@Autowired
+	SpringMessageResolver springMessageResolver;
 
 	@Test
 	void testHtmlTemplateEngine() {
-		assertEquals(htmlTemplateEngine, mailKitSetup.htmlTemplateEngine());
+		assertEquals(htmlTemplateEngine, mailKitSetup.htmlTemplateEngine(springMessageResolver));
 		assertNotNull(htmlTemplateEngine);
 		assertEquals(1, htmlTemplateEngine.getTemplateResolvers().size());
 		assertEquals(2, htmlTemplateEngine.getMessageResolvers().size());
@@ -30,7 +33,7 @@ class MailKitSetupTest {
 
 	@Test
 	void testSubjectTemplateEngine() {
-		assertEquals(subjectTemplateEngine, mailKitSetup.subjectTemplateEngine());
+		assertEquals(subjectTemplateEngine, mailKitSetup.subjectTemplateEngine(springMessageResolver));
 		assertNotNull(subjectTemplateEngine);
 		assertEquals(1, subjectTemplateEngine.getTemplateResolvers().size());
 		assertEquals(2, subjectTemplateEngine.getMessageResolvers().size());

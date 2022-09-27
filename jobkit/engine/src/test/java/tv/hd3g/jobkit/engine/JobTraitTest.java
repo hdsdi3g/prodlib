@@ -38,14 +38,14 @@ class JobTraitTest {
 		String name;
 		String spoolName;
 		int priority;
-		Runnable task;
+		RunnableWithException task;
 		Consumer<Exception> afterRunCommand;
 
 		@Override
 		public boolean runOneShot(final String name,
 		                          final String spoolName,
 		                          final int priority,
-		                          final Runnable task,
+		                          final RunnableWithException task,
 		                          final Consumer<Exception> afterRunCommand) {
 			triggerCount++;
 			this.name = name;
@@ -75,7 +75,7 @@ class JobTraitTest {
 	}
 
 	@Test
-	void testRunOneShotJob() {
+	void testRunOneShotJob() throws Exception {
 		trait.runOneShot(job);
 
 		assertEquals(1, trait.triggerCount);

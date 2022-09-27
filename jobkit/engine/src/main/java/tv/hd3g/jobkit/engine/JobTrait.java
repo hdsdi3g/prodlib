@@ -10,14 +10,14 @@ public interface JobTrait {
 	boolean runOneShot(final String name,
 	                   final String spoolName,
 	                   final int priority,
-	                   final Runnable task,
+	                   final RunnableWithException task,
 	                   final Consumer<Exception> afterRunCommand);
 
 	/**
 	 * @return true if the task is queued
 	 */
 	default boolean runOneShot(final Job job) {
-		final Runnable run = () -> {
+		final RunnableWithException run = () -> {
 			job.onJobStart();
 			job.run();
 		};

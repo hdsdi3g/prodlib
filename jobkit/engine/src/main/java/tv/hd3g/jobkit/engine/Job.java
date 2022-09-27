@@ -1,6 +1,6 @@
 package tv.hd3g.jobkit.engine;
 
-public interface Job extends Runnable {
+public interface Job extends RunnableWithException {
 
 	String getJobName();
 

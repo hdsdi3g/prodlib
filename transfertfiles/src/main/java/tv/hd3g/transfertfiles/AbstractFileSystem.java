@@ -25,10 +25,13 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+
 /**
  * Expected to be thread safe.
  * Don't forget to implements hashCode, equals and toString.
  */
+@JsonIgnoreType
 public interface AbstractFileSystem<T extends AbstractFile> extends Closeable {
 
 	void connect();
@@ -44,8 +47,8 @@ public interface AbstractFileSystem<T extends AbstractFile> extends Closeable {
 	default T getFromPath(final String path0, final String... pathN) {
 		if (pathN != null && pathN.length > 0) {
 			return getFromPath(path0 + "/" + Stream.of(pathN)
-			        .filter(not(Objects::isNull))
-			        .collect(joining("/")));
+					.filter(not(Objects::isNull))
+					.collect(joining("/")));
 		} else {
 			return getFromPath(path0);
 		}

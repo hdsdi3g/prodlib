@@ -7,5 +7,4 @@ import tv.hd3g.jobkit.engine.ExecutionEvent;
 
 @Service
 public class JobKitEventServiceImpl implements ExecutionEvent, BackgroundServiceEvent {
-
 }

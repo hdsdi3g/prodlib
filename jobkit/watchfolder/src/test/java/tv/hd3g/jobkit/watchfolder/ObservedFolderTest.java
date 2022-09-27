@@ -19,7 +19,6 @@ package tv.hd3g.jobkit.watchfolder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -56,6 +55,12 @@ class ObservedFolderTest {
 		minFixedStateTime = Duration.ofSeconds(1);
 
 		observedFolder = new ObservedFolder();
+	}
+
+	@Test
+	void testToString() {
+		observedFolder.setLabel(label);
+		assertEquals(label, observedFolder.toString());
 	}
 
 	@Test
@@ -104,113 +109,4 @@ class ObservedFolderTest {
 		assertTrue(observedFolder.createFileSystem().getFileSystem() instanceof FTPFileSystem);
 	}
 
-	@Test
-	void testSetLabel() {
-		observedFolder.setLabel(label);
-		assertEquals(label, observedFolder.getLabel());
-	}
-
-	@Test
-	void testGetLabel() {
-		assertNull(observedFolder.getLabel());
-	}
-
-	@Test
-	void testGetTargetFolder() {
-		assertNull(observedFolder.getTargetFolder());
-	}
-
-	@Test
-	void testSetTargetFolder() {
-		observedFolder.setTargetFolder(targetFolder);
-		assertEquals(targetFolder, observedFolder.getTargetFolder());
-	}
-
-	@Test
-	void testGetAllowedExtentions() {
-		assertNull(observedFolder.getAllowedExtentions());
-	}
-
-	@Test
-	void testSetAllowedExtentions() {
-		observedFolder.setAllowedExtentions(allowedExtentions);
-		assertEquals(allowedExtentions, observedFolder.getAllowedExtentions());
-	}
-
-	@Test
-	void testGetBlockedExtentions() {
-		assertNull(observedFolder.getBlockedExtentions());
-	}
-
-	@Test
-	void testSetBlockedExtentions() {
-		observedFolder.setBlockedExtentions(blockedExtentions);
-		assertEquals(blockedExtentions, observedFolder.getBlockedExtentions());
-	}
-
-	@Test
-	void testGetIgnoreRelativePaths() {
-		assertNull(observedFolder.getIgnoreRelativePaths());
-	}
-
-	@Test
-	void testSetIgnoreRelativePaths() {
-		observedFolder.setIgnoreRelativePaths(ignoreRelativePaths);
-		assertEquals(ignoreRelativePaths, observedFolder.getIgnoreRelativePaths());
-	}
-
-	@Test
-	void testIsAllowedHidden() {
-		assertFalse(observedFolder.isAllowedHidden());
-	}
-
-	@Test
-	void testSetAllowedHidden() {
-		observedFolder.setAllowedHidden(true);
-		assertTrue(observedFolder.isAllowedHidden());
-	}
-
-	@Test
-	void testIsAllowedLinks() {
-		assertFalse(observedFolder.isAllowedLinks());
-	}
-
-	@Test
-	void testSetAllowedLinks() {
-		observedFolder.setAllowedLinks(true);
-		assertTrue(observedFolder.isAllowedLinks());
-	}
-
-	@Test
-	void testIsRecursive() {
-		assertFalse(observedFolder.isRecursive());
-	}
-
-	@Test
-	void testSetRecursive() {
-		observedFolder.setRecursive(true);
-		assertTrue(observedFolder.isRecursive());
-	}
-
-	@Test
-	void testGetIgnoreFiles() {
-		assertNull(observedFolder.getIgnoreFiles());
-	}
-
-	@Test
-	void testSetIgnoreFiles() {
-		observedFolder.setIgnoreFiles(ignoreFiles);
-		assertEquals(ignoreFiles, observedFolder.getIgnoreFiles());
-	}
-
-	@Test
-	void testGetMinFixedStateTime() {
-		assertNull(observedFolder.getMinFixedStateTime());
-	}
-
-	@Test
-	void testSetMinFixedStateTime() {
-		observedFolder.setMinFixedStateTime(minFixedStateTime);
-		assertEquals(minFixedStateTime, observedFolder.getMinFixedStateTime());
-	}
 }

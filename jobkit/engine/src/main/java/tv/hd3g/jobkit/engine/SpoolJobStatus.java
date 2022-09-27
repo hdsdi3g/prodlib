@@ -1,11 +1,13 @@
 package tv.hd3g.jobkit.engine;
 
-public interface SpoolJobStatus {
+interface SpoolJobStatus {
 
-	String getName();
+	String getJobName();
 
 	String getSpoolName();
 
-	int getPriority();
+	int getJobPriority();
+
+	Supervisable getSupervisable();
 
 }

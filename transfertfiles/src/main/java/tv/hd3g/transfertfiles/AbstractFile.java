@@ -30,6 +30,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+
 import tv.hd3g.transfertfiles.filters.DataExchangeFilter;
 import tv.hd3g.transfertfiles.local.LocalFileSystem;
 
@@ -37,6 +39,7 @@ import tv.hd3g.transfertfiles.local.LocalFileSystem;
  * Expected to be stateless (store statuses in corresponding AbstractFileSystem) and thread safe.
  * Don't forget to implements hashCode, equals and toString.
  */
+@JsonIgnoreType
 public interface AbstractFile {
 
 	AbstractFileSystem<?> getFileSystem();// NOSONAR S1452
@@ -97,8 +100,8 @@ public interface AbstractFile {
 	default AbstractFile renameTo(final String path0, final String... pathN) {
 		if (pathN != null && pathN.length > 0) {
 			return renameTo(path0 + "/" + Stream.of(pathN)
-			        .filter(not(Objects::isNull))
-			        .collect(joining("/")));
+					.filter(not(Objects::isNull))
+					.collect(joining("/")));
 		} else {
 			return renameTo(path0);
 		}
@@ -128,12 +131,12 @@ public interface AbstractFile {
 			p = p.replace("//", "/");
 		}
 		if (p.contains("../")
-		    || p.contains("./")
-		    || p.contains("/~/")
-		    || p.startsWith("~/")
-		    || p.equals("..")
-		    || p.equals(".")
-		    || p.equals("~")) {
+			|| p.contains("./")
+			|| p.contains("/~/")
+			|| p.startsWith("~/")
+			|| p.equals("..")
+			|| p.equals(".")
+			|| p.equals("~")) {
 			throw new IllegalArgumentException("Invalid path: \"" + path + "\"");
 		}
 
@@ -154,8 +157,8 @@ public interface AbstractFile {
 	 * @return data size readed from this
 	 */
 	long downloadAbstract(final OutputStream outputStream,
-	                      int bufferSize,
-	                      final SizedStoppableCopyCallback copyCallback);
+						  int bufferSize,
+						  final SizedStoppableCopyCallback copyCallback);
 
 	/**
 	 * Only use with a regular file. Type will not be checked before copy action.
@@ -163,31 +166,31 @@ public interface AbstractFile {
 	 * @return data size writer to this
 	 */
 	long uploadAbstract(final InputStream inputStream,
-	                    int bufferSize,
-	                    final SizedStoppableCopyCallback copyCallback);
+						int bufferSize,
+						final SizedStoppableCopyCallback copyCallback);
 
 	static void checkIsSameFileSystem(final AbstractFile from,
-	                                  final AbstractFile destination) {
+									  final AbstractFile destination) {
 		final var fromFs = from.getFileSystem();
 		final var toFs = destination.getFileSystem();
 		if (fromFs.equals(toFs) == false
-		    || fromFs instanceof LocalFileSystem
-		    || toFs instanceof LocalFileSystem) {
+			|| fromFs instanceof LocalFileSystem
+			|| toFs instanceof LocalFileSystem) {
 			return;
 		}
 		if (fromFs.reusableHashCode() == toFs.reusableHashCode()) {
 			throw new UncheckedIOException(
-			        new IOException(
-			                "Can't use same FileSystem instances between to AbstractFiles. Please start a new FS instance for one of the two AbstractFile"));
+					new IOException(
+							"Can't use same FileSystem instances between to AbstractFiles. Please start a new FS instance for one of the two AbstractFile"));
 		}
 	}
 
 	default DataExchangeInOutStream copyAbstractToAbstract(final AbstractFile destination,
-	                                                       final DataExchangeObserver dataExchangeObserver,
-	                                                       final DataExchangeFilter... filters) {
+														   final DataExchangeObserver dataExchangeObserver,
+														   final DataExchangeFilter... filters) {
 		final var bufferSize = Math.max(8192,
-		        Math.max(destination.getFileSystem().getIOBufferSize(),
-		                getFileSystem().getIOBufferSize()));
+				Math.max(destination.getFileSystem().getIOBufferSize(),
+						getFileSystem().getIOBufferSize()));
 		final var exchange = new DataExchangeInOutStream();
 		Stream.of(filters).forEach(exchange::addFilter);
 		copyAbstractToAbstract(destination, bufferSize, dataExchangeObserver, exchange);
@@ -195,9 +198,9 @@ public interface AbstractFile {
 	}
 
 	default void copyAbstractToAbstract(final AbstractFile destination,
-	                                    final int bufferSize,
-	                                    final DataExchangeObserver dataExchangeObserver,
-	                                    final DataExchangeInOutStream exchange) {
+										final int bufferSize,
+										final DataExchangeObserver dataExchangeObserver,
+										final DataExchangeInOutStream exchange) {
 		checkIsSameFileSystem(this, destination);
 
 		final var sourceStream = exchange.getSourceOriginStream();
@@ -205,13 +208,13 @@ public interface AbstractFile {
 		final var startDate = System.currentTimeMillis();
 
 		final SizedStoppableCopyCallback readCallback = copied -> dataExchangeObserver
-		        .onTransfertProgressFromSource(this, startDate, copied);
+				.onTransfertProgressFromSource(this, startDate, copied);
 		final SizedStoppableCopyCallback writeCallback = copied -> dataExchangeObserver
-		        .onTransfertProgressToDestination(destination, startDate, copied);
+				.onTransfertProgressToDestination(destination, startDate, copied);
 
 		dataExchangeObserver.beforeTransfert(this, destination);
 		final var downloader = CompletableFuture.supplyAsync(() -> downloadAbstract(destStream, bufferSize,
-		        readCallback));
+				readCallback));
 
 		final var writed = destination.uploadAbstract(sourceStream, bufferSize, writeCallback);
 
@@ -223,6 +226,6 @@ public interface AbstractFile {
 			throw new IllegalStateException(e);
 		}
 		dataExchangeObserver.afterTransfert(this, destination, readed, writed,
-		        Duration.ofMillis(System.currentTimeMillis() - startDate));
+				Duration.ofMillis(System.currentTimeMillis() - startDate));
 	}
 }

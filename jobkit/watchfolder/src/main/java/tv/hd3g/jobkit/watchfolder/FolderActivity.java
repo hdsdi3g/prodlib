@@ -16,34 +16,49 @@
  */
 package tv.hd3g.jobkit.watchfolder;
 
+import static tv.hd3g.jobkit.engine.Supervisable.getSupervisable;
+
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
 public interface FolderActivity {
 
-	default void onStartScans(final List<? extends ObservedFolder> observedFolder) {
+	void onAfterScan(final ObservedFolder observedFolder,
+					 final Duration scanTime,
+					 final WatchedFiles scanResult) throws IOException;
+
+	default void onStartScans(final List<? extends ObservedFolder> observedFolders) throws IOException {
+		getSupervisable()
+				.setContext("ObservedFolders", observedFolders)
+				.markAsInternalStateChange()
+				.resultDone("startscans", "Start scans");
 	}
 
-	default void onStopScans(final List<? extends ObservedFolder> observedFolder) {
+	default void onStopScans(final List<? extends ObservedFolder> observedFolders) throws IOException {
+		getSupervisable()
+				.setContext("ObservedFolders", observedFolders)
+				.markAsInternalStateChange()
+				.resultDone("stopscans", "Stop scans");
 	}
 
-	default void onBeforeScan(final ObservedFolder observedFolder) {
+	default void onBeforeScan(final ObservedFolder observedFolder) throws IOException {
 	}
 
 	default WatchFolderPickupType getPickUpType(final ObservedFolder observedFolder) {
 		return WatchFolderPickupType.FILES_ONLY;
 	}
 
-	void onAfterScan(final ObservedFolder observedFolder,
-	                 final Duration scanTime,
-	                 final WatchedFiles scanResult);
-
-	default void onScanErrorFolder(final ObservedFolder observedFolder, final Exception e) {
+	default void onScanErrorFolder(final ObservedFolder observedFolder, final Exception e) throws IOException {
+		getSupervisable()
+				.setContext("ObservedFolder", observedFolder)
+				.markAsInternalStateChange()
+				.resultError(e);
 	}
 
 	default RetryScanPolicyOnUserError retryScanPolicyOnUserError(final ObservedFolder observedFolder,
-	                                                              final WatchedFiles scanResult,
-	                                                              final Exception e) {
+																  final WatchedFiles scanResult,
+																  final Exception e) {
 		return RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
 	}
 

@@ -2,16 +2,12 @@ package tv.hd3g.jobkit.engine;
 
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import tv.hd3g.jobkit.engine.status.SpoolerStatus;
 
 public class Spooler {
 
@@ -19,23 +15,16 @@ public class Spooler {
 
 	private final ConcurrentHashMap<String, SpoolExecutor> spoolExecutors;
 	private final ExecutionEvent event;
-	private final ThreadFactory threadFactory;
 	private final AtomicLong threadCount;
 	private final AtomicBoolean shutdown;
+	private final SupervisableEvents supervisableEvents;
 
-	public Spooler(final ExecutionEvent event) {
+	public Spooler(final ExecutionEvent event, final SupervisableEvents supervisableEvents) {
 		this.event = event;
 		spoolExecutors = new ConcurrentHashMap<>();
 		threadCount = new AtomicLong(0);
 		shutdown = new AtomicBoolean(false);
-
-		threadFactory = r -> {
-			final var t = new Thread(r);
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.setDaemon(false);
-			t.setName("SpoolExecutor #" + threadCount.getAndIncrement());
-			return t;
-		};
+		this.supervisableEvents = supervisableEvents;
 	}
 
 	private Stream<SpoolExecutor> getSpoolExecutorStream() {
@@ -50,7 +39,8 @@ public class Spooler {
 		if (shutdown.get()) {
 			return spoolExecutors.get(name);
 		}
-		return spoolExecutors.computeIfAbsent(name, n -> new SpoolExecutor(n, event, threadFactory));
+		return spoolExecutors.computeIfAbsent(name,
+				n -> new SpoolExecutor(n, event, threadCount, supervisableEvents));
 	}
 
 	public int getAllQueuesSize() {
@@ -70,11 +60,15 @@ public class Spooler {
 		}
 		shutdown.set(true);
 		log.info("Shutdown all ({}) spoolExecutors. {} are running jobs and {} in waiting.",
-		        spoolExecutors.mappingCount(),
-		        getRunningQueuesCount(),
-		        getAllQueuesSize());
+				spoolExecutors.mappingCount(),
+				getRunningQueuesCount(),
+				getAllQueuesSize());
 		getSpoolExecutorStream().forEach(SpoolExecutor::shutdown);
-		event.shutdownSpooler();
+
+		final var s = new Supervisable(Thread.currentThread().toString(), "ShutdownSpooler", supervisableEvents);
+		s.start();
+		event.shutdownSpooler(s);
+		s.end();
 	}
 
 	/**
@@ -87,13 +81,6 @@ public class Spooler {
 			log.info("Wait to ends all current ({}) running jobs...", count);
 		}
 		getSpoolExecutorStream().forEach(SpoolExecutor::waitToClose);
-	}
-
-	public SpoolerStatus getLastStatus() {
-		final var allCurrentStatuses = getSpoolExecutorStream()
-		        .map(SpoolExecutor::getLastStatus)
-		        .collect(Collectors.toSet());
-		return new SpoolerStatus(allCurrentStatuses, threadCount.get(), shutdown.get());
 	}
 
 }

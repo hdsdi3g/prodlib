@@ -16,27 +16,47 @@
  */
 package tv.hd3g.mailkit.mod.configuration;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Optional;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.spring5.messageresolver.SpringMessageResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
+import tv.hd3g.jobkit.engine.SupervisableManager;
+import tv.hd3g.mailkit.mod.component.Translate;
+import tv.hd3g.mailkit.mod.service.AppNotificationService;
+import tv.hd3g.mailkit.notification.NotificationManager;
+import tv.hd3g.mailkit.notification.implmail.NotificationEngineMailSetup;
+import tv.hd3g.mailkit.notification.implmail.NotificationEngineMailTemplateDebug;
+import tv.hd3g.mailkit.notification.implmail.NotificationEngineMailTemplateFull;
+import tv.hd3g.mailkit.notification.implmail.NotificationEngineMailTemplateSimple;
+import tv.hd3g.mailkit.notification.implmail.NotificationMailTemplateToolkit;
+import tv.hd3g.mailkit.notification.implmail.NotificationRouterMail;
+
 @Configuration
 public class MailKitSetup {
 
-	private final SpringMessageResolver springMessageResolver;
-
-	@Autowired
-	public MailKitSetup(final ResourceBundleMessageSource rbms, final MessageSource messageSource) {
+	@Bean
+	@Primary
+	public ResourceBundleMessageSource resourceBundleMessageSource() {
+		final var rbms = new ResourceBundleMessageSource();
 		rbms.addBasenames("mailkit-messages");
-		springMessageResolver = new SpringMessageResolver();
-		springMessageResolver.setMessageSource(messageSource);
+		return rbms;
+	}
+
+	@Bean
+	public SpringMessageResolver getSpringMessageResolver(final MessageSource rbms) {
+		final var springMessageResolver = new SpringMessageResolver();
+		springMessageResolver.setMessageSource(rbms);
+		return springMessageResolver;
 	}
 
 	private ITemplateResolver templateResolver(final String suffix, final TemplateMode mode) {
@@ -51,7 +71,7 @@ public class MailKitSetup {
 	}
 
 	@Bean(name = "htmlTemplateEngine")
-	public TemplateEngine htmlTemplateEngine() {
+	public TemplateEngine htmlTemplateEngine(final SpringMessageResolver springMessageResolver) {
 		final var templateEngine = new TemplateEngine();
 		templateEngine.addTemplateResolver(templateResolver(".html", TemplateMode.HTML));
 		templateEngine.addMessageResolver(springMessageResolver);
@@ -59,11 +79,41 @@ public class MailKitSetup {
 	}
 
 	@Bean(name = "subjectTemplateEngine")
-	public TemplateEngine subjectTemplateEngine() {
+	public TemplateEngine subjectTemplateEngine(final SpringMessageResolver springMessageResolver) {
 		final var templateEngine = new TemplateEngine();
 		templateEngine.addTemplateResolver(templateResolver(".txt", TemplateMode.TEXT));
 		templateEngine.addMessageResolver(springMessageResolver);
 		return templateEngine;
+	}
+
+	@Bean
+	public NotificationManager getNotificationManager(final ResourceBundleMessageSource rbms,
+													  final AppNotificationService appNotificationService,
+													  final MailKitConfig config,
+													  final JavaMailSender mailSender,
+													  final Translate translate,
+													  final SupervisableManager supervisableManager) {
+		Optional.ofNullable(appNotificationService.getMessageSourceBasename())
+				.ifPresent(rbms::addBasenames);
+		final var toolkit = new NotificationMailTemplateToolkit(translate, config.getEnv());
+
+		final var setupEngine = new NotificationEngineMailSetup(
+				supervisableManager,
+				appNotificationService,
+				mailSender,
+				config.getSenderAddr(),
+				Optional.ofNullable(config.getReplyToAddr()).orElse(config.getSenderAddr()),
+				config.getGroupDev(),
+				config.getGroupAdmin(),
+				config.getGroupSecurity());
+
+		final var router = new NotificationRouterMail(
+				new NotificationEngineMailTemplateSimple(toolkit),
+				new NotificationEngineMailTemplateFull(toolkit),
+				new NotificationEngineMailTemplateDebug(toolkit),
+				setupEngine);
+
+		return new NotificationManager().register(router).register(supervisableManager);
 	}
 
 }
