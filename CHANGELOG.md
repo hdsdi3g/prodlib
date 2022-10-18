@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades needs
 
+## 10.0.1
+
+Update Apache Commons Text to 1.10.0 (security) #49
+
 ## 10.0.0
 
 Switch from Java 11 (LTS) to Java 17 (LTS) #39
