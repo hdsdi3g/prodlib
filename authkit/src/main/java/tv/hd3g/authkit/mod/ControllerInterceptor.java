@@ -29,7 +29,6 @@ import java.net.UnknownHostException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,10 +68,10 @@ public class ControllerInterceptor implements HandlerInterceptor {
 	private final CookieService cookieService;
 
 	public ControllerInterceptor(final AuditReportService auditService,
-	                             final SecuredTokenService securedTokenService,
-	                             final AuthKitEndpointsListener authKitEndpointsListener,
-	                             final AuthenticationService authenticationService,
-	                             final CookieService cookieService) {
+								 final SecuredTokenService securedTokenService,
+								 final AuthKitEndpointsListener authKitEndpointsListener,
+								 final AuthenticationService authenticationService,
+								 final CookieService cookieService) {
 		this.auditService = auditService;
 		this.securedTokenService = securedTokenService;
 		this.authKitEndpointsListener = authKitEndpointsListener;
@@ -81,11 +80,10 @@ public class ControllerInterceptor implements HandlerInterceptor {
 	}
 
 	private boolean isRequestIsHandle(final HttpServletRequest request, final Object handler) {
-		if (handler instanceof ResourceHttpRequestHandler) {
-			final var httpHandler = (ResourceHttpRequestHandler) handler;
+		if (handler instanceof final ResourceHttpRequestHandler httpHandler) {
 			Optional.ofNullable(httpHandler.getUrlPathHelper())
-			        .map(uph -> uph.getLookupPathForRequest(request))
-			        .ifPresent(h -> log.trace("HandlerH: {}", h));
+					.map(uph -> uph.getLookupPathForRequest(request))
+					.ifPresent(h -> log.trace("HandlerH: {}", h));
 			return false;
 		} else if (handler instanceof HandlerMethod == false) {
 			log.info("Unknown handler: {}", handler.getClass());
@@ -99,8 +97,8 @@ public class ControllerInterceptor implements HandlerInterceptor {
 		 * Extract potential JWT
 		 */
 		Optional<String> oBearer = Optional.ofNullable(request.getHeader(AUTHORIZATION))
-		        .filter(content -> content.toLowerCase().startsWith("bearer"))
-		        .map(content -> content.substring("bearer".length()).trim());
+				.filter(content -> content.toLowerCase().startsWith("bearer"))
+				.map(content -> content.substring("bearer".length()).trim());
 
 		var fromCookie = false;
 		if (oBearer.isEmpty()) {
@@ -118,7 +116,7 @@ public class ControllerInterceptor implements HandlerInterceptor {
 		LoggedUserTagsTokenDto loggedDto;
 		try {
 			loggedDto = Objects.requireNonNull(securedTokenService
-			        .loggedUserRightsExtractToken(oBearer.get(), fromCookie));
+					.loggedUserRightsExtractToken(oBearer.get(), fromCookie));
 		} catch (final NotAcceptableSecuredTokenException e) {
 			throw new UnauthorizedRequestException("Invalid JWT in auth request");
 		}
@@ -138,9 +136,9 @@ public class ControllerInterceptor implements HandlerInterceptor {
 			}
 			if (addr1 == null || addr1.equals(addr2) == false) {
 				throw new UnauthorizedRequestException(
-				        "Reject request for from " + loggedDto.getOnlyForHost()
-				                                       + " because the actual token contain a IP restriction on {} only",
-				        loggedDto.getUserUUID());
+						"Reject request for from " + loggedDto.getOnlyForHost()
+													   + " because the actual token contain a IP restriction on {} only",
+						loggedDto.getUserUUID());
 			}
 		}
 		return Optional.ofNullable(loggedDto);
@@ -150,12 +148,12 @@ public class ControllerInterceptor implements HandlerInterceptor {
 	 * Get mandatory rights and compare with user rights
 	 */
 	private void compareUserRightsAndRequestMandatories(final HttpServletRequest request,
-	                                                    final LoggedUserTagsTokenDto loggedUserTagsTokenDto,
-	                                                    final Method classMethod,
-	                                                    final AnnotatedControllerClass annotatedControllerClass) {
+														final LoggedUserTagsTokenDto loggedUserTagsTokenDto,
+														final Method classMethod,
+														final AnnotatedControllerClass annotatedControllerClass) {
 		final var requireAuthList = annotatedControllerClass.getRequireAuthList(classMethod);
 		if (requireAuthList.isEmpty()
-		    && annotatedControllerClass.isRequireValidAuth(classMethod) == false) {
+			&& annotatedControllerClass.isRequireValidAuth(classMethod) == false) {
 			/**
 			 * Absolutely no auth required here
 			 */
@@ -178,15 +176,15 @@ public class ControllerInterceptor implements HandlerInterceptor {
 		}
 
 		if (requireAuthList.stream().noneMatch(
-		        annotation -> stream(annotation.value()).allMatch(loggedUserTagsTokenDto.getTags()::contains))) {
+				annotation -> stream(annotation.value()).allMatch(loggedUserTagsTokenDto.getTags()::contains))) {
 			throw new ForbiddenRequestException("Forbidden user", userUUID);
 		}
 	}
 
 	private void checkRenforcedRightsChecks(final HttpServletRequest request,
-	                                        final AnnotatedControllerClass annotatedControllerClass,
-	                                        final Method classMethod,
-	                                        final LoggedUserTagsTokenDto tokenPayload) {
+											final AnnotatedControllerClass annotatedControllerClass,
+											final Method classMethod,
+											final LoggedUserTagsTokenDto tokenPayload) {
 		if (annotatedControllerClass.isRequireRenforceCheckBefore(classMethod) == false) {
 			return;
 		}
@@ -197,19 +195,19 @@ public class ControllerInterceptor implements HandlerInterceptor {
 
 		final var clientAddr = getOriginalRemoteAddr(request);
 		final var actualTags = authenticationService.getRightsForUser(userUUID, clientAddr)
-		        .stream().distinct().collect(toUnmodifiableSet());
+				.stream().distinct().collect(toUnmodifiableSet());
 		for (final var tag : tokenPayload.getTags()) {
 			if (actualTags.contains(tag) == false) {
 				throw new ForbiddenRequestException("User has lost some rights (like " + tag + ") before last login",
-				        userUUID);
+						userUUID);
 			}
 		}
 	}
 
 	@Override
 	public boolean preHandle(final HttpServletRequest request, // NOSONAR S3516
-	                         final HttpServletResponse response,
-	                         final Object handler) throws IOException {
+							 final HttpServletResponse response,
+							 final Object handler) throws IOException {
 		if (isRequestIsHandle(request, handler) == false) {
 			return true;
 		}
@@ -234,19 +232,19 @@ public class ControllerInterceptor implements HandlerInterceptor {
 		request.setAttribute(USER_UUID_ATTRIBUTE_NAME, userUUID);
 
 		Optional.ofNullable(cookieService.getRedirectAfterLoginCookiePayload(request))
-		        .ifPresent(redirectTo -> request.setAttribute(REDIRECT_AFTER_LOGIN_ATTRIBUTE_NAME, redirectTo));
+				.ifPresent(redirectTo -> request.setAttribute(REDIRECT_AFTER_LOGIN_ATTRIBUTE_NAME, redirectTo));
 
 		if (userUUID == null) {
 			log.info("Request {} {}:{}()",
-			        controllerClass.getSimpleName(),
-			        request.getMethod(),
-			        handlerMethod.getMethod().getName());
+					controllerClass.getSimpleName(),
+					request.getMethod(),
+					handlerMethod.getMethod().getName());
 		} else {
 			log.info("Request {} {}:{}() {}",
-			        controllerClass.getSimpleName(),
-			        request.getMethod(),
-			        handlerMethod.getMethod().getName(),
-			        userUUID);
+					controllerClass.getSimpleName(),
+					request.getMethod(),
+					handlerMethod.getMethod().getName(),
+					userUUID);
 		}
 
 		return true;
@@ -254,24 +252,24 @@ public class ControllerInterceptor implements HandlerInterceptor {
 
 	public static final Optional<String> getRequestUserUUID(final HttpServletRequest request) {
 		return Optional.ofNullable(request.getAttribute(USER_UUID_ATTRIBUTE_NAME))
-		        .map(o -> sanitize((String) o));
+				.map(o -> sanitize((String) o));
 	}
 
 	public static final Optional<LoggedUserTagsTokenDto> getUserTokenFromRequestAttribute(final HttpServletRequest request) {
 		return Optional.ofNullable(request.getAttribute(USER_TOKEN_ATTRIBUTE_NAME))
-		        .map(LoggedUserTagsTokenDto.class::cast);
+				.map(LoggedUserTagsTokenDto.class::cast);
 	}
 
 	public static final Optional<String> getPathToRedirectToAfterLogin(final HttpServletRequest request) {
 		return Optional.ofNullable(request.getAttribute(REDIRECT_AFTER_LOGIN_ATTRIBUTE_NAME))
-		        .map(o -> sanitize((String) o));
+				.map(o -> sanitize((String) o));
 	}
 
 	@Override
 	public void afterCompletion(final HttpServletRequest request,
-	                            final HttpServletResponse response,
-	                            final Object handler,
-	                            final Exception exception) throws Exception {
+								final HttpServletResponse response,
+								final Object handler,
+								final Exception exception) throws Exception {
 
 		if (handler instanceof HandlerMethod == false) {
 			return;
@@ -289,36 +287,36 @@ public class ControllerInterceptor implements HandlerInterceptor {
 
 		Optional.ofNullable(exception).ifPresent(e -> {
 			final var names = auditList.stream()
-			        .filter(AuditAfter::cantDoErrors)
-			        .map(AuditAfter::value)
-			        .collect(Collectors.toUnmodifiableList());
+					.filter(AuditAfter::cantDoErrors)
+					.map(AuditAfter::value)
+					.toList();
 			if (names.isEmpty() == false) {
 				auditService.onImportantError(request, names, e);
 			}
 		});
 
 		final var namesChangeSecurity = auditList.stream()
-		        .filter(AuditAfter::changeSecurity)
-		        .map(AuditAfter::value)
-		        .collect(Collectors.toUnmodifiableList());
+				.filter(AuditAfter::changeSecurity)
+				.map(AuditAfter::value)
+				.toList();
 		if (namesChangeSecurity.isEmpty() == false) {
 			auditService.onChangeSecurity(request, namesChangeSecurity);
 		}
 
 		final var namesUseSecurity = auditList.stream()
-		        .filter(AuditAfter::useSecurity)
-		        .map(AuditAfter::value)
-		        .collect(Collectors.toUnmodifiableList());
+				.filter(AuditAfter::useSecurity)
+				.map(AuditAfter::value)
+				.toList();
 		if (namesUseSecurity.isEmpty() == false) {
 			auditService.onUseSecurity(request, namesUseSecurity);
 		}
 
 		final var namesSimpleAudit = auditList.stream()
-		        .filter(audit -> audit.cantDoErrors() == false
-		                         && audit.changeSecurity() == false
-		                         && audit.useSecurity() == false)
-		        .map(AuditAfter::value)
-		        .collect(Collectors.toUnmodifiableList());
+				.filter(audit -> audit.cantDoErrors() == false
+								 && audit.changeSecurity() == false
+								 && audit.useSecurity() == false)
+				.map(AuditAfter::value)
+				.toList();
 		if (namesSimpleAudit.isEmpty() == false) {
 			auditService.onSimpleEvent(request, namesSimpleAudit);
 		}

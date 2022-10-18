@@ -56,41 +56,41 @@ class AnnotationExtractor {
 		if (element.isAnnotationPresent(RequestMapping.class)) {
 			final var a = element.getAnnotation(RequestMapping.class);
 			mappings.add(new MappingAnnotation(a.name(),
-			        a.value(),
-			        Arrays.stream(a.method()).collect(Collectors.toUnmodifiableSet()),
-			        a.headers(), a.consumes(), a.produces()));
+					a.value(),
+					Arrays.stream(a.method()).collect(Collectors.toUnmodifiableSet()),
+					a.headers(), a.consumes(), a.produces()));
 		}
 		if (element.isAnnotationPresent(PostMapping.class)) {
 			final var a = element.getAnnotation(PostMapping.class);
 			mappings.add(new MappingAnnotation(a.name(), a.value(), Set.of(POST),
-			        a.headers(), a.consumes(), a.produces()));
+					a.headers(), a.consumes(), a.produces()));
 		}
 		if (element.isAnnotationPresent(PatchMapping.class)) {
 			final var a = element.getAnnotation(PatchMapping.class);
 			mappings.add(new MappingAnnotation(a.name(), a.value(), Set.of(PATCH),
-			        a.headers(), a.consumes(), a.produces()));
+					a.headers(), a.consumes(), a.produces()));
 		}
 		if (element.isAnnotationPresent(PutMapping.class)) {
 			final var a = element.getAnnotation(PutMapping.class);
 			mappings.add(new MappingAnnotation(a.name(), a.value(), Set.of(PUT),
-			        a.headers(), a.consumes(), a.produces()));
+					a.headers(), a.consumes(), a.produces()));
 		}
 		if (element.isAnnotationPresent(DeleteMapping.class)) {
 			final var a = element.getAnnotation(DeleteMapping.class);
 			mappings.add(new MappingAnnotation(a.name(), a.value(), Set.of(DELETE),
-			        a.headers(), a.consumes(), a.produces()));
+					a.headers(), a.consumes(), a.produces()));
 		}
 		if (element.isAnnotationPresent(GetMapping.class)) {
 			final var a = element.getAnnotation(GetMapping.class);
 			mappings.add(new MappingAnnotation(a.name(), a.value(), Set.of(GET),
-			        a.headers(), a.consumes(), a.produces()));
+					a.headers(), a.consumes(), a.produces()));
 		}
 
 		allCheckBefore = Stream.concat(
-		        stream(element.getAnnotationsByType(CheckBefore.class)),
-		        stream(element.getAnnotationsByType(CheckOneBefore.class)).flatMap(audits -> stream(audits.value())))
-		        .distinct().map(cb -> Arrays.stream(cb.value()).distinct().collect(Collectors.toUnmodifiableSet()))
-		        .collect(Collectors.toUnmodifiableList());
+				stream(element.getAnnotationsByType(CheckBefore.class)),
+				stream(element.getAnnotationsByType(CheckOneBefore.class)).flatMap(audits -> stream(audits.value())))
+				.distinct().map(cb -> Arrays.stream(cb.value()).distinct().collect(Collectors.toUnmodifiableSet()))
+				.toList();
 	}
 
 	public static class MappingAnnotation {
@@ -102,11 +102,11 @@ class AnnotationExtractor {
 		private final List<String> produces;
 
 		private MappingAnnotation(final String requestName,
-		                          final String[] requestValuePaths,
-		                          final Set<RequestMethod> requestMethods,
-		                          final String[] headers,
-		                          final String[] consumes,
-		                          final String[] produces) {
+								  final String[] requestValuePaths,
+								  final Set<RequestMethod> requestMethods,
+								  final String[] headers,
+								  final String[] consumes,
+								  final String[] produces) {
 			this.requestName = Optional.ofNullable(requestName);
 			requestValuePath = Arrays.stream(requestValuePaths).findFirst();
 			this.requestMethods = requestMethods;
@@ -117,7 +117,7 @@ class AnnotationExtractor {
 
 		private List<String> getOptionalList(final String[] value) {
 			Objects.requireNonNull(value, "value can't to be null");
-			return Arrays.stream(value).collect(Collectors.toUnmodifiableList());
+			return List.of(value);
 		}
 
 		public Set<RequestMethod> getRequestMethods() {

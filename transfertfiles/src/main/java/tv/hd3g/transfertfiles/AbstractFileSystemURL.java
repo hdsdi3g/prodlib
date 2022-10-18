@@ -18,7 +18,6 @@ package tv.hd3g.transfertfiles;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static tv.hd3g.transfertfiles.AbstractFile.normalizePath;
 
 import java.io.Closeable;
@@ -48,8 +47,8 @@ public class AbstractFileSystemURL implements Closeable {
 	private final String basePath;
 
 	protected AbstractFileSystemURL(final String protectedRessourceURL,
-	                                final AbstractFileSystem<?> fileSystem,
-	                                final String basePath) {
+									final AbstractFileSystem<?> fileSystem,
+									final String basePath) {
 		this.protectedRessourceURL = protectedRessourceURL;
 		this.fileSystem = fileSystem;
 		this.basePath = basePath;
@@ -84,21 +83,21 @@ public class AbstractFileSystemURL implements Closeable {
 		final var passive = query.containsKey("active") == false;
 		final var ignoreInvalidCertificates = query.containsKey("ignoreInvalidCertificates");
 		final var keys = query.getOrDefault("key", List.of()).stream()
-		        .map(File::new)
-		        .filter(File::exists)
-		        .collect(toUnmodifiableList());
+				.map(File::new)
+				.filter(File::exists)
+				.toList();
 
 		log.trace("Parsed URL: {}", Map.of(
-		        "protocol", Optional.ofNullable(protocol).orElse("null"),
-		        "basePath", Optional.ofNullable(basePath).orElse("null"),
-		        "host", Optional.ofNullable(host).map(Object::toString).orElse("null"),
-		        "query", Optional.ofNullable(query).map(Object::toString).orElse("null"),
-		        "username", Optional.ofNullable(username).orElse("null"),
-		        "protectedRessourceURL", Optional.ofNullable(protectedRessourceURL).orElse("null"),
-		        "port", port,
-		        "passive", passive,
-		        "ignoreInvalidCertificates", ignoreInvalidCertificates,
-		        "keys", Optional.ofNullable(keys).map(Object::toString).orElse("null")));
+				"protocol", Optional.ofNullable(protocol).orElse("null"),
+				"basePath", Optional.ofNullable(basePath).orElse("null"),
+				"host", Optional.ofNullable(host).map(Object::toString).orElse("null"),
+				"query", Optional.ofNullable(query).map(Object::toString).orElse("null"),
+				"username", Optional.ofNullable(username).orElse("null"),
+				"protectedRessourceURL", Optional.ofNullable(protectedRessourceURL).orElse("null"),
+				"port", port,
+				"passive", passive,
+				"ignoreInvalidCertificates", ignoreInvalidCertificates,
+				"keys", Optional.ofNullable(query.get("key")).map(Object::toString).orElse("null")));
 
 		if (protocol.contentEquals("file")) {
 			log.debug("Init URL LocalFileSystem: {}", this::toString);
@@ -121,20 +120,20 @@ public class AbstractFileSystemURL implements Closeable {
 		} else if (protocol.contentEquals("ftps")) {
 			log.debug("Init URL FTPSFileSystem: {}", this::toString);
 			fileSystem = new FTPSFileSystem(host, port, username, password, passive,
-			        ignoreInvalidCertificates, basePath);
+					ignoreInvalidCertificates, basePath);
 		} else if (protocol.contentEquals("ftpes")) {
 			log.debug("Init URL FTPESFileSystem: {}", this::toString);
 			fileSystem = new FTPESFileSystem(host, port, username, password, passive,
-			        ignoreInvalidCertificates, basePath);
+					ignoreInvalidCertificates, basePath);
 		} else {
 			throw new UncheckedIOException(
-			        new IOException("Can't manage protocol \"" + protocol + "\" in URL: " + toString()));
+					new IOException("Can't manage protocol \"" + protocol + "\" in URL: " + toString()));
 		}
 
 		final var timeout = query.getOrDefault("timeout", List.of()).stream()
-		        .map(Integer::valueOf)
-		        .findFirst()
-		        .orElse(0);
+				.map(Integer::valueOf)
+				.findFirst()
+				.orElse(0);
 		if (timeout > 0) {
 			fileSystem.setTimeout(timeout, SECONDS);
 		}

@@ -16,14 +16,11 @@
  */
 package tv.hd3g.authkit.mod.service;
 
-import static java.util.stream.Collectors.toUnmodifiableList;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -45,15 +42,15 @@ public class ValidPasswordPolicyServiceImpl implements ValidPasswordPolicyServic
 	 * 0000 1111 2222 ... dddd eeee ffff ...
 	 */
 	public static final List<String> stupidLettersNumbers = Collections.unmodifiableList(Stream.concat(
-	        IntStream.range(0, 10).mapToObj(i -> {
-		        final var array = new char[4];
-		        Arrays.fill(array, String.valueOf(i).charAt(0));
-		        return new String(array);
-	        }), IntStream.range('a', 'z' + 1).mapToObj(i -> {
-		        final var array = new char[4];
-		        Arrays.fill(array, (char) i);
-		        return new String(array);
-	        })).collect(Collectors.toList()));
+			IntStream.range(0, 10).mapToObj(i -> {
+				final var array = new char[4];
+				Arrays.fill(array, String.valueOf(i).charAt(0));
+				return new String(array);
+			}), IntStream.range('a', 'z' + 1).mapToObj(i -> {
+				final var array = new char[4];
+				Arrays.fill(array, (char) i);
+				return new String(array);
+			})).toList());
 
 	@Value("${authkit.password_policy.min_size:8}")
 	private int minSize;
@@ -75,8 +72,8 @@ public class ValidPasswordPolicyServiceImpl implements ValidPasswordPolicyServic
 	 */
 	@Override
 	public void checkPasswordValidation(final String username,
-	                                    final Password password,
-	                                    final PasswordValidationLevel level) throws PasswordComplexityException {
+										final Password password,
+										final PasswordValidationLevel level) throws PasswordComplexityException {
 
 		Stream<String> sUsernameParts = Stream.empty();
 		if (level == PasswordValidationLevel.DEFAULT) {
@@ -88,12 +85,12 @@ public class ValidPasswordPolicyServiceImpl implements ValidPasswordPolicyServic
 		}
 
 		final var sGenericTerms = Arrays.stream(Optional.ofNullable(ignoreGenericTerms)
-		        .orElse(new String[0])).map(String::toLowerCase);
+				.orElse(new String[0])).map(String::toLowerCase);
 
 		final var ignoreTermList = Stream.of(
-		        sGenericTerms, sUsernameParts, stupidPasswordWords.stream(), stupidLettersNumbers.stream())
-		        .reduce(Stream::concat).orElseGet(Stream::empty)
-		        .distinct().collect(toUnmodifiableList());
+				sGenericTerms, sUsernameParts, stupidPasswordWords.stream(), stupidLettersNumbers.stream())
+				.reduce(Stream::concat).orElseGet(Stream::empty)
+				.distinct().toList();
 
 		for (final String term : ignoreTermList) {
 			if (password.contain(term)) {

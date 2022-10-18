@@ -113,8 +113,8 @@ public class TOTPServiceImpl implements TOTPService {
 	@Override
 	public List<String> makeBackupCodes() {
 		return cipherService.getSecureRandom().ints(backupCodeQuantity, 0, 1_000_000)
-		        .mapToObj(i -> leftPad(String.valueOf(i), 6, "0"))
-		        .collect(Collectors.toUnmodifiableList());
+				.mapToObj(i -> leftPad(String.valueOf(i), 6, "0"))
+				.toList();
 	}
 
 	@Override
@@ -124,8 +124,8 @@ public class TOTPServiceImpl implements TOTPService {
 		final var credential = credentialRepository.getByUserUUID(userUUID);
 		credential.getTotpBackupCodes().clear();
 		final var newCodes = backupCodes.stream()
-		        .map(code -> new Totpbackupcode(credential, code))
-		        .collect(Collectors.toUnmodifiableSet());
+				.map(code -> new Totpbackupcode(credential, code))
+				.collect(Collectors.toUnmodifiableSet());
 		credential.getTotpBackupCodes().addAll(newCodes);
 		credential.setTotpkey(cipherService.cipherFromData(secret));
 	}
@@ -158,9 +158,9 @@ public class TOTPServiceImpl implements TOTPService {
 		final var secret = cipherService.unCipherToData(credential.getTotpkey());
 		if (isCodeIsValid(secret, stringCode) == false) {
 			final var bcpCode = totpbackupcodeRepository.getByCredential(credential).stream()
-			        .filter(bcp -> bcp.getCode().equals(stringCode))
-			        .findFirst()
-			        .orElseThrow(BadTOTPCodeCantLoginException::new);
+					.filter(bcp -> bcp.getCode().equals(stringCode))
+					.findFirst()
+					.orElseThrow(BadTOTPCodeCantLoginException::new);
 			totpbackupcodeRepository.delete(bcpCode);
 		}
 	}
@@ -177,8 +177,8 @@ public class TOTPServiceImpl implements TOTPService {
 	 * See https://github.com/j256/two-factor-auth/blob/master/src/main/java/com/j256/twofactorauth/TimeBasedOneTimePasswordUtil.java
 	 */
 	public static String makeCodeAtTime(final byte[] secret,
-	                                    final long timeMillis,
-	                                    final int timeStepSeconds) throws GeneralSecurityException {
+										final long timeMillis,
+										final int timeStepSeconds) throws GeneralSecurityException {
 		final var data = new byte[8];
 		var value = timeMillis / 1000 / timeStepSeconds;
 		for (var i = 7; value > 0; i--) {

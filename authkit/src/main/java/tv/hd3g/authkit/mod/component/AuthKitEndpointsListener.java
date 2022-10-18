@@ -40,21 +40,21 @@ public class AuthKitEndpointsListener implements ApplicationListener<Application
 	}
 
 	@Override
-	public void onApplicationEvent(final ApplicationEvent event) {
-		if (event instanceof ContextRefreshedEvent) {
-			((ContextRefreshedEvent) event).getApplicationContext()
-			        .getBean(RequestMappingHandlerMapping.class)
-			        .getHandlerMethods().values().stream()
-			        .map(HandlerMethod::getBeanType).forEach(this::getAnnotatedClass);
+	public void onApplicationEvent(final ApplicationEvent aEvent) {
+		if (aEvent instanceof final ContextRefreshedEvent event) {
+			event.getApplicationContext()
+					.getBean(RequestMappingHandlerMapping.class)
+					.getHandlerMethods().values().stream()
+					.map(HandlerMethod::getBeanType).forEach(this::getAnnotatedClass);
 		}
 	}
 
 	public Set<String> getAllRights() {
 		return annotationCache.values()
-		        .stream()
-		        .flatMap(AnnotatedControllerClass::getAllRights)
-		        .distinct()
-		        .collect(toUnmodifiableSet());
+				.stream()
+				.flatMap(AnnotatedControllerClass::getAllRights)
+				.distinct()
+				.collect(toUnmodifiableSet());
 	}
 
 	public AnnotatedControllerClass getAnnotatedClass(final Class<?> controllerClass) {

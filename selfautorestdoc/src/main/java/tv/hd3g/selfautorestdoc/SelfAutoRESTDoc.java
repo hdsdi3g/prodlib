@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -64,11 +63,11 @@ public class SelfAutoRESTDoc {
 		final var model = launcher.getModel();
 
 		return restControllerAutoDocByClass.values().stream()
-		        .map(c -> c.processAnalysis(model))
-		        .flatMap(controller -> controller.getMethods().stream()
-		                .map(method -> new RESTEntryPoint(controller, method)))
-		        .sorted((l, r) -> (l.getPaths() + l.getVerbs()).compareTo(r.getPaths() + r.getVerbs()))
-		        .collect(Collectors.toUnmodifiableList());
+				.map(c -> c.processAnalysis(model))
+				.flatMap(controller -> controller.getMethods().stream()
+						.map(method -> new RESTEntryPoint(controller, method)))
+				.sorted((l, r) -> (l.getPaths() + l.getVerbs()).compareTo(r.getPaths() + r.getVerbs()))
+				.toList();
 	}
 
 	private static String linkifyTitle(final String title) {

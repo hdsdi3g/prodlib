@@ -21,7 +21,6 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,19 +41,19 @@ class RESTController {
 
 	private static boolean isAnnotationMapping(final Annotation a) {
 		return a.annotationType() == RequestMapping.class ||
-		       a.annotationType() == PostMapping.class ||
-		       a.annotationType() == PatchMapping.class ||
-		       a.annotationType() == PutMapping.class ||
-		       a.annotationType() == DeleteMapping.class ||
-		       a.annotationType() == GetMapping.class;
+			   a.annotationType() == PostMapping.class ||
+			   a.annotationType() == PatchMapping.class ||
+			   a.annotationType() == PutMapping.class ||
+			   a.annotationType() == DeleteMapping.class ||
+			   a.annotationType() == GetMapping.class;
 	}
 
 	public RESTControllerAnalysis processAnalysis(final CtModel model) {
 		final var classAnnotations = new AnnotationExtractor(controllerClass);
 		final var methods = Arrays.stream(controllerClass.getDeclaredMethods())
-		        .filter(m -> Modifier.isPublic(m.getModifiers()))
-		        .filter(m -> Arrays.stream(m.getAnnotations()).anyMatch(RESTController::isAnnotationMapping))
-		        .map(m -> new RESTMethod(m, model)).collect(Collectors.toUnmodifiableList());
+				.filter(m -> Modifier.isPublic(m.getModifiers()))
+				.filter(m -> Arrays.stream(m.getAnnotations()).anyMatch(RESTController::isAnnotationMapping))
+				.map(m -> new RESTMethod(m, model)).toList();
 
 		return new RESTControllerAnalysis(classAnnotations, methods);
 	}
@@ -64,7 +63,7 @@ class RESTController {
 		private final List<RESTMethod> methods;
 
 		private RESTControllerAnalysis(final AnnotationExtractor classAnnotations,
-		                               final List<RESTMethod> methods) {
+									   final List<RESTMethod> methods) {
 			this.classAnnotations = classAnnotations;
 			this.methods = methods;
 		}

@@ -39,7 +39,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -165,22 +164,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	private User getUserByUUID(final String userUUID) {
 		return Optional.ofNullable(userRepository.getByUUID(userUUID)).orElseThrow(
-		        () -> new AuthKitException("Can't found User " + userUUID));
+				() -> new AuthKitException("Can't found User " + userUUID));
 	}
 
 	private Group getGroupByName(final String name) {
 		return Optional.ofNullable(groupRepository.getByName(name)).orElseThrow(
-		        () -> new AuthKitException("Can't found group \"" + name + "\""));
+				() -> new AuthKitException("Can't found group \"" + name + "\""));
 	}
 
 	private Role getRoleByName(final String name) {
 		return Optional.ofNullable(roleRepository.getByName(name)).orElseThrow(
-		        () -> new AuthKitException("Can't found role \"" + name + "\""));
+				() -> new AuthKitException("Can't found role \"" + name + "\""));
 	}
 
 	private RoleRight getRoleRight(final String roleName, final String rightName) {
 		return Optional.ofNullable(roleRightRepository.getRoleRight(roleName, rightName)).orElseThrow(
-		        () -> new AuthKitException("Can't found role right \"" + roleName + ":" + rightName + "\""));
+				() -> new AuthKitException("Can't found role right \"" + roleName + ":" + rightName + "\""));
 	}
 
 	@Override
@@ -192,7 +191,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		} else if (credential.getLdapdomain() != null) {
 			try {
 				externalAuthClientService.logonUser(credential.getLogin(), userEnterPassword, credential
-				        .getLdapdomain());
+						.getLdapdomain());
 			} catch (final UserCantLoginException e) {
 				return Optional.ofNullable(INVALID_PASSWORD);
 			}
@@ -206,8 +205,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	}
 
 	private void checkLoginUserIsEnabled(final HttpServletRequest request,
-	                                     final Credential credential,
-	                                     final String what) throws DisabledUserCantLoginException {
+										 final Credential credential,
+										 final String what) throws DisabledUserCantLoginException {
 		if (credential.isEnabled() == false) {
 			auditReportService.onRejectLogin(request, DISABLED_LOGIN, realm, what);
 			throw new DisabledUserCantLoginException();
@@ -215,7 +214,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	}
 
 	private void checkLoginUserMustchangepassword(final Credential credential,
-	                                              final String userUUID) throws UserMustChangePasswordException {
+												  final String userUUID) throws UserMustChangePasswordException {
 		if (credential.isMustchangepassword()) {
 			throw new UserMustChangePasswordException(userUUID);
 		}
@@ -228,8 +227,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	}
 
 	private void checkLoginUserNoCredential(final HttpServletRequest request,
-	                                        final Credential credential,
-	                                        final String what) throws UnknownUserCantLoginException {
+											final Credential credential,
+											final String what) throws UnknownUserCantLoginException {
 		if (credential == null) {
 			auditReportService.onRejectLogin(request, USER_NOT_FOUND, realm, what);
 			throw new UnknownUserCantLoginException();
@@ -237,14 +236,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	}
 
 	private void checkPasswordDuringLogin(final HttpServletRequest request,
-	                                      final LoginFormDto form,
-	                                      final Credential credential) throws NoPasswordUserCantLoginException, BadPasswordUserCantLoginException {
+										  final LoginFormDto form,
+										  final Credential credential) throws NoPasswordUserCantLoginException, BadPasswordUserCantLoginException {
 		final var checkPasswordBadResult = checkPassword(form.getUserpassword(), credential);
 		if (checkPasswordBadResult.isPresent()) {
 			auditReportService.onRejectLogin(request, checkPasswordBadResult.get(), realm, form.getUserlogin());
 			switch (checkPasswordBadResult.get()) {
-			case MISSING_PASSWORD:
-			case EMPTY_PASSWORD:
+			case MISSING_PASSWORD, EMPTY_PASSWORD:
 				throw new NoPasswordUserCantLoginException();
 			default:
 				credential.setLogontrial(credential.getLogontrial() + 1);
@@ -255,7 +253,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	}
 
 	private Credential importLDAPUserFirstTime(final HttpServletRequest request,
-	                                           final LoginFormDto form) throws UnknownUserCantLoginException {
+											   final LoginFormDto form) throws UnknownUserCantLoginException {
 		try {
 			final var clientAddr = InetAddress.getByName(getOriginalRemoteAddr(request));
 			if (externalAuthClientService.isIPAllowedToCreateUserAccount(clientAddr) == false) {
@@ -263,7 +261,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			}
 			final var ldapUser = externalAuthClientService.logonUser(form.getUserlogin(), form.getUserpassword());
 			final var userUUID = userDao.addLDAPUserCredential(ldapUser.getLogin(), ldapUser.getDomain(), realm)
-			        .toString();
+					.toString();
 			return credentialRepository.getByUserUUID(userUUID);
 		} catch (final UserCantLoginException | UnknownHostException e) {
 			auditReportService.onRejectLogin(request, USER_NOT_FOUND, realm, form.getUserlogin());
@@ -272,19 +270,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	}
 
 	private void ldapLogon(final HttpServletRequest request,
-	                       final LoginFormDto form,
-	                       final Credential credential,
-	                       final User user) throws UnknownUserCantLoginException {
+						   final LoginFormDto form,
+						   final Credential credential,
+						   final User user) throws UnknownUserCantLoginException {
 		try {
 			final var ldapUser = externalAuthClientService.logonUser(
-			        credential.getLogin(), form.getUserpassword(), credential.getLdapdomain());
+					credential.getLogin(), form.getUserpassword(), credential.getLdapdomain());
 
 			setUserPrivacy(user.getUuid(), new UserPrivacyDto(ldapUser));
 			/**
 			 * Import ldapUser Groups to db
 			 */
 			final var groupNames = user.getGroups().stream().map(Group::getName)
-			        .distinct().collect(toUnmodifiableSet());
+					.distinct().collect(toUnmodifiableSet());
 			ldapUser.getGroups().forEach(ldapGroupName -> {
 				if (groupNames.contains(ldapGroupName)) {
 					return;
@@ -327,7 +325,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		final var rejected = checkPassword(setupDto.getCurrentpassword(), credential);
 		if (rejected.isPresent()) {
 			throw new AuthKitException(SC_UNAUTHORIZED,
-			        "Can't accept demand, bad password ; " + rejected.get().toString());
+					"Can't accept demand, bad password ; " + rejected.get().toString());
 		}
 		totpService.setupTOTP(validatedToken.getSecret(), validatedToken.getBackupCodes(), expectedUserUUID);
 	}
@@ -348,7 +346,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	@Override
 	public LoginRequestContentDto userLoginRequest(final HttpServletRequest request,
-	                                               final LoginFormDto form) throws UserCantLoginException {
+												   final LoginFormDto form) throws UserCantLoginException {
 		var credential = credentialRepository.getFromRealmLogin(realm, form.getUserlogin());
 		if (credential == null && externalAuthClientService.isAvailable()) {
 			credential = importLDAPUserFirstTime(request, form);
@@ -375,9 +373,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	}
 
 	private LoginRequestContentDto prepareSessionToken(final HttpServletRequest request,
-	                                                   final boolean shortSessionTime,
-	                                                   final Credential credential,
-	                                                   final String userUUID) {
+													   final boolean shortSessionTime,
+													   final Credential credential,
+													   final String userUUID) {
 		final var clientAddr = getOriginalRemoteAddr(request);
 		final var tags = Set.copyOf(userDao.getRightsForUser(userUUID, clientAddr));
 
@@ -399,7 +397,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		}
 
 		final var userSessionToken = tokenService.loggedUserRightsGenerateToken(
-		        userUUID, sessionDuration, tags, host);
+				userUUID, sessionDuration, tags, host);
 		final var cookie = cookieService.createLogonCookie(userSessionToken, sessionDuration);
 		auditReportService.onLogin(request, longSessionDuration, tags);
 
@@ -408,7 +406,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	@Override
 	public LoginRequestContentDto userLoginRequest(final HttpServletRequest request,
-	                                               final TOTPLogonCodeFormDto form) throws UserCantLoginException, NotAcceptableSecuredTokenException {
+												   final TOTPLogonCodeFormDto form) throws UserCantLoginException, NotAcceptableSecuredTokenException {
 		final var userUUID = tokenService.userFormExtractTokenUUID(TOKEN_FORMNAME_ENTER_TOTP, form.getSecuretoken());
 		final var credential = credentialRepository.getByUserUUID(userUUID);
 		checkLoginUserNoCredential(request, credential, userUUID);
@@ -442,7 +440,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		}
 
 		final var hashedPassword = addUser.getUserPassword().hash(
-		        userPassword -> ARGON2.hash(iterations, memory, parallelism, userPassword));
+				userPassword -> ARGON2.hash(iterations, memory, parallelism, userPassword));
 		final var cipherHashedPassword = cipherService.cipherFromString(hashedPassword);
 		final var userUUID = userDao.addUserCredential(userLogin, cipherHashedPassword, realm).toString();
 
@@ -499,7 +497,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	@Override
 	public void changeUserPassword(final String userUUID,
-	                               final Password newPassword) throws ResetWithSamePasswordException, BlockedUserException {
+								   final Password newPassword) throws ResetWithSamePasswordException, BlockedUserException {
 		Objects.requireNonNull(newPassword, "No password enter");
 		final var user = getUserByUUID(userUUID);
 		final var credential = user.getCredential();
@@ -525,7 +523,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		}
 
 		final var newHashedPassword = newPassword.hash(
-		        userPassword -> ARGON2.hash(iterations, memory, parallelism, userPassword));
+				userPassword -> ARGON2.hash(iterations, memory, parallelism, userPassword));
 		final var newCipherHashedPassword = cipherService.cipherFromString(newHashedPassword);
 		credential.setPasswordhash(newCipherHashedPassword);
 		credential.setMustchangepassword(false);
@@ -540,8 +538,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	@Override
 	public List<String> getContextRightsForUser(final String userUUID,
-	                                            final String clientAddr,
-	                                            final String rightName) {
+												final String clientAddr,
+												final String rightName) {
 		return userDao.getContextRightsForUser(userUUID, clientAddr, rightName);
 	}
 
@@ -549,9 +547,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	public boolean isUserEnabledAndNonBlocked(final String userUUID) {
 		final var credential = credentialRepository.getByUserUUID(userUUID);
 		return (credential == null
-		        || credential.isEnabled() == false
-		        || credential.isMustchangepassword()
-		        || credential.getLogontrial() >= maxLogonTrial) == false;
+				|| credential.isEnabled() == false
+				|| credential.isMustchangepassword()
+				|| credential.getLogontrial() >= maxLogonTrial) == false;
 	}
 
 	////////// Group zone
@@ -581,7 +579,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		final var name = changeGroup.getName();
 		getGroupByName(name).setDescription(changeGroup.getDescription());
 		log.info(() -> "Change role \"" + name + "\" description to \""
-		               + sanitize(changeGroup.getDescription()) + "\"");
+					   + sanitize(changeGroup.getDescription()) + "\"");
 	}
 
 	@Override
@@ -605,13 +603,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	@Override
 	public List<GroupOrRoleDto> listAllGroups() {
 		return groupRepository.findAll().stream().map(GroupOrRoleDto::new)
-		        .collect(Collectors.toUnmodifiableList());
+				.toList();
 	}
 
 	@Override
 	public List<GroupOrRoleDto> listGroupsForUser(final String userUUID) {
 		return groupRepository.getByUserUUID(userUUID).stream().map(GroupOrRoleDto::new)
-		        .collect(Collectors.toUnmodifiableList());
+				.toList();
 	}
 
 	////////// Role zone
@@ -642,7 +640,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		final var role = getRoleByName(name);
 		role.setDescription(changeRole.getDescription());
 		log.info(() -> "Change role \"" + name + "\" description to \""
-		               + sanitize(changeRole.getDescription()) + "\"");
+					   + sanitize(changeRole.getDescription()) + "\"");
 	}
 
 	@Override
@@ -677,13 +675,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	@Override
 	public List<GroupOrRoleDto> listAllRoles() {
 		return roleRepository.findAll().stream().map(GroupOrRoleDto::new)
-		        .collect(Collectors.toUnmodifiableList());
+				.toList();
 	}
 
 	@Override
 	public List<GroupOrRoleDto> listRolesForGroup(final String groupName) {
 		return roleRepository.getByGroupName(groupName).stream().map(GroupOrRoleDto::new)
-		        .collect(Collectors.toUnmodifiableList());
+				.toList();
 	}
 
 	////////// Rights zone
@@ -748,13 +746,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	@Override
 	public List<UserDto> listLinkedUsersForGroup(final String groupName) {
 		return getGroupByName(groupName).getUsers().stream().map(UserDto::new)
-		        .collect(Collectors.toUnmodifiableList());
+				.toList();
 	}
 
 	@Override
 	public List<GroupOrRoleDto> listLinkedGroupsForRole(final String roleName) {
 		return getRoleByName(roleName).getGroups().stream().map(GroupOrRoleDto::new)
-		        .collect(Collectors.toUnmodifiableList());
+				.toList();
 	}
 
 	/////////// UserPrivacy
@@ -768,7 +766,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			return cipherService.unCipherToString(ciphered);
 		};
 		return userPrivacyRepository.getByUserUUID(userUUIDList).stream()
-		        .map(up -> new UserPrivacyDto(up, unCipher)).collect(Collectors.toUnmodifiableList());
+				.map(up -> new UserPrivacyDto(up, unCipher)).toList();
 	}
 
 	@Override

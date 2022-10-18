@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,54 +54,54 @@ class RESTMethod {
 		final var paramList = Arrays.asList(method.getParameters());
 
 		urlParameters = paramList.stream()
-		        .filter(p -> p.isAnnotationPresent(PathVariable.class))
-		        .map(p -> {
-			        final var a = p.getAnnotation(PathVariable.class);
-			        final var name = a.value();
-			        final var type = p.getType();
-			        final var required = a.required();
-			        return new URLVariable(name, type, required);
-		        })
-		        .collect(Collectors.toUnmodifiableList());
+				.filter(p -> p.isAnnotationPresent(PathVariable.class))
+				.map(p -> {
+					final var a = p.getAnnotation(PathVariable.class);
+					final var name = a.value();
+					final var type = p.getType();
+					final var required = a.required();
+					return new URLVariable(name, type, required);
+				})
+				.toList();
 		urlQueryParameters = paramList.stream()
-		        .filter(p -> p.isAnnotationPresent(RequestParam.class))
-		        .map(p -> {
-			        final var a = p.getAnnotation(RequestParam.class);
-			        var name = a.value();
-			        if (name == null || name.isEmpty()) {
-				        name = p.getName();
-			        }
-			        final var type = p.getType();
-			        final var required = a.required();
-			        final var defaultValue = a.defaultValue();
-			        if (ValueConstants.DEFAULT_NONE.equals(defaultValue)) {
-				        return new URLVariable(name, type, required);
-			        }
-			        return new URLVariable(name, type, required, defaultValue);
-		        })
-		        .collect(Collectors.toUnmodifiableList());
+				.filter(p -> p.isAnnotationPresent(RequestParam.class))
+				.map(p -> {
+					final var a = p.getAnnotation(RequestParam.class);
+					var name = a.value();
+					if (name == null || name.isEmpty()) {
+						name = p.getName();
+					}
+					final var type = p.getType();
+					final var required = a.required();
+					final var defaultValue = a.defaultValue();
+					if (ValueConstants.DEFAULT_NONE.equals(defaultValue)) {
+						return new URLVariable(name, type, required);
+					}
+					return new URLVariable(name, type, required, defaultValue);
+				})
+				.toList();
 
 		/**
 		 * Accept method
 		 */
 		requestBodyType = paramList.stream()
-		        .filter(p -> p.isAnnotationPresent(RequestBody.class))
-		        .findFirst().map(Parameter::getType)
-		        .flatMap(type -> model.getAllTypes().stream()
-		                .filter(t -> type.getName().equals(t.getQualifiedName()))
-		                .findFirst())
-		        .map(CtType::getReference)
-		        .map(r -> new DtoAnalyser(r, false));
+				.filter(p -> p.isAnnotationPresent(RequestBody.class))
+				.findFirst().map(Parameter::getType)
+				.flatMap(type -> model.getAllTypes().stream()
+						.filter(t -> type.getName().equals(t.getQualifiedName()))
+						.findFirst())
+				.map(CtType::getReference)
+				.map(r -> new DtoAnalyser(r, false));
 
 		final var controller = model.getAllTypes().stream()
-		        .filter(t -> method.getDeclaringClass().getName().equals(t.getQualifiedName()))
-		        .findFirst();
+				.filter(t -> method.getDeclaringClass().getName().equals(t.getQualifiedName()))
+				.findFirst();
 
 		/**
 		 * Return method
 		 */
 		methodType = controller.map(t -> t.getMethodsByName(method.getName()))
-		        .flatMap(m -> m.stream().findFirst());
+				.flatMap(m -> m.stream().findFirst());
 
 		if (methodType.isEmpty()) {
 			methodReturn = Optional.empty();
@@ -110,7 +109,7 @@ class RESTMethod {
 		}
 		final var mainType = methodType.get().getType();
 		final var mainReturnTypeName = mainType
-		        .getQualifiedName();
+				.getQualifiedName();
 		if (ResponseEntity.class.getName().equals(mainReturnTypeName) == false) {
 			/**
 			 * Not ResponseEntity<?>
@@ -216,10 +215,10 @@ class RESTMethod {
 
 	public List<String> getMethodComments() {
 		return methodType.map(CtElement::getComments).stream()
-		        .flatMap(Collection::stream)
-		        .filter(c -> CommentType.JAVADOC.equals(c.getCommentType()))
-		        .map(CtComment::getContent)
-		        .collect(Collectors.toUnmodifiableList());
+				.flatMap(Collection::stream)
+				.filter(c -> CommentType.JAVADOC.equals(c.getCommentType()))
+				.map(CtComment::getContent)
+				.toList();
 	}
 
 }

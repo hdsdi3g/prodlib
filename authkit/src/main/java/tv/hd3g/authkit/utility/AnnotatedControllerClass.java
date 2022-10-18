@@ -17,7 +17,6 @@
 package tv.hd3g.authkit.utility;
 
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static java.util.stream.Collectors.toUnmodifiableMap;
 
 import java.lang.reflect.Method;
@@ -49,78 +48,78 @@ public class AnnotatedControllerClass {
 		final Function<CheckOneBefore, Stream<CheckBefore>> extractCheckOnBefore = audits -> stream(audits.value());
 		final Function<AuditAllAfter, Stream<AuditAfter>> extractAuditAllAfter = audits -> stream(audits.value());
 
-		final var refererMethods = stream(referer.getMethods()).collect(toUnmodifiableList());
+		final var refererMethods = stream(referer.getMethods()).toList();
 
 		allClassCheckBefore = Stream.concat(
-		        stream(referer.getAnnotationsByType(CheckBefore.class)),
-		        stream(referer.getAnnotationsByType(CheckOneBefore.class))
-		                .flatMap(extractCheckOnBefore))
-		        .distinct()
-		        .collect(toUnmodifiableList());
+				stream(referer.getAnnotationsByType(CheckBefore.class)),
+				stream(referer.getAnnotationsByType(CheckOneBefore.class))
+						.flatMap(extractCheckOnBefore))
+				.distinct()
+				.toList();
 
 		final var allClassAuditsAfter = Stream.concat(
-		        stream(referer.getAnnotationsByType(AuditAfter.class)),
-		        stream(referer.getAnnotationsByType(AuditAllAfter.class))
-		                .flatMap(extractAuditAllAfter))
-		        .distinct()
-		        .collect(toUnmodifiableList());
+				stream(referer.getAnnotationsByType(AuditAfter.class)),
+				stream(referer.getAnnotationsByType(AuditAllAfter.class))
+						.flatMap(extractAuditAllAfter))
+				.distinct()
+				.toList();
 
 		allClassRenforceCheckBefore = referer.getAnnotationsByType(RenforceCheckBefore.class).length > 0;
 
 		allMethodsCheckBefore = refererMethods.stream()
-		        .collect(toUnmodifiableMap(
-		                method -> method,
-		                method -> Stream.concat(
-		                        stream(method.getAnnotationsByType(CheckBefore.class)),
-		                        stream(method.getAnnotationsByType(CheckOneBefore.class))
-		                                .flatMap(extractCheckOnBefore))
-		                        .distinct()
-		                        .collect(toUnmodifiableList())));
+				.collect(toUnmodifiableMap(
+						method -> method,
+						method -> Stream.concat(
+								stream(method.getAnnotationsByType(CheckBefore.class)),
+								stream(method.getAnnotationsByType(CheckOneBefore.class))
+										.flatMap(extractCheckOnBefore))
+								.distinct()
+								.toList()));
 
 		final var allMethodsAuditsAfter = refererMethods.stream().collect(Collectors.toUnmodifiableMap(
-		        method -> method,
-		        method -> Stream.concat(
-		                stream(method.getAnnotationsByType(AuditAfter.class)),
-		                stream(method.getAnnotationsByType(AuditAllAfter.class))
-		                        .flatMap(extractAuditAllAfter))
-		                .distinct()
-		                .collect(toUnmodifiableList())));
+				method -> method,
+				method -> Stream.concat(
+						stream(method.getAnnotationsByType(AuditAfter.class)),
+						stream(method.getAnnotationsByType(AuditAllAfter.class))
+								.flatMap(extractAuditAllAfter))
+						.distinct()
+						.toList()));
 
 		allMethodsRenforceCheckBefore = refererMethods.stream()
-		        .collect(toUnmodifiableMap(
-		                method -> method,
-		                method -> method.getAnnotationsByType(RenforceCheckBefore.class).length > 0));
+				.collect(toUnmodifiableMap(
+						method -> method,
+						method -> method.getAnnotationsByType(RenforceCheckBefore.class).length > 0));
 
 		if (allClassCheckBefore.isEmpty()) {
 			allMethodsRequireValidAuth = refererMethods.stream()
-			        .collect(toUnmodifiableMap(
-			                method -> method,
-			                method -> allMethodsCheckBefore.get(method).isEmpty() == false));
+					.collect(toUnmodifiableMap(
+							method -> method,
+							method -> allMethodsCheckBefore.get(method).isEmpty() == false));
 		} else {
 			/**
 			 * Set all methods to true
 			 */
 			allMethodsRequireValidAuth = refererMethods.stream()
-			        .collect(toUnmodifiableMap(
-			                method -> method,
-			                method -> true));
+					.collect(toUnmodifiableMap(
+							method -> method,
+							method -> true));
 		}
 
 		checkBeforeListByMethods = refererMethods.stream()
-		        .collect(toUnmodifiableMap(
-		                method -> method,
-		                method -> Stream.concat(
-		                        allClassCheckBefore.stream(),
-		                        allMethodsCheckBefore.getOrDefault(method, List.of()).stream())
-		                        .collect(toUnmodifiableList())));
+				.collect(toUnmodifiableMap(
+						method -> method,
+						method -> Stream.concat(
+								allClassCheckBefore.stream(),
+								allMethodsCheckBefore.getOrDefault(method, List.of()).stream())
+								.toList()));
 
 		auditAfterListByMethods = refererMethods.stream()
-		        .collect(toUnmodifiableMap(
-		                method -> method,
-		                method -> Stream.concat(
-		                        allClassAuditsAfter.stream(),
-		                        allMethodsAuditsAfter.getOrDefault(method, List.of()).stream())
-		                        .collect(toUnmodifiableList())));
+				.collect(toUnmodifiableMap(
+						method -> method,
+						method -> Stream.concat(
+								allClassAuditsAfter.stream(),
+								allMethodsAuditsAfter.getOrDefault(method, List.of()).stream())
+								.toList()));
 
 		controllerType = ControllerType.getFromClass(referer);
 	}
@@ -147,11 +146,11 @@ public class AnnotatedControllerClass {
 
 	public Stream<String> getAllRights() {
 		return Stream.concat(
-		        allClassCheckBefore.stream(),
-		        allMethodsCheckBefore.values()
-		                .stream()
-		                .flatMap(List::stream))
-		        .flatMap(cb -> Arrays.stream(cb.value()))
-		        .distinct();
+				allClassCheckBefore.stream(),
+				allMethodsCheckBefore.values()
+						.stream()
+						.flatMap(List::stream))
+				.flatMap(cb -> Arrays.stream(cb.value()))
+				.distinct();
 	}
 }

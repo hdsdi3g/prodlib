@@ -79,8 +79,8 @@ public class ExternalAuthClientLDAPServiceImpl implements ExternalAuthClientServ
 
 	@Override
 	public ExternalAuthUserDto logonUser(final String login,
-	                                     final Password password,
-	                                     final String domain) throws UserCantLoginException {
+										 final Password password,
+										 final String domain) throws UserCantLoginException {
 		if (isAvailable() == false) {
 			throw new ExternalAuthErrorCantLoginException();
 		} else if (password == null || password.length() == 0) {
@@ -113,9 +113,9 @@ public class ExternalAuthClientLDAPServiceImpl implements ExternalAuthClientServ
 			controls.setTimeLimit(500);
 
 			final var answer = context.search(
-			        toDC(domain),
-			        configuration.getLdapSearchLogonQuery().replace("<ldapTenantName>", login),
-			        controls);
+					toDC(domain),
+					configuration.getLdapSearchLogonQuery().replace("<ldapTenantName>", login),
+					controls);
 			if (answer.hasMore() == false) {
 				log.error("Can't get LDAP entry for {}", login);
 				throw new UnknownUserCantLoginException();
@@ -129,17 +129,17 @@ public class ExternalAuthClientLDAPServiceImpl implements ExternalAuthClientServ
 			}
 
 			final var userLongName = extractLDAPSearchResultVar(configuration.getLdapCommonName(), attr)
-			        .orElseThrow(() -> new NamingException("Can't get LDAP user CN for " + login));
+					.orElseThrow(() -> new NamingException("Can't get LDAP user CN for " + login));
 			final var userEmail = extractLDAPSearchResultVar(configuration.getLdapMailName(), attr).orElse(null);
 			final var memberOf = extractLDAPSearchResultVars("memberOf", attr)
-			        .map(extractOrganizationalUnits)
-			        .collect(Collectors.toUnmodifiableList());
+					.map(extractOrganizationalUnits)
+					.toList();
 
 			return new ExternalAuthUserDto(login,
-			        domain,
-			        userLongName,
-			        userEmail,
-			        memberOf);
+					domain,
+					userLongName,
+					userEmail,
+					memberOf);
 		} catch (final CommunicationException e) {
 			log.error("Failed to connect to {}: {}", configuration.getHost(), configuration.getPort(), e);
 			throw new ExternalAuthErrorCantLoginException();
@@ -150,7 +150,7 @@ public class ExternalAuthClientLDAPServiceImpl implements ExternalAuthClientServ
 	}
 
 	private Optional<String> extractLDAPSearchResultVar(final String key,
-	                                                    final Attributes attr) {
+														final Attributes attr) {
 		final var item = attr.get(key);
 		if (item == null) {
 			return Optional.empty();
@@ -169,7 +169,7 @@ public class ExternalAuthClientLDAPServiceImpl implements ExternalAuthClientServ
 	}
 
 	private Stream<String> extractLDAPSearchResultVars(final String key,
-	                                                   final Attributes attr) {
+													   final Attributes attr) {
 		final var item = attr.get(key);
 		if (item == null) {
 			return Stream.empty();
@@ -177,13 +177,13 @@ public class ExternalAuthClientLDAPServiceImpl implements ExternalAuthClientServ
 		try {
 			final var size = item.size();
 			return StreamSupport.stream(Spliterators.spliterator(item.getAll().asIterator(), size, Spliterator.ORDERED),
-			        false).map(value -> {
-				        if (value instanceof String == false) {
-					        return String.valueOf(value);
-				        } else {
-					        return (String) value;
-				        }
-			        });
+					false).map(value -> {
+						if (value instanceof String == false) {
+							return String.valueOf(value);
+						} else {
+							return (String) value;
+						}
+					});
 		} catch (final NamingException e) {
 			log.debug("Can't found {} in LDAP datas", key, e);
 		}
@@ -197,21 +197,21 @@ public class ExternalAuthClientLDAPServiceImpl implements ExternalAuthClientServ
 		 */
 		final var entrySplited = ldapEntry.split(",");
 		final var commonName = Arrays.stream(entrySplited)
-		        .filter(dn -> dn.toUpperCase().startsWith("CN="))
-		        .map(dn -> dn.substring(3)).collect(Collectors.joining());
+				.filter(dn -> dn.toUpperCase().startsWith("CN="))
+				.map(dn -> dn.substring(3)).collect(Collectors.joining());
 		final var organizationalUnits = Arrays.stream(entrySplited)
-		        .filter(dn -> dn.toUpperCase().startsWith("OU="))
-		        .map(dn -> dn.substring(3)).collect(Collectors.joining("/", "/", ""));
+				.filter(dn -> dn.toUpperCase().startsWith("OU="))
+				.map(dn -> dn.substring(3)).collect(Collectors.joining("/", "/", ""));
 		final var domain = Arrays.stream(entrySplited)
-		        .filter(dn -> dn.toUpperCase().startsWith("DC="))
-		        .map(dn -> dn.substring(3)).collect(Collectors.joining("."));
+				.filter(dn -> dn.toUpperCase().startsWith("DC="))
+				.map(dn -> dn.substring(3)).collect(Collectors.joining("."));
 		return commonName + " (" + domain + organizationalUnits + ")";
 	};
 
 	private static String toDC(final String domain) {
 		return Arrays.stream(domain.split("\\."))
-		        .filter(entry -> entry.isEmpty() == false)
-		        .collect(Collectors.joining(",DC=", "DC=", ""));
+				.filter(entry -> entry.isEmpty() == false)
+				.collect(Collectors.joining(",DC=", "DC=", ""));
 	}
 
 	@Override

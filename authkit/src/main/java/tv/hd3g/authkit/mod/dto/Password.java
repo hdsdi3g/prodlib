@@ -16,10 +16,26 @@
  */
 package tv.hd3g.authkit.mod.dto;
 
+import static java.lang.Character.CONNECTOR_PUNCTUATION;
+import static java.lang.Character.CURRENCY_SYMBOL;
+import static java.lang.Character.DASH_PUNCTUATION;
+import static java.lang.Character.ENCLOSING_MARK;
+import static java.lang.Character.END_PUNCTUATION;
+import static java.lang.Character.FINAL_QUOTE_PUNCTUATION;
+import static java.lang.Character.INITIAL_QUOTE_PUNCTUATION;
+import static java.lang.Character.MATH_SYMBOL;
+import static java.lang.Character.MODIFIER_SYMBOL;
+import static java.lang.Character.OTHER_PUNCTUATION;
+import static java.lang.Character.OTHER_SYMBOL;
+import static java.lang.Character.START_PUNCTUATION;
+
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -159,11 +175,11 @@ public class Password implements CharSequence {
 	 * See Arrays.java (from OpenJDK)
 	 */
 	private static boolean equalsInsensitive(final char[] l,
-	                                         final int lFromIndex,
-	                                         final int lToIndex,
-	                                         final char[] r,
-	                                         final int rFromIndex,
-	                                         final int rToIndex) {
+											 final int lFromIndex,
+											 final int lToIndex,
+											 final char[] r,
+											 final int rFromIndex,
+											 final int rToIndex) {
 		rangeCheck(l.length, lFromIndex, lToIndex);
 		rangeCheck(r.length, rFromIndex, rToIndex);
 
@@ -226,8 +242,8 @@ public class Password implements CharSequence {
 	}
 
 	public void checkComplexity(final int minSize,
-	                            final boolean mustHaveSpecialChars,
-	                            final String genericTermPresenceToIgnore) throws PasswordComplexityException {
+								final boolean mustHaveSpecialChars,
+								final String genericTermPresenceToIgnore) throws PasswordComplexityException {
 		if (value[0] == '\0') {
 			throw new IllegalStateException(REUSE_ERROR);
 		}
@@ -266,20 +282,36 @@ public class Password implements CharSequence {
 		}
 	}
 
+	private static final Set<Integer> specialCharList = Stream.of(
+			CONNECTOR_PUNCTUATION,
+			CURRENCY_SYMBOL,
+			DASH_PUNCTUATION,
+			ENCLOSING_MARK,
+			END_PUNCTUATION,
+			FINAL_QUOTE_PUNCTUATION,
+			INITIAL_QUOTE_PUNCTUATION,
+			MATH_SYMBOL,
+			MODIFIER_SYMBOL,
+			OTHER_PUNCTUATION,
+			OTHER_SYMBOL,
+			START_PUNCTUATION)
+			.map(b -> (int) b)// NOSONAR S1612
+			.collect(Collectors.toSet());
+
 	public static void checkSomeComplexity(final int minSize,
-	                                       final boolean mustHaveSpecialChars,
-	                                       final char[] value) throws PasswordComplexityException {
+										   final boolean mustHaveSpecialChars,
+										   final char[] value) throws PasswordComplexityException {
 
 		if (IntStream.range(0, value.length).mapToObj(i -> value[i]).noneMatch(Character::isLowerCase) ||
-		    IntStream.range(0, value.length).mapToObj(i -> value[i]).noneMatch(Character::isUpperCase)) {
+			IntStream.range(0, value.length).mapToObj(i -> value[i]).noneMatch(Character::isUpperCase)) {
 			throw new PasswordTooSimpleException("Proposed password don't mix upper and lower case");
 		}
 
 		final var lenWOSpaces = IntStream.range(0, value.length).mapToObj(i -> value[i])
-		        .filter(ch -> Character.isSpaceChar(ch) == false).count();
+				.filter(ch -> Character.isSpaceChar(ch) == false).count();
 		if (lenWOSpaces < minSize) {
 			throw new PasswordTooShortException(
-			        "Spaces in proposed password are not counted for length validation constraint");
+					"Spaces in proposed password are not counted for length validation constraint");
 		}
 		final var valueWOSpaces = new char[(int) lenWOSpaces];
 
@@ -292,44 +324,27 @@ public class Password implements CharSequence {
 
 		if (mustHaveSpecialChars) {
 			final var specialCharsPresence = IntStream.range(0, valueWOSpaces.length)
-			        .mapToObj(i -> valueWOSpaces[i])
-			        .anyMatch(ch -> {
-				        switch (Character.getType(ch)) {
-				        case Character.CONNECTOR_PUNCTUATION:
-				        case Character.CURRENCY_SYMBOL:
-				        case Character.DASH_PUNCTUATION:
-				        case Character.ENCLOSING_MARK:
-				        case Character.END_PUNCTUATION:
-				        case Character.FINAL_QUOTE_PUNCTUATION:
-				        case Character.INITIAL_QUOTE_PUNCTUATION:
-				        case Character.MATH_SYMBOL:
-				        case Character.MODIFIER_SYMBOL:
-				        case Character.OTHER_PUNCTUATION:
-				        case Character.OTHER_SYMBOL:
-				        case Character.START_PUNCTUATION:
-					        return true;
-				        default:
-					        return false;
-				        }
-			        });
+					.mapToObj(i -> valueWOSpaces[i])
+					.map(Character::getType)
+					.anyMatch(specialCharList::contains);
 			if (specialCharsPresence == false) {
 				Arrays.fill(valueWOSpaces, '\0');
 				throw new PasswordTooSimpleException(
-				        "Proposed password must at least include a special char, for this specific account.");
+						"Proposed password must at least include a special char, for this specific account.");
 			}
 		}
 
 		if (containCharArray(valueWOSpaces, "abcdefghijklmnopqrstuvwxyz".toCharArray()) ||
-		    containCharArray(valueWOSpaces, "qwertyuiopasdfghjklzxcvbnm".toCharArray()) ||
-		    containCharArray(valueWOSpaces, "azertyuiopqsdfghjklmwxcvbn".toCharArray())) {
+			containCharArray(valueWOSpaces, "qwertyuiopasdfghjklzxcvbnm".toCharArray()) ||
+			containCharArray(valueWOSpaces, "azertyuiopqsdfghjklmwxcvbn".toCharArray())) {
 			Arrays.fill(valueWOSpaces, '\0');
 			throw new PasswordTooSimpleException(
-			        "Proposed password can't include a too simple abcdef/qwerty string sequence.");
+					"Proposed password can't include a too simple abcdef/qwerty string sequence.");
 		}
 	}
 
 	public void checkComplexity(final int minSize,
-	                            final boolean mustHaveSpecialChars) throws PasswordComplexityException {
+								final boolean mustHaveSpecialChars) throws PasswordComplexityException {
 		if (value[0] == '\0') {
 			throw new IllegalStateException(REUSE_ERROR);
 		}

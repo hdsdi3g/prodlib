@@ -16,8 +16,6 @@
  */
 package tv.hd3g.authkit.mod.dto.validated;
 
-import static java.util.stream.Collectors.toUnmodifiableList;
-
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -34,8 +32,8 @@ public class ListStringDto {
 
 	public List<String> getList() {
 		return list.stream()
-		        .map(LogSanitizer::sanitize)
-		        .collect(toUnmodifiableList());
+				.map(LogSanitizer::sanitize)
+				.toList();
 	}
 
 	public void setList(final List<String> list) {

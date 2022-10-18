@@ -35,13 +35,13 @@ public class SelfAutoRestDocEndpointsListener implements ApplicationListener<App
 	}
 
 	@Override
-	public void onApplicationEvent(final ApplicationEvent event) {
-		if (event instanceof ContextRefreshedEvent) {
-			((ContextRefreshedEvent) event).getApplicationContext()
-			        .getBean(RequestMappingHandlerMapping.class)
-			        .getHandlerMethods().values().stream()
-			        .map(HandlerMethod::getBeanType)
-			        .forEach(selfAutoRESTDoc::registerClass);
+	public void onApplicationEvent(final ApplicationEvent aEvent) {
+		if (aEvent instanceof final ContextRefreshedEvent event) {
+			event.getApplicationContext()
+					.getBean(RequestMappingHandlerMapping.class)
+					.getHandlerMethods().values().stream()
+					.map(HandlerMethod::getBeanType)
+					.forEach(selfAutoRESTDoc::registerClass);
 		}
 	}
 

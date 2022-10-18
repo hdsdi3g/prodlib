@@ -50,12 +50,12 @@ class RESTEntryPoint {
 	 */
 	public String getVerbs() {
 		return Stream.concat(
-		        controller.getAnnotations().getMappings().stream()
-		                .flatMap(mapping -> mapping.getRequestMethods().stream()),
-		        method.getAnnotations().getMappings().stream()
-		                .flatMap(mapping -> mapping.getRequestMethods().stream()))
-		        .map(Enum::name)
-		        .collect(Collectors.joining(", "));
+				controller.getAnnotations().getMappings().stream()
+						.flatMap(mapping -> mapping.getRequestMethods().stream()),
+				method.getAnnotations().getMappings().stream()
+						.flatMap(mapping -> mapping.getRequestMethods().stream()))
+				.map(Enum::name)
+				.collect(Collectors.joining(", "));
 	}
 
 	/**
@@ -63,14 +63,14 @@ class RESTEntryPoint {
 	 */
 	public String getRights() {
 		final Function<Set<String>, String> andJoin = checkBefore -> checkBefore.stream()
-		        .collect(Collectors.joining(" & "));
+				.collect(Collectors.joining(" & "));
 
 		final var controllerCB = controller.getAnnotations().getAllCheckBefore().stream()
-		        .map(andJoin)
-		        .collect(Collectors.joining(" | "));
+				.map(andJoin)
+				.collect(Collectors.joining(" | "));
 		final var methodCB = method.getAnnotations().getAllCheckBefore().stream()
-		        .map(andJoin)
-		        .collect(Collectors.joining(" | "));
+				.map(andJoin)
+				.collect(Collectors.joining(" | "));
 
 		if (controllerCB.isEmpty() && methodCB.isEmpty()) {
 			return "";
@@ -86,23 +86,23 @@ class RESTEntryPoint {
 	 */
 	private static String ensurePaths(final String... values) {
 		return Arrays.stream(values)
-		        .filter(v -> v != null && v.isBlank() == false)
-		        .map(String::trim)
-		        .map(v -> {
-			        if (v.equals("/")) {
-				        return "";
-			        }
-			        var start = 0;
-			        if (v.startsWith("/")) {
-				        start = 1;
-			        }
-			        var ends = v.length();
-			        if (v.endsWith("/")) {
-				        ends = v.length() - 1;
-			        }
-			        return v.substring(start, ends);
-		        })
-		        .collect(Collectors.joining("/", "/", ""));
+				.filter(v -> v != null && v.isBlank() == false)
+				.map(String::trim)
+				.map(v -> {
+					if (v.equals("/")) {
+						return "";
+					}
+					var start = 0;
+					if (v.startsWith("/")) {
+						start = 1;
+					}
+					var ends = v.length();
+					if (v.endsWith("/")) {
+						ends = v.length() - 1;
+					}
+					return v.substring(start, ends);
+				})
+				.collect(Collectors.joining("/", "/", ""));
 	}
 
 	/**
@@ -110,18 +110,18 @@ class RESTEntryPoint {
 	 */
 	private List<String> getAllRequestValuePaths() {
 		final Function<MappingAnnotation, String> getPathsFromControllers = controllerAnnotations -> controllerAnnotations
-		        .getRequestValuePath().orElse("/");
+				.getRequestValuePath().orElse("/");
 
 		final Function<String, Stream<String>> flatCtrlPathMethodsPathsMapper = globalPath -> {
 			final Function<MappingAnnotation, String> getFullPathMapper = methodAnnotations -> ensurePaths(
-			        globalPath, methodAnnotations.getRequestValuePath().orElse(""));
+					globalPath, methodAnnotations.getRequestValuePath().orElse(""));
 			return method.getAnnotations().getMappings().stream().map(getFullPathMapper);
 		};
 
 		return controller.getAnnotations().getMappings().stream()
-		        .map(getPathsFromControllers)
-		        .flatMap(flatCtrlPathMethodsPathsMapper)
-		        .collect(Collectors.toUnmodifiableList());
+				.map(getPathsFromControllers)
+				.flatMap(flatCtrlPathMethodsPathsMapper)
+				.toList();
 	}
 
 	/**
@@ -134,21 +134,21 @@ class RESTEntryPoint {
 		}
 
 		final var queryParameters = method.getUrlQueryParameters().stream()
-		        .map(qp -> {
-			        final Supplier<String> getTypeName = () -> qp.getName() + "=<" + qp.getType().getSimpleName() + ">";
-			        return Optional.ofNullable(qp.getDefaultValue())
-			                .map(defaultValue -> qp.getName() + "=" + defaultValue)
-			                .orElseGet(getTypeName);
-		        })
-		        .collect(Collectors.joining("&", "?", ""));
+				.map(qp -> {
+					final Supplier<String> getTypeName = () -> qp.getName() + "=<" + qp.getType().getSimpleName() + ">";
+					return Optional.ofNullable(qp.getDefaultValue())
+							.map(defaultValue -> qp.getName() + "=" + defaultValue)
+							.orElseGet(getTypeName);
+				})
+				.collect(Collectors.joining("&", "?", ""));
 		return allRequestValuePathsStream.collect(Collectors.joining(", ", "", queryParameters));
 	}
 
 	private Stream<String> flatMapFromAnnotationMappings(final Function<MappingAnnotation, Stream<String>> mapper) {
 		return Stream.concat(
-		        controller.getAnnotations().getMappings().stream().flatMap(mapper),
-		        method.getAnnotations().getMappings().stream().flatMap(mapper))
-		        .filter(n -> n.isBlank() == false);
+				controller.getAnnotations().getMappings().stream().flatMap(mapper),
+				method.getAnnotations().getMappings().stream().flatMap(mapper))
+				.filter(n -> n.isBlank() == false);
 	}
 
 	public String getRequestNames() {
@@ -172,15 +172,15 @@ class RESTEntryPoint {
 	 */
 	public Map<String, String> getUrlParameters() {
 		return method.getUrlParameters().stream()
-		        .collect(Collectors.toMap(URLVariable::getName, k -> {
-			        var opt = "";
-			        if (k.isRequired() == false) {
-				        opt = " not required";
-			        }
-			        return k.getType().getSimpleName() +
-			               Optional.ofNullable(k.getDefaultValue()).map(v -> " (" + v + ") ").orElse("") +
-			               opt;
-		        }, (v1, v2) -> v1, LinkedHashMap::new));
+				.collect(Collectors.toMap(URLVariable::getName, k -> {
+					var opt = "";
+					if (k.isRequired() == false) {
+						opt = " not required";
+					}
+					return k.getType().getSimpleName() +
+						   Optional.ofNullable(k.getDefaultValue()).map(v -> " (" + v + ") ").orElse("") +
+						   opt;
+				}, (v1, v2) -> v1, LinkedHashMap::new));
 	}
 
 	private String dtoFormatter(final DtoItem item) {
@@ -198,7 +198,7 @@ class RESTEntryPoint {
 				sb.append("{");
 				sb.append(System.lineSeparator());
 				sb.append(item.getSubItems().stream().map(this::dtoFormatter)
-				        .collect(Collectors.joining(System.lineSeparator())));
+						.collect(Collectors.joining(System.lineSeparator())));
 				sb.append(System.lineSeparator());
 				sb.append(prefix);
 				sb.append("}");
@@ -215,7 +215,7 @@ class RESTEntryPoint {
 			sb.append("{");
 			sb.append(System.lineSeparator());
 			sb.append(item.getSubItems().stream().map(this::dtoFormatter)
-			        .collect(Collectors.joining(System.lineSeparator())));
+					.collect(Collectors.joining(System.lineSeparator())));
 			sb.append(System.lineSeparator());
 			sb.append(prefix);
 			sb.append("}");
@@ -239,8 +239,8 @@ class RESTEntryPoint {
 			return Optional.empty();
 		}
 		return Optional.ofNullable(bodyRequest.get().getDtoContent().stream()
-		        .map(this::dtoFormatter)
-		        .collect(Collectors.toUnmodifiableList()));
+				.map(this::dtoFormatter)
+				.toList());
 	}
 
 	public Optional<List<String>> getDTOResponse() {
@@ -249,8 +249,8 @@ class RESTEntryPoint {
 			return Optional.empty();
 		}
 		return Optional.ofNullable(methodReturn.get().getDtoContent().stream()
-		        .map(this::dtoFormatter)
-		        .collect(Collectors.toUnmodifiableList()));
+				.map(this::dtoFormatter)
+				.toList());
 	}
 
 	public String getControllerSimpleName() {
@@ -264,13 +264,13 @@ class RESTEntryPoint {
 			return ctrl.substring(0, hash - 1);
 		}
 		return method.getControllerFile()
-		        .map(cFile -> {
-			        final var f = cFile.getAbsolutePath();
-			        final var relative = new File("").getAbsolutePath();
-			        return f.substring(relative.length() + 1);
-		        })
-		        .map(f -> f.replace('\\', '/'))
-		        .orElse(ctrl);
+				.map(cFile -> {
+					final var f = cFile.getAbsolutePath();
+					final var relative = new File("").getAbsolutePath();
+					return f.substring(relative.length() + 1);
+				})
+				.map(f -> f.replace('\\', '/'))
+				.orElse(ctrl);
 	}
 
 	public String getMethodName() {

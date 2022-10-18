@@ -16,8 +16,6 @@
  */
 package tv.hd3g.transfertfiles.sftp;
 
-import static java.util.stream.Collectors.toUnmodifiableList;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -59,10 +57,10 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 	}
 
 	public SFTPFileSystem(final InetAddress host,
-	                      final int port,
-	                      final String username,
-	                      final String basePath,
-	                      final boolean absoluteBasePath) {
+						  final int port,
+						  final String username,
+						  final String basePath,
+						  final boolean absoluteBasePath) {
 		super(basePath);
 		client = new SSHClient();
 		wasConnected = false;
@@ -77,7 +75,7 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 		log.debug("Init ssh client to {}", this);
 
 		final var defaultKhFile = System.getProperty("user.home")
-		                          + File.separator + ".ssh" + File.separator + "known_hosts";
+								  + File.separator + ".ssh" + File.separator + "known_hosts";
 		final var knownHostFile = new File(System.getProperty("ssh.knownhosts", defaultKhFile));
 		try {
 			FileUtils.forceMkdirParent(knownHostFile);
@@ -151,10 +149,10 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 			throw new UncheckedIOException(new FileNotFoundException(privateKey.getPath()));
 		} else if (privateKey.isDirectory()) {
 			authKeys.addAll(Stream.of("id_rsa", "id_dsa", "id_ed25519", "id_ecdsa")
-			        .map(f -> new File(privateKey, f))
-			        .filter(File::exists)
-			        .map(fPrivateKey -> loadPrivateKey(fPrivateKey, keyPassword))
-			        .collect(toUnmodifiableList()));
+					.map(f -> new File(privateKey, f))
+					.filter(File::exists)
+					.map(fPrivateKey -> loadPrivateKey(fPrivateKey, keyPassword))
+					.toList());
 		} else {
 			authKeys.add(loadPrivateKey(privateKey, keyPassword));
 		}
@@ -188,7 +186,7 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 		}
 		if (timeoutDuration > Integer.MAX_VALUE) {
 			throw new IllegalArgumentException("Can't set a timeoutDuration > Integer.MAX_VALUE: "
-			                                   + timeoutDuration);
+											   + timeoutDuration);
 		}
 	}
 
@@ -268,10 +266,10 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 		if (isAvaliable() == false) {
 			if (wasConnected == false) {
 				throw new UncheckedIOException(
-				        new IOException("Non-active SSH client, try to connect before"));
+						new IOException("Non-active SSH client, try to connect before"));
 			} else {
 				throw new UncheckedIOException(
-				        new IOException("SSH client was disconnected. Please retry with another instance."));
+						new IOException("SSH client was disconnected. Please retry with another instance."));
 			}
 		}
 		final var aPath = getPathFromRelative(path);
@@ -307,8 +305,8 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 		}
 		final var other = (SFTPFileSystem) obj;
 		return Objects.equals(host, other.host)
-		       && port == other.port
-		       && Objects.equals(username, other.username);
+			   && port == other.port
+			   && Objects.equals(username, other.username);
 	}
 
 	@Override
