@@ -41,6 +41,9 @@ import javax.naming.ldap.LdapContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.owasp.esapi.Encoder;
+import org.owasp.esapi.PropNames;
+import org.owasp.esapi.reference.DefaultEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +62,11 @@ import tv.hd3g.authkit.mod.exception.UserCantLoginException.UnknownUserCantLogin
 @Service
 public class ExternalAuthClientLDAPServiceImpl implements ExternalAuthClientService {
 	private static Logger log = LogManager.getLogger();
+	private static final Encoder encoder;
+	static {
+		System.setProperty(PropNames.DISCARD_LOGSPECIAL, "true");
+		encoder = DefaultEncoder.getInstance();
+	}
 
 	@Autowired
 	private ExternalLDAP externalLDAP;
@@ -78,9 +86,12 @@ public class ExternalAuthClientLDAPServiceImpl implements ExternalAuthClientServ
 	}
 
 	@Override
-	public ExternalAuthUserDto logonUser(final String login,
+	public ExternalAuthUserDto logonUser(final String unProtectedlogin,
 										 final Password password,
-										 final String domain) throws UserCantLoginException {
+										 final String unProtectedDomain) throws UserCantLoginException {
+		final var domain = encoder.encodeForDN(unProtectedDomain);
+		final var login = encoder.encodeForLDAP(unProtectedlogin);
+
 		if (isAvailable() == false) {
 			throw new ExternalAuthErrorCantLoginException();
 		} else if (password == null || password.length() == 0) {

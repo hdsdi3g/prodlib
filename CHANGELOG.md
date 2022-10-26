@@ -36,6 +36,10 @@ Remove `SendMailToFileService`, replaced by `FlatJavaMailSender`.
 
 Add Jackson annotations and serializers for `AbstractFile`, `AbstractFileSystem` and `CachedFileAttributes`.
 
+### AuthKit
+
+Correct Security warning https://github.com/hdsdi3g/prodlib/security/code-scanning/5
+
 ## 10.0.1
 
 Update Apache Commons Text to 1.10.0 (security) #49

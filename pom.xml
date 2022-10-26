@@ -59,6 +59,7 @@
         <opencsv.version>5.6</opencsv.version>
         <spoon.version>10.1.1</spoon.version>
         <j2html.version>1.6.0</j2html.version>
+        <esapi.version>2.5.0.0</esapi.version>
         <log4j2.version>2.17.2</log4j2.version>
         <maven.gpg.version>3.0.1</maven.gpg.version>
         <gpg.skip>true</gpg.skip>
