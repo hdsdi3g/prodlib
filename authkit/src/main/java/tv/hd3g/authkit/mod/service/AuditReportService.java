@@ -93,16 +93,18 @@ public interface AuditReportService {
 	                                               Duration sinceTime);
 
 	public enum RejectLoginCause {
-		USER_NOT_FOUND("Can't found user from login name and realm"),
-		MISSING_PASSWORD("User has not send a password"),
-		EMPTY_PASSWORD("User has send an empty password"),
-		INVALID_PASSWORD("User has send an INVALID password"),
-		DISABLED_LOGIN("User login is set to disabled");
+		USER_NOT_FOUND("Can't found user from login name and realm", false),
+		MISSING_PASSWORD("User has not send a password", true),
+		EMPTY_PASSWORD("User has send an empty password", true),
+		INVALID_PASSWORD("User has send an INVALID password", false),
+		DISABLED_LOGIN("User login is set to disabled", false);
 
 		private final String cause;
+		private final boolean noPasswordUser;
 
-		RejectLoginCause(final String cause) {
+		RejectLoginCause(final String cause, final boolean noPasswordUser) {
 			this.cause = cause;
+			this.noPasswordUser = noPasswordUser;
 		}
 
 		@Override
@@ -110,5 +112,8 @@ public interface AuditReportService {
 			return cause;
 		}
 
+		public boolean isNoPasswordUser() {
+			return noPasswordUser;
+		}
 	}
 }

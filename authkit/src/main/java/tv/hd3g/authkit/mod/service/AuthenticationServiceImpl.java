@@ -241,10 +241,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		final var checkPasswordBadResult = checkPassword(form.getUserpassword(), credential);
 		if (checkPasswordBadResult.isPresent()) {
 			auditReportService.onRejectLogin(request, checkPasswordBadResult.get(), realm, form.getUserlogin());
-			switch (checkPasswordBadResult.get()) {
-			case MISSING_PASSWORD, EMPTY_PASSWORD:
+			if (checkPasswordBadResult.get().isNoPasswordUser()) {
 				throw new NoPasswordUserCantLoginException();
-			default:
+			} else {
 				credential.setLogontrial(credential.getLogontrial() + 1);
 				credentialRepository.save(credential);
 				throw new BadPasswordUserCantLoginException();
