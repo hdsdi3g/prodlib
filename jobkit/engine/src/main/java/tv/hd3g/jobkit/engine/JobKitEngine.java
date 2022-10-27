@@ -31,7 +31,7 @@ public class JobKitEngine implements JobTrait {
 		if (supervisableManager == null) {
 			spooler = new Spooler(executionEvent, SupervisableManager.voidSupervisableEvents());
 		} else {
-			spooler = new Spooler(executionEvent, supervisableManager.getLifeCycle());
+			spooler = new Spooler(executionEvent, supervisableManager);
 		}
 	}
 

@@ -84,17 +84,9 @@ class SupervisableManagerTest {
 	}
 
 	@Test
-	void testGetLifeCycle() {
-		final var lf = s.getLifeCycle();
-		assertNotNull(lf);
-	}
-
-	@Test
 	void testGetLifeCycle_extractContext() {
-		final var lf = s.getLifeCycle();
-
 		when(objectMapper.valueToTree(businessObject)).thenReturn(context);
-		final var result = lf.extractContext(businessObject);
+		final var result = s.extractContext(businessObject);
 		verify(objectMapper, times(1)).valueToTree(businessObject);
 		assertEquals(context, result);
 	}
@@ -102,31 +94,26 @@ class SupervisableManagerTest {
 	@Test
 	void testGetLifeCycle_extractContext_defaultObjectMapper() {
 		s = new SupervisableManager(name);
-		final var lf = s.getLifeCycle();
 
 		final var text = faker.artist().name();
-		final var result = lf.extractContext(List.of(text));
+		final var result = s.extractContext(List.of(text));
 		assertEquals("[\"" + text + "\"]", result.toString());
 	}
 
 	@Test
 	void testGetBusinessObject() throws JsonProcessingException, IllegalArgumentException {
-		final var lf = s.getLifeCycle();
-
 		when(objectMapper.treeToValue(context, Object.class)).thenReturn(businessObject);
-		final var result = lf.getBusinessObject(context, Object.class);
+		final var result = s.getBusinessObject(context, Object.class);
 		verify(objectMapper, times(1)).treeToValue(context, Object.class);
 		assertEquals(businessObject, result);
 	}
 
 	@Test
 	void testGetLifeCycle_onEnd() {
-		final var lf = s.getLifeCycle();
-
 		when(supervisable.getEndEvent(oError, name)).thenReturn(ofNullable(supervisableEndEvent));
 		s.registerOnEndEventConsumer(eventConsumer);
-
-		lf.onEnd(supervisable, oError);
+		
+		s.onEnd(supervisable, oError);
 
 		verify(eventConsumer, times(1)).afterProcess(supervisableEndEvent);
 		verify(supervisable, times(1)).getEndEvent(oError, name);
@@ -134,13 +121,12 @@ class SupervisableManagerTest {
 
 	@Test
 	void testGetLifeCycle_onEnd_Exception() {
-		final var lf = s.getLifeCycle();
 
 		when(supervisable.getEndEvent(oError, name)).thenReturn(ofNullable(supervisableEndEvent));
 		s.registerOnEndEventConsumer(eventConsumer);
 
 		Mockito.doThrow(new IllegalStateException()).when(eventConsumer).afterProcess(supervisableEndEvent);
-		lf.onEnd(supervisable, oError);
+		s.onEnd(supervisable, oError);
 
 		verify(eventConsumer, times(1)).afterProcess(supervisableEndEvent);
 		verify(supervisable, times(1)).getEndEvent(oError, name);
@@ -149,7 +135,7 @@ class SupervisableManagerTest {
 	@Test
 	void testGetLifeCycle_onEnd_close() {
 		s.close();
-		s.getLifeCycle().onEnd(supervisable, oError);
+		s.onEnd(supervisable, oError);
 		verify(supervisable, times(1)).getEndEvent(oError, name);
 	}
 
@@ -170,10 +156,8 @@ class SupervisableManagerTest {
 
 	@Test
 	void testGetLifeCycle_onEnd_retention() {
-		final var lf = s.getLifeCycle();
-
 		when(supervisable.getEndEvent(oError, name)).thenReturn(ofNullable(supervisableEndEvent));
-		lf.onEnd(supervisable, oError);
+		s.onEnd(supervisable, oError);
 		s.registerOnEndEventConsumer(eventConsumer);
 
 		verify(eventConsumer, times(1)).afterProcess(supervisableEndEvent);
@@ -182,11 +166,9 @@ class SupervisableManagerTest {
 
 	@Test
 	void testGetLifeCycle_onEnd_limited_retention() {
-		final var lf = s.getLifeCycle();
-
 		when(supervisable.getEndEvent(oError, name)).thenReturn(ofNullable(supervisableEndEvent));
-		lf.onEnd(supervisable, oError);
-		lf.onEnd(supervisable, oError);
+		s.onEnd(supervisable, oError);
+		s.onEnd(supervisable, oError);
 		s.registerOnEndEventConsumer(eventConsumer);
 
 		verify(eventConsumer, times(1)).afterProcess(supervisableEndEvent);
@@ -196,15 +178,13 @@ class SupervisableManagerTest {
 	@Test
 	void testGetLifeCycle_onEnd_non_limited_retention() {
 		final var iterations = faker.random().nextInt(5, 100);
-
 		s = new SupervisableManager(name, objectMapper, iterations);
-		final var lf = s.getLifeCycle();
 
 		when(supervisable.getEndEvent(oError, name)).thenReturn(ofNullable(supervisableEndEvent));
 		for (var pos = 0; pos < iterations; pos++) {
-			lf.onEnd(supervisable, oError);
+			s.onEnd(supervisable, oError);
 		}
-		lf.onEnd(supervisable, oError);
+		s.onEnd(supervisable, oError);
 
 		s.registerOnEndEventConsumer(eventConsumer);
 

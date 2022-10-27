@@ -23,6 +23,7 @@ import tv.hd3g.jobkit.engine.BackgroundServiceEvent;
 import tv.hd3g.jobkit.engine.ExecutionEvent;
 import tv.hd3g.jobkit.engine.JobKitEngine;
 import tv.hd3g.jobkit.engine.SupervisableManager;
+import tv.hd3g.jobkit.engine.SupervisableServiceSupplier;
 
 @Configuration
 public class JobKitSetup {
@@ -59,6 +60,11 @@ public class JobKitSetup {
 				.orElse("");
 
 		return new SupervisableManager((appName + " " + env).trim(), jacksonObjectMapper, maxEndEventsRetention);
+	}
+
+	@Bean
+	public SupervisableServiceSupplier getSupervisableSupplier(final SupervisableManager supervisableManager) {
+		return new SupervisableServiceSupplier(supervisableManager);
 	}
 
 	@Bean

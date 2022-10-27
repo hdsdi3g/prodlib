@@ -38,6 +38,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <java.version>17</java.version>
+        <aspectj-java.version>17</aspectj-java.version>
 
         <mockito.version>4.4.0</mockito.version>
         <datafaker.version>1.6.0</datafaker.version>
@@ -61,10 +62,13 @@
         <j2html.version>1.6.0</j2html.version>
         <esapi.version>2.5.0.0</esapi.version>
         <log4j2.version>2.17.2</log4j2.version>
+        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
         <maven.gpg.version>3.0.1</maven.gpg.version>
         <gpg.skip>true</gpg.skip>
         <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.12</nexus-staging-maven-plugin.version>
+        <aspectj-maven-plugin.version>1.14.0</aspectj-maven-plugin.version>
         <maven.jacoco.version>0.8.8</maven.jacoco.version>
         <sonar.version>3.9.1.2184</sonar.version>
 
@@ -251,11 +255,8 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version><!--$NO-MVN-MAN-VER$-->
                 <configuration>
                     <release>${maven.compiler.release}</release>
                 </configuration>
@@ -263,6 +264,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version><!--$NO-MVN-MAN-VER$-->
             </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>

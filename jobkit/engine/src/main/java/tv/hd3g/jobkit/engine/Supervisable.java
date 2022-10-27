@@ -17,7 +17,6 @@
 package tv.hd3g.jobkit.engine;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
-import static tv.hd3g.jobkit.engine.FlatJobKitEngine.manuallyRegistedSupervisables;
 import static tv.hd3g.jobkit.engine.SupervisableEventMark.INTERNAL_STATE_CHANGE;
 import static tv.hd3g.jobkit.engine.SupervisableEventMark.SECURITY;
 import static tv.hd3g.jobkit.engine.SupervisableEventMark.TRIVIAL;
@@ -48,6 +47,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class Supervisable {
 	private static Logger log = LogManager.getLogger();
 
+	static final ThreadLocal<Supervisable> manuallyRegistedSupervisables = new ThreadLocal<>();
+
 	public static final Supervisable getSupervisable() {
 		final var t = Thread.currentThread();
 		if (t instanceof final SpoolJobStatus status) {
@@ -59,9 +60,6 @@ public class Supervisable {
 				throw new IllegalThreadStateException("Can't extract Supervisable, current Thread " + t.getName()
 													  + " is not a SpoolJobStatus: " + t.getClass().getName());
 			} else {
-				/**
-				 * Should used only in FlatJobKitEngine
-				 */
 				return manually;
 			}
 		}

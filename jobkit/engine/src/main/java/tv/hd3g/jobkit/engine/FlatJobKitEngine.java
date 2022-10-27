@@ -16,6 +16,8 @@
  */
 package tv.hd3g.jobkit.engine;
 
+import static tv.hd3g.jobkit.engine.Supervisable.manuallyRegistedSupervisables;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,11 +30,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class FlatJobKitEngine extends JobKitEngine {
+	private static final Logger log = LogManager.getLogger();
 	private static final String AFTER = "AFTER ";
 
-	static final ThreadLocal<Supervisable> manuallyRegistedSupervisables = new ThreadLocal<>();
-
-	private static final Logger log = LogManager.getLogger();
 	private final FlatScheduledExecutorService flatShExecutor;
 	private final List<SupervisableEndEvent> endEvents;
 	private final FlatSupervisableEvents supervisableEvents;

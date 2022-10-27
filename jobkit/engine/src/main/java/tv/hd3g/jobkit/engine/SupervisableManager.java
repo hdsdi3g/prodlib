@@ -31,12 +31,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class SupervisableManager {
+public class SupervisableManager implements SupervisableEvents {
 	private static Logger log = LogManager.getLogger();
 
 	private final String name;
 	private final ObjectMapper objectMapper;
-	private final LifeCycle lifeCycle;
 	private final AtomicBoolean shutdown;
 	private final Set<SupervisableOnEndEventConsumer> onEndEventConsumers;
 	private final ArrayDeque<SupervisableEndEvent> lastEndEvents;
@@ -45,7 +44,6 @@ public class SupervisableManager {
 	public SupervisableManager(final String name, final ObjectMapper objectMapper, final int maxEndEventsRetention) {
 		this.name = Objects.requireNonNull(name, "\"name\" can't to be null");
 		this.objectMapper = Objects.requireNonNull(objectMapper, "\"objectMapper\" can't to be null");
-		lifeCycle = new LifeCycle();
 		shutdown = new AtomicBoolean(false);
 		onEndEventConsumers = Collections.synchronizedSet(new HashSet<>());
 		this.maxEndEventsRetention = maxEndEventsRetention;
@@ -57,7 +55,7 @@ public class SupervisableManager {
 	}
 
 	public SupervisableContextExtractor createContextExtractor(final SupervisableEndEvent event) {
-		return new SupervisableContextExtractor(lifeCycle, event);
+		return new SupervisableContextExtractor(this, event);
 	}
 
 	static SupervisableEvents voidSupervisableEvents() {
@@ -65,10 +63,6 @@ public class SupervisableManager {
 		 * Do nothing
 		 */
 		return new SupervisableEvents() {};
-	}
-
-	SupervisableEvents getLifeCycle() {
-		return lifeCycle;
 	}
 
 	void close() {
@@ -87,56 +81,49 @@ public class SupervisableManager {
 		}
 	}
 
-	class LifeCycle implements SupervisableEvents {
+	@Override
+	public void onEnd(final Supervisable supervisable, final Optional<Exception> oError) {
+		final var oEndEvent = supervisable.getEndEvent(oError, name);
+		if (oEndEvent.isEmpty()) {
+			log.trace("Supervisable is empty");
+			return;
+		}
+		final var endEvent = oEndEvent.get();
 
-		private LifeCycle() {
+		if (shutdown.get()) {
+			log.error("Can't manage event [onEnd/{}] on a closed SupervisableManager", supervisable);
+			return;
+		}
+		log.trace("Queue end event for {}", supervisable);
+
+		synchronized (lastEndEvents) {
+			while (lastEndEvents.size() >= maxEndEventsRetention) {
+				lastEndEvents.pollLast();
+			}
+			lastEndEvents.push(endEvent);
 		}
 
-		@Override
-		public void onEnd(final Supervisable supervisable, final Optional<Exception> oError) {
-			final var oEndEvent = supervisable.getEndEvent(oError, name);
-			if (oEndEvent.isEmpty()) {
-				log.trace("Supervisable is empty");
-				return;
-			}
-			final var endEvent = oEndEvent.get();
-
-			if (shutdown.get()) {
-				log.error("Can't manage event [onEnd/{}] on a closed SupervisableManager", supervisable);
-				return;
-			}
-			log.trace("Queue end event for {}", supervisable);
-
-			synchronized (lastEndEvents) {
-				while (lastEndEvents.size() >= maxEndEventsRetention) {
-					lastEndEvents.pollLast();
-				}
-				lastEndEvents.push(endEvent);
-			}
-
-			try {
-				onEndEventConsumers.forEach(event -> event.afterProcess(endEvent));
-			} catch (final Exception e) {
-				log.error("Can't queue end event", e);
-			}
+		try {
+			onEndEventConsumers.forEach(event -> event.afterProcess(endEvent));
+		} catch (final Exception e) {
+			log.error("Can't queue end event", e);
 		}
+	}
 
-		@Override
-		public JsonNode extractContext(final Object businessObject) {
-			log.trace("Extract {} / {}...", businessObject, businessObject.getClass().getName());
-			final var result = objectMapper.valueToTree(businessObject);
-			log.trace("...extract result {} / {}: {}", businessObject, businessObject.getClass().getName(), result);
-			return result;
-		}
+	@Override
+	public JsonNode extractContext(final Object businessObject) {
+		log.trace("Extract {} / {}...", businessObject, businessObject.getClass().getName());
+		final var result = objectMapper.valueToTree(businessObject);
+		log.trace("...extract result {} / {}: {}", businessObject, businessObject.getClass().getName(), result);
+		return result;
+	}
 
-		@Override
-		public <T> T getBusinessObject(final JsonNode context, final Class<T> type) throws JsonProcessingException {
-			log.trace("Read {} / {}...", context, type.getName());
-			final var result = objectMapper.treeToValue(context, type);
-			log.trace("...to {}", result);
-			return result;
-		}
-
+	@Override
+	public <T> T getBusinessObject(final JsonNode context, final Class<T> type) throws JsonProcessingException {
+		log.trace("Read {} / {}...", context, type.getName());
+		final var result = objectMapper.treeToValue(context, type);
+		log.trace("...to {}", result);
+		return result;
 	}
 
 	@Override
