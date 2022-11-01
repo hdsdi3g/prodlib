@@ -30,6 +30,7 @@
         <module>jobkit</module>
         <module>transfertfiles</module>
         <module>csvkit</module>
+        <module>demo</module>
     </modules>
 
     <properties>
@@ -40,6 +41,10 @@
         <java.version>17</java.version>
         <repackage.classifier/>
         <spring-native.version>0.12.1</spring-native.version>
+        <native-buildtools.version>0.9.16</native-buildtools.version>
+        <graalvm.version>22.3.0</graalvm.version>
+        <!-- initialize-at-run-time=com.oracle.truffle.js.scriptengine.GraalJSEngineFactory -->
+        <native-image-extra-flags>--language:js</native-image-extra-flags>
 
         <mockito.version>4.4.0</mockito.version>
         <datafaker.version>1.6.0</datafaker.version>
@@ -378,19 +383,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <classifier>${repackage.classifier}</classifier>
-                    <image>
-                        <builder>paketobuildpacks/builder:tiny</builder>
-                        <env>
-                            <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
-                        </env>
-                    </image>
-                </configuration>
             </plugin>
         </plugins>
     </build>
