@@ -18,7 +18,7 @@ package tv.hd3g.transfertfiles;
 
 import java.time.Duration;
 
-import org.apache.logging.log4j.LogManager;
+import org.slf4j.LoggerFactory;
 
 /**
  * Expected to be thread safe.
@@ -29,8 +29,8 @@ public interface DataExchangeObserver {
 	 * @return true for keep transfert, false to cancel it
 	 */
 	default boolean onTransfertProgressFromSource(final AbstractFile source,
-	                                              final long startDate,
-	                                              final long dataTransferred) {
+												  final long startDate,
+												  final long dataTransferred) {
 		return true;
 	}
 
@@ -39,20 +39,20 @@ public interface DataExchangeObserver {
 	 * @return true for keep transfert, false to cancel it
 	 */
 	default boolean onTransfertProgressToDestination(final AbstractFile destination,
-	                                                 final long startDate,
-	                                                 final long dataTransferred) {
+													 final long startDate,
+													 final long dataTransferred) {
 		return true;
 	}
 
 	default void beforeTransfert(final AbstractFile source,
-	                             final AbstractFile destination) {
+								 final AbstractFile destination) {
 	}
 
 	default void afterTransfert(final AbstractFile source,
-	                            final AbstractFile destination,
-	                            final long dataSizeTranferedFromSource,
-	                            final long dataSizeTranferedToDestination,
-	                            final Duration transfertDuration) {
+								final AbstractFile destination,
+								final long dataSizeTranferedFromSource,
+								final long dataSizeTranferedToDestination,
+								final Duration transfertDuration) {
 	}
 
 	static DataExchangeObserver createLogger() {
@@ -60,24 +60,24 @@ public interface DataExchangeObserver {
 	}
 
 	static DataExchangeObserver createLogger(final DataExchangeObserver reference) {
-		final var log = LogManager.getLogger();
+		final var log = LoggerFactory.getLogger(DataExchangeObserver.class);
 
 		return new DataExchangeObserver() {
 
 			@Override
 			public void afterTransfert(final AbstractFile source,
-			                           final AbstractFile destination,
-			                           final long dataSizeTranferedFromSource,
-			                           final long dataSizeTranferedToDestination,
-			                           final Duration transfertDuration) {
+									   final AbstractFile destination,
+									   final long dataSizeTranferedFromSource,
+									   final long dataSizeTranferedToDestination,
+									   final Duration transfertDuration) {
 				log.info("After transfert form \"{}\" to \"{}\": {}/{} bytes during {}",
-				        source,
-				        destination,
-				        dataSizeTranferedFromSource,
-				        dataSizeTranferedToDestination,
-				        transfertDuration);
+						source,
+						destination,
+						dataSizeTranferedFromSource,
+						dataSizeTranferedToDestination,
+						transfertDuration);
 				reference.afterTransfert(source, destination, dataSizeTranferedFromSource,
-				        dataSizeTranferedToDestination, transfertDuration);
+						dataSizeTranferedToDestination, transfertDuration);
 			}
 
 			@Override
@@ -88,27 +88,27 @@ public interface DataExchangeObserver {
 
 			@Override
 			public boolean onTransfertProgressFromSource(final AbstractFile source,
-			                                             final long startDate,
-			                                             final long dataTransferred) {
+														 final long startDate,
+														 final long dataTransferred) {
 				if (log.isTraceEnabled()) {
 					log.trace("Transfert form \"{}\": {} bytes, since {}",
-					        source, dataTransferred,
-					        Duration.ofMillis(System.currentTimeMillis() - startDate));
+							source, dataTransferred,
+							Duration.ofMillis(System.currentTimeMillis() - startDate));
 				}
 				return reference.onTransfertProgressFromSource(source, startDate, dataTransferred);
 			}
 
 			@Override
 			public boolean onTransfertProgressToDestination(final AbstractFile destination,
-			                                                final long startDate,
-			                                                final long dataTransferred) {
+															final long startDate,
+															final long dataTransferred) {
 				if (log.isTraceEnabled()) {
 					log.trace("Transfert to \"{}\": {} bytes, since {}",
-					        destination, dataTransferred,
-					        Duration.ofMillis(System.currentTimeMillis() - startDate));
+							destination, dataTransferred,
+							Duration.ofMillis(System.currentTimeMillis() - startDate));
 				}
 				return reference.onTransfertProgressToDestination(destination, startDate,
-				        dataTransferred);
+						dataTransferred);
 			}
 
 		};

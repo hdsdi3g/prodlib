@@ -8,12 +8,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 class SpoolExecutor {
-
-	private static Logger log = LogManager.getLogger();
 
 	private final String name;
 	private final ExecutionEvent event;

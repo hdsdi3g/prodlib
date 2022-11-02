@@ -22,11 +22,10 @@ import static tv.hd3g.transfertfiles.AbstractFile.normalizePath;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class CommonAbstractFileSystem<T extends AbstractFile> implements AbstractFileSystem<T> {
-	private static final Logger log = LogManager.getLogger();
 
 	private final String basePath;
 	private final String standardHostName;
@@ -38,10 +37,10 @@ public abstract class CommonAbstractFileSystem<T extends AbstractFile> implement
 	 */
 	protected CommonAbstractFileSystem(final String basePath, final String standardHostname) {
 		this.basePath = normalizePath(requireNonNull(basePath, "basePath"));
-		this.standardHostName = getClass().getSimpleName()
-								+ "#"
-								+ requireNonNull(standardHostname, "\"standardHostname\" can't to be null")
-								+ basePath;
+		standardHostName = getClass().getSimpleName()
+						   + "#"
+						   + requireNonNull(standardHostname, "\"standardHostname\" can't to be null")
+						   + basePath;
 		log.trace("Init FileSystem, basePath={} standardHostname={} hashCode=#{}",
 				basePath, standardHostName, hashCode());
 		timeoutDuration = 0;

@@ -20,13 +20,12 @@ import static jakarta.transaction.Transactional.TxType.REQUIRES_NEW;
 
 import java.util.Arrays;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.authkit.mod.controller.RestControllerUser;
 import tv.hd3g.authkit.mod.dto.Password;
 import tv.hd3g.authkit.mod.dto.validated.AddGroupOrRoleDto;
@@ -37,8 +36,8 @@ import tv.hd3g.authkit.mod.repository.CredentialRepository;
 import tv.hd3g.commons.authkit.CheckBefore;
 
 @Service
+@Slf4j
 public class CmdLineServiceImpl implements CmdLineService {
-	private static Logger log = LogManager.getLogger();
 
 	@Autowired
 	private CredentialRepository credentialRepository;

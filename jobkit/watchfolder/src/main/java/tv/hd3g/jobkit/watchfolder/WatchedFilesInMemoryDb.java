@@ -26,17 +26,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.AbstractFileSystemURL;
 import tv.hd3g.transfertfiles.CachedFileAttributes;
 
 /**
  * Not thread safe
  */
+@Slf4j
 public class WatchedFilesInMemoryDb implements WatchedFilesDb {
-	private static final Logger log = LogManager.getLogger();
 
 	private final Map<CachedFileAttributes, FileInMemoryDb> allWatchedFiles;
 

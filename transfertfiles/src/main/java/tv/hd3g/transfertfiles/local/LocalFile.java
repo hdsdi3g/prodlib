@@ -41,9 +41,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.AbstractFile;
 import tv.hd3g.transfertfiles.CannotDeleteException;
 import tv.hd3g.transfertfiles.CommonAbstractFile;
@@ -51,8 +50,8 @@ import tv.hd3g.transfertfiles.SizedStoppableCopyCallback;
 import tv.hd3g.transfertfiles.TransfertObserver;
 import tv.hd3g.transfertfiles.TransfertObserver.TransfertDirection;
 
+@Slf4j
 public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S2160
-	private static final Logger log = LogManager.getLogger();
 
 	private final File internalFile;
 

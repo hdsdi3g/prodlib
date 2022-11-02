@@ -20,7 +20,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = { "tv.hd3g.jobkit", "tv.hd3g.selfautorestdoc.mod" })
+@ComponentScan(basePackages = { "tv.hd3g.jobkit" })
 public class Setup {
 
 }

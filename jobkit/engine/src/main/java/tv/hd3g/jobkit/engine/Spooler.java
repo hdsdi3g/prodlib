@@ -7,11 +7,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class Spooler {
-	private static Logger log = LogManager.getLogger();
 
 	private final ConcurrentHashMap<String, SpoolExecutor> spoolExecutors;
 	private final ExecutionEvent event;

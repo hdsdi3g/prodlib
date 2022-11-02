@@ -29,17 +29,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.ftp.FTPESFileSystem;
 import tv.hd3g.transfertfiles.ftp.FTPFileSystem;
 import tv.hd3g.transfertfiles.ftp.FTPSFileSystem;
 import tv.hd3g.transfertfiles.local.LocalFileSystem;
 import tv.hd3g.transfertfiles.sftp.SFTPFileSystem;
 
+@Slf4j
 public class AbstractFileSystemURL implements Closeable {
-	private static final Logger log = LogManager.getLogger();
 
 	private final String protectedRessourceURL;
 	private final AbstractFileSystem<?> fileSystem;
@@ -99,10 +97,10 @@ public class AbstractFileSystemURL implements Closeable {
 				"keys", Optional.ofNullable(query.get("key")).map(Object::toString).orElse("null")));
 
 		if (protocol.contentEquals("file")) {
-			log.debug("Init URL LocalFileSystem: {}", this::toString);
+			log.debug("Init URL LocalFileSystem: {}", toString());
 			fileSystem = new LocalFileSystem(new File(basePath));
 		} else if (protocol.contentEquals("sftp")) {
-			log.debug("Init URL SFTPFileSystem: {}", this::toString);
+			log.debug("Init URL SFTPFileSystem: {}", toString());
 			fileSystem = new SFTPFileSystem(host, port, username, basePath);
 			final var sFTPfileSystem = (SFTPFileSystem) fileSystem;
 
@@ -114,14 +112,14 @@ public class AbstractFileSystemURL implements Closeable {
 				keys.forEach(privateKey -> sFTPfileSystem.manuallyAddPrivatekeyAuth(privateKey, password));
 			}
 		} else if (protocol.contentEquals("ftp")) {
-			log.debug("Init URL FTPFileSystem: {}", this::toString);
+			log.debug("Init URL FTPFileSystem: {}", toString());
 			fileSystem = new FTPFileSystem(host, port, username, password, passive, basePath);
 		} else if (protocol.contentEquals("ftps")) {
-			log.debug("Init URL FTPSFileSystem: {}", this::toString);
+			log.debug("Init URL FTPSFileSystem: {}", toString());
 			fileSystem = new FTPSFileSystem(host, port, username, password, passive,
 					ignoreInvalidCertificates, basePath);
 		} else if (protocol.contentEquals("ftpes")) {
-			log.debug("Init URL FTPESFileSystem: {}", this::toString);
+			log.debug("Init URL FTPESFileSystem: {}", toString());
 			fileSystem = new FTPESFileSystem(host, port, username, password, passive,
 					ignoreInvalidCertificates, basePath);
 		} else {

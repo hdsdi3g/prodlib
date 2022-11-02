@@ -30,11 +30,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 class FlatScheduledExecutorService implements ScheduledExecutorService {
-	private static final Logger log = LogManager.getLogger();
 
 	private final Set<FlatScheduledFuture> registedTasks;
 

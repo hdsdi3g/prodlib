@@ -18,14 +18,13 @@ package tv.hd3g.jobkit.engine;
 
 import java.util.Objects;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.NullNode;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class SupervisableContextExtractor {
-	private static Logger log = LogManager.getLogger();
 
 	private final SupervisableSerializer serializer;
 	private final SupervisableEndEvent event;

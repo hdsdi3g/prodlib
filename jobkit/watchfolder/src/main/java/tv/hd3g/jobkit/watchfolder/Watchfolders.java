@@ -30,16 +30,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.jobkit.engine.BackgroundService;
 import tv.hd3g.jobkit.engine.JobKitEngine;
 
+@Slf4j
 public class Watchfolders {
 	static final int DEFAULT_RETRY_AFTER_TIME = 10;
-
-	private static final Logger log = LogManager.getLogger();
 
 	private final Map<ObservedFolder, BackgroundService> observedFoldersServices;
 	private final FolderActivity folderActivity;

@@ -31,9 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import net.schmizz.sshj.common.StreamCopier.Listener;
 import net.schmizz.sshj.sftp.FileAttributes;
 import net.schmizz.sshj.sftp.FileMode.Type;
@@ -52,10 +50,9 @@ import tv.hd3g.transfertfiles.SizedStoppableCopyCallback;
 import tv.hd3g.transfertfiles.TransfertObserver;
 import tv.hd3g.transfertfiles.TransfertObserver.TransfertDirection;
 
+@Slf4j
 public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2160
 	private static final String CAN_T_STAT = "Can't stat \"";
-
-	private static final Logger log = LogManager.getLogger();
 
 	private final SFTPClient sftpClient;
 	private final String sftpAbsolutePath;

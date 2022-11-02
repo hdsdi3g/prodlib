@@ -51,13 +51,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.fasterxml.jackson.databind.JsonNode;
 
 import j2html.TagCreator;
 import j2html.tags.DomContent;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.commons.version.EnvironmentVersion;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 import tv.hd3g.jobkit.engine.SupervisableMessage;
@@ -69,12 +67,11 @@ import tv.hd3g.mailkit.mod.service.SendAsSimpleNotificationContextPredicate;
 import tv.hd3g.mailkit.notification.ExceptionToString;
 import tv.hd3g.mailkit.notification.NotificationEnvironment;
 
+@Slf4j
 public class NotificationMailTemplateToolkit {
 	private static final String ATTR_JSON = ".json";
 	private static final String ATTR_JSON_VALUE = ".json.value";
 	private static final String CONTEXT_STR = "Context:";
-
-	private static Logger log = LogManager.getLogger();
 
 	static final String APPNAME = ".appname";
 

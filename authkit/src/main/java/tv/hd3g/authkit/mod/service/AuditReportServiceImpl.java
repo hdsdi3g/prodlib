@@ -30,21 +30,20 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.authkit.mod.entity.Audit;
 import tv.hd3g.authkit.mod.repository.AuditRepository;
 
 @Service
 @Transactional(readOnly = false)
+@Slf4j
 public class AuditReportServiceImpl implements AuditReportService {
-	private static final Logger log = LogManager.getLogger();
 
 	public static final String EVENTNAME_REPORT = "Report";
 	public static final String EVENTNAME_LOGIN = "Login";

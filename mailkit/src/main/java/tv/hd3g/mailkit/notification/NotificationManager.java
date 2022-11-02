@@ -21,13 +21,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.jobkit.engine.SupervisableManager;
 
+@Slf4j
 public class NotificationManager {
-	private static Logger log = LogManager.getLogger();
 	private final List<NotificationRouter> routers;
 
 	public NotificationManager() {

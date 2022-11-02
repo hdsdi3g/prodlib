@@ -25,20 +25,18 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
 import jakarta.mail.MessagingException;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.commons.mailkit.SendMailDto.MessageGrade;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 import tv.hd3g.mailkit.notification.NotificationGroup;
 import tv.hd3g.mailkit.notification.NotificationRouter;
 
+@Slf4j
 public class NotificationRouterMail implements NotificationRouter {
 	public static final String USER_AGENT = "JavaMail/MailKit/Notification";
-
-	private static Logger log = LogManager.getLogger();
 
 	private final NotificationMailMessageProducer engineSimpleTemplate;
 	private final NotificationMailMessageProducer engineFullTemplate;

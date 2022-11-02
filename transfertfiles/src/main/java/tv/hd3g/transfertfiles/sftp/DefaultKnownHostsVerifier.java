@@ -21,15 +21,15 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.security.PublicKey;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.schmizz.sshj.common.KeyType;
 import net.schmizz.sshj.common.SecurityUtils;
 import net.schmizz.sshj.transport.verification.OpenSSHKnownHosts;
 
 class DefaultKnownHostsVerifier extends OpenSSHKnownHosts {
-	private static final Logger currentlog = LogManager.getLogger();
+	private static final Logger currentlog = LoggerFactory.getLogger(DefaultKnownHostsVerifier.class);
 
 	public DefaultKnownHostsVerifier(final File khFile) throws IOException {
 		super(khFile);
@@ -40,7 +40,7 @@ class DefaultKnownHostsVerifier extends OpenSSHKnownHosts {
 	protected boolean hostKeyUnverifiableAction(final String hostname, final PublicKey key) {
 		final var type = KeyType.fromKey(key);
 		currentlog.info("The authenticity of host '{}' can't be established. {} key fingerprint is {}.",
-		        hostname, type, SecurityUtils.getFingerprint(key));
+				hostname, type, SecurityUtils.getFingerprint(key));
 		try {
 			entries().add(new HostEntry(null, hostname, KeyType.fromKey(key), key));
 			write();
@@ -57,8 +57,8 @@ class DefaultKnownHostsVerifier extends OpenSSHKnownHosts {
 		final var fp = SecurityUtils.getFingerprint(key);
 		final var path = getFile().getAbsolutePath();
 		currentlog.error(
-		        "REMOTE HOST IDENTIFICATION HAS CHANGED! IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY! Someone could be eavesdropping on you right now (man-in-the-middle attack)! It is also possible that the host key has just been changed. The fingerprint for the {} key sent by the remote host is {}. Please contact your system administrator or add correct host key in {} to get rid of this message.",
-		        type, fp, path);
+				"REMOTE HOST IDENTIFICATION HAS CHANGED! IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY! Someone could be eavesdropping on you right now (man-in-the-middle attack)! It is also possible that the host key has just been changed. The fingerprint for the {} key sent by the remote host is {}. Please contact your system administrator or add correct host key in {} to get rid of this message.",
+				type, fp, path);
 		return false;
 	}
 }

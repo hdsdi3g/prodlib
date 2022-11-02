@@ -1,5 +1,17 @@
 # All ProdLib projects upgrades
 
+## 17.0.0
+
+Remove all log4j calls and replace it by slf4j and logback, adapt code for this #135
+
+Update Code Policy Validation to 3.0.0 (remove log4j calls).
+
+Add lombok, slf4j and logback-classic for all project under Starter.
+
+Explicit Hateoas and Thymeleaf uses only for needed projects.
+
+Separate loggers for FTPFileSystem, FTPS and FTPES.
+
 ## 16.0.0
 
 Implement parallel running Watchfolder logic #97

@@ -25,21 +25,20 @@ import static tv.hd3g.authkit.utility.ControllerType.REST;
 import java.io.IOException;
 import java.util.Optional;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.authkit.mod.exception.SecurityRejectedRequestException;
 import tv.hd3g.authkit.mod.exception.UnauthorizedRequestException;
 import tv.hd3g.authkit.mod.service.AuditReportService;
 import tv.hd3g.authkit.mod.service.CookieService;
 import tv.hd3g.authkit.utility.ControllerType;
 
+@Slf4j
 public class SecurityRejectedRequestMappingExceptionResolver extends SimpleMappingExceptionResolver {
-	private static final Logger log = LogManager.getLogger();
 
 	private final AuditReportService auditService;
 	private final CookieService cookieService;

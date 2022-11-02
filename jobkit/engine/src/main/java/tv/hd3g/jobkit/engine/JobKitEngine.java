@@ -14,11 +14,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class JobKitEngine implements JobTrait {
-	private static Logger log = LogManager.getLogger();
 
 	private final List<BackgroundService> backgroundServices;
 	private final ScheduledExecutorService scheduledExecutor;

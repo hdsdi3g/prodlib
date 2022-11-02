@@ -8,8 +8,6 @@ import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -19,6 +17,7 @@ import org.springframework.core.env.Environment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.jobkit.engine.BackgroundServiceEvent;
 import tv.hd3g.jobkit.engine.ExecutionEvent;
 import tv.hd3g.jobkit.engine.JobKitEngine;
@@ -26,10 +25,8 @@ import tv.hd3g.jobkit.engine.SupervisableManager;
 import tv.hd3g.jobkit.engine.SupervisableServiceSupplier;
 
 @Configuration
+@Slf4j
 public class JobKitSetup {
-
-	private static final Logger log = LogManager.getLogger();
-
 	@Value("${jobkit.supervisable.maxEndEventsRetention:100}")
 	private int maxEndEventsRetention;
 
@@ -40,7 +37,7 @@ public class JobKitSetup {
 			t.setDaemon(false);
 			t.setPriority(MIN_PRIORITY + 1);
 			t.setName("SchTaskStarter");
-			t.setUncaughtExceptionHandler((thrd, e) -> log.fatal("Regular scheduled thread have an uncaught error", e));
+			t.setUncaughtExceptionHandler((thrd, e) -> log.error("Regular scheduled thread have an uncaught error", e));
 			return t;
 		});
 	}

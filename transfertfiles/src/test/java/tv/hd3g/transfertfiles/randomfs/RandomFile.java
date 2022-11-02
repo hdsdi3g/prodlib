@@ -24,17 +24,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.AbstractFile;
 import tv.hd3g.transfertfiles.BufferVault;
 import tv.hd3g.transfertfiles.CommonAbstractFile;
 import tv.hd3g.transfertfiles.SizedStoppableCopyCallback;
 import tv.hd3g.transfertfiles.TransfertObserver;
 
+@Slf4j
 public class RandomFile extends CommonAbstractFile<RandomFileSystem> {
-	private static final Logger log = LogManager.getLogger();
 
 	private final Random r = ThreadLocalRandom.current();
 	private final LinkedBlockingQueue<BufferVault> transfered;

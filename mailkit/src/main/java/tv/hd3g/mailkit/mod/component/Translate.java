@@ -25,8 +25,6 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -34,13 +32,14 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 import tv.hd3g.mailkit.mod.configuration.MailKitConfig;
 
 @Component
+@Slf4j
 public class Translate {
 	private static final String MAILKIT_NOTIFICATION = "mailkit.notification.";
-	private static Logger log = LogManager.getLogger();
 	private static ConcurrentMap<Locale, Properties> messagesFiles = new ConcurrentHashMap<>();
 
 	@Autowired

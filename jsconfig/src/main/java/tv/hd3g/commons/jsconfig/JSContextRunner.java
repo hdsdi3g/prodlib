@@ -27,19 +27,17 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;
 
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.commons.jsconfig.mod.JSConfigConfig;
 import tv.hd3g.commons.jsconfig.mod.component.ContextBuilderProvider;
 
 /**
  * Thread safe
  */
+@Slf4j
 public class JSContextRunner {
-	private static final Logger log = LogManager.getLogger();
-
 	private final ContextBuilderProvider contextBuilderProvider;
 	private final ReentrantReadWriteLock lock;
 	private final Set<File> fileSrc;

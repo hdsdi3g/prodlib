@@ -21,8 +21,6 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -32,6 +30,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.authkit.mod.exception.AuthKitException;
 import tv.hd3g.authkit.utility.LogSanitizer;
 
@@ -40,14 +39,14 @@ import tv.hd3g.authkit.utility.LogSanitizer;
  */
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
+@Slf4j
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
-	private static Logger log = LogManager.getLogger();
 
 	@ExceptionHandler(AuthKitException.class)
 	protected ResponseEntity<Object> handleRESTException(final AuthKitException e, final WebRequest request) {
-		log.warn(() -> "REST Error for " + LogSanitizer.sanitize(request.getDescription(true)), e);
+		log.warn("REST Error for " + LogSanitizer.sanitize(request.getDescription(true)), e);
 		return new ResponseEntity<>(Map.of("message",
-		        Optional.ofNullable(e.getMessage()).orElse("(No message)")),
-		        Optional.ofNullable(HttpStatus.resolve(e.getReturnCode())).orElse(INTERNAL_SERVER_ERROR));
+				Optional.ofNullable(e.getMessage()).orElse("(No message)")),
+				Optional.ofNullable(HttpStatus.resolve(e.getReturnCode())).orElse(INTERNAL_SERVER_ERROR));
 	}
 }

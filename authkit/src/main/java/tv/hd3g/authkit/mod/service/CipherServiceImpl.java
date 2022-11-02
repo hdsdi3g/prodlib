@@ -32,19 +32,18 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * See https://proandroiddev.com/security-best-practices-symmetric-encryption-with-aes-in-java-7616beaaade9
  */
 @Service
+@Slf4j
 public class CipherServiceImpl implements CipherService {
 	private static final String SHA3_512 = "SHA3-512";
-
-	private static Logger log = LogManager.getLogger();
 
 	private SecureRandom random;
 	private final SecretKey secretKey;
@@ -53,9 +52,9 @@ public class CipherServiceImpl implements CipherService {
 	private final int gCMParameterSpecLen;
 
 	public CipherServiceImpl(@Value("${authkit.cipher_secret}") final String base64secret,
-	                         @Value("${authkit.cipher_ivsize:12}") final int ivSize,
-	                         @Value("${authkit.cipher_transformation:AES/GCM/NoPadding}") final String transformation,
-	                         @Value("${authkit.cipher_GCMParameterSpecLen:128}") final int gCMParameterSpecLen) throws GeneralSecurityException {
+							 @Value("${authkit.cipher_ivsize:12}") final int ivSize,
+							 @Value("${authkit.cipher_transformation:AES/GCM/NoPadding}") final String transformation,
+							 @Value("${authkit.cipher_GCMParameterSpecLen:128}") final int gCMParameterSpecLen) throws GeneralSecurityException {
 		final var secret = Base64.getDecoder().decode(base64secret.getBytes(UTF_8));
 		secretKey = new SecretKeySpec(secret, "AES");
 		try {
@@ -68,11 +67,11 @@ public class CipherServiceImpl implements CipherService {
 		this.transformation = transformation;
 		this.gCMParameterSpecLen = gCMParameterSpecLen;
 
-		log.debug(() -> "Init cipher with "
-		                + "secret width=" + secret.length * 8 + " bits"
-		                + ", ivSize=" + ivSize
-		                + ", transformation=" + transformation
-		                + ", GCMParameterSpecLen=" + gCMParameterSpecLen);
+		log.debug("Init cipher with "
+				  + "secret width=" + secret.length * 8 + " bits"
+				  + ", ivSize=" + ivSize
+				  + ", transformation=" + transformation
+				  + ", GCMParameterSpecLen=" + gCMParameterSpecLen);
 
 		try {
 			final var v = new String(internalUnCipher(internalCipher("check".getBytes(UTF_8))), UTF_8);

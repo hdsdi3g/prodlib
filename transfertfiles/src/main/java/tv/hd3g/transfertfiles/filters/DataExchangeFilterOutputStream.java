@@ -19,16 +19,14 @@ package tv.hd3g.transfertfiles.filters;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.BufferVault;
 
 /**
  * Not reusable
  */
+@Slf4j
 public class DataExchangeFilterOutputStream implements DataExchangeFilter {
-	private static final Logger log = LogManager.getLogger();
 
 	private final int defaultBufferSize;
 	private final BufferVault dataDest;
@@ -36,7 +34,7 @@ public class DataExchangeFilterOutputStream implements DataExchangeFilter {
 	private OutputStream externalOutputStream;
 
 	public DataExchangeFilterOutputStream(final UnaryIOExceptionOperator<OutputStream> streamProvider,
-	                                      final int defaultBufferSize) {
+										  final int defaultBufferSize) {
 		this.defaultBufferSize = defaultBufferSize;
 		dataDest = new BufferVault(defaultBufferSize);
 		this.streamProvider = streamProvider;
@@ -63,7 +61,7 @@ public class DataExchangeFilterOutputStream implements DataExchangeFilter {
 
 		if (log.isTraceEnabled()) {
 			log.trace("Readed before filter {} bytes, after filter {} bytes",
-			        dataSource.getSize(), dataDest.getSize());
+					dataSource.getSize(), dataDest.getSize());
 		}
 
 		return dataDest;

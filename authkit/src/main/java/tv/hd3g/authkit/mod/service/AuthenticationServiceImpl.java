@@ -40,8 +40,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -50,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.authkit.mod.component.AuthKitEndpointsListener;
 import tv.hd3g.authkit.mod.dto.LoginRequestContentDto;
 import tv.hd3g.authkit.mod.dto.Password;
@@ -97,11 +96,10 @@ import tv.hd3g.authkit.mod.service.AuditReportService.RejectLoginCause;
 
 @Service
 @Transactional(readOnly = false)
+@Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
 	private static final Argon2 ARGON2 = Argon2Factory.create();
 	private static final String MSG_CANT_FOUND_CREDENTIAL_FOR_USER = "Can't found Credential for user ";
-
-	private static Logger log = LogManager.getLogger();
 
 	@Autowired
 	private SecuredTokenService tokenService;
@@ -576,8 +574,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	public void setGroupDescription(final AddGroupOrRoleDto changeGroup) {
 		final var name = changeGroup.getName();
 		getGroupByName(name).setDescription(changeGroup.getDescription());
-		log.info(() -> "Change role \"" + name + "\" description to \""
-					   + sanitize(changeGroup.getDescription()) + "\"");
+		log.info("Change role \"" + name + "\" description to \""
+				 + sanitize(changeGroup.getDescription()) + "\"");
 	}
 
 	@Override
@@ -637,8 +635,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		final var name = changeRole.getName();
 		final var role = getRoleByName(name);
 		role.setDescription(changeRole.getDescription());
-		log.info(() -> "Change role \"" + name + "\" description to \""
-					   + sanitize(changeRole.getDescription()) + "\"");
+		log.info("Change role \"" + name + "\" description to \""
+				 + sanitize(changeRole.getDescription()) + "\"");
 	}
 
 	@Override

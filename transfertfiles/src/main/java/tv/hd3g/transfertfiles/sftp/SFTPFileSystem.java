@@ -31,17 +31,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
+import lombok.extern.slf4j.Slf4j;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 import tv.hd3g.transfertfiles.CommonAbstractFileSystem;
 import tv.hd3g.transfertfiles.InvalidURLException;
 
+@Slf4j
 public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
-	private static final Logger log = LogManager.getLogger();
 
 	private final SSHClient client;
 	private final InetAddress host;

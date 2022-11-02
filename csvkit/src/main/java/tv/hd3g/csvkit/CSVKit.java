@@ -37,18 +37,17 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Reusable
  */
+@Slf4j
 public class CSVKit {
-	private static Logger log = LogManager.getLogger();
 
 	protected final CSVParserBuilder csvParserBuilder;
 	protected final int skipLines;
@@ -60,22 +59,22 @@ public class CSVKit {
 
 	public static CSVKit createFrenchFlavor(final int skipLines) {
 		final var parser = new CSVParserBuilder()
-		        .withSeparator(';')
-		        .withQuoteChar('"');
+				.withSeparator(';')
+				.withQuoteChar('"');
 		return new CSVKit(parser, skipLines);
 	}
 
 	protected CSVReaderBuilder createCSVReaderBuilder(final Reader reader) {
 		return new CSVReaderBuilder(reader)
-		        .withCSVParser(csvParserBuilder.build())
-		        .withSkipLines(skipLines);
+				.withCSVParser(csvParserBuilder.build())
+				.withSkipLines(skipLines);
 	}
 
 	public <T> void importCSV(final byte[] rawSource,
-	                          final Charset sourceCharset,
-	                          final Predicate<String[]> rowValidator,
-	                          final Function<String[], T> transform,
-	                          final LinkedBlockingQueue<T> result) {
+							  final Charset sourceCharset,
+							  final Predicate<String[]> rowValidator,
+							  final Function<String[], T> transform,
+							  final LinkedBlockingQueue<T> result) {
 		try (final Reader reader = new StringReader(new String(rawSource, sourceCharset))) {
 			try (var csvReader = createCSVReaderBuilder(reader).build()) {
 				String[] nextLine;
@@ -93,10 +92,10 @@ public class CSVKit {
 	}
 
 	public <T> void importAllCSV(final Map<String, Supplier<byte[]>> rawSourcesBySourceNames,
-	                             final Charset sourceCharset,
-	                             final Predicate<String[]> rowValidator,
-	                             final Function<String[], T> transform,
-	                             final LinkedBlockingQueue<T> result) {
+								 final Charset sourceCharset,
+								 final Predicate<String[]> rowValidator,
+								 final Function<String[], T> transform,
+								 final LinkedBlockingQueue<T> result) {
 		rawSourcesBySourceNames.forEach((name, source) -> {
 			log.info("Start load CSV from \"{}\"...", name);
 			importCSV(source.get(), sourceCharset, rowValidator, transform, result);
@@ -104,8 +103,8 @@ public class CSVKit {
 	}
 
 	public static <T, R> Map<String, R> groupingById(final Stream<T> values,
-	                                                 final Function<? super T, String> idClassifier,
-	                                                 final Function<List<T>, R> transform) {
+													 final Function<? super T, String> idClassifier,
+													 final Function<List<T>, R> transform) {
 		return values.collect(groupingBy(idClassifier, collectingAndThen(toUnmodifiableList(), transform)));
 	}
 
@@ -113,20 +112,20 @@ public class CSVKit {
 	 * @return Only the keys bettween left and right. The other will be sended on lostLeft/lostRight.
 	 */
 	public static <L, R, C> Map<String, C> aggregateById(final Map<String, L> left,
-	                                                     final Map<String, R> right,
-	                                                     final BiFunction<L, R, C> transform,
-	                                                     final BiConsumer<String, R> lostLeft,
-	                                                     final BiConsumer<String, L> lostRight) {
+														 final Map<String, R> right,
+														 final BiFunction<L, R, C> transform,
+														 final BiConsumer<String, R> lostLeft,
+														 final BiConsumer<String, L> lostRight) {
 		left.keySet().stream()
-		        .filter(not(right::containsKey))
-		        .forEach(id -> lostRight.accept(id, left.get(id)));
+				.filter(not(right::containsKey))
+				.forEach(id -> lostRight.accept(id, left.get(id)));
 		right.keySet().stream()
-		        .filter(not(left::containsKey))
-		        .forEach(id -> lostLeft.accept(id, right.get(id)));
+				.filter(not(left::containsKey))
+				.forEach(id -> lostLeft.accept(id, right.get(id)));
 		return left.keySet().stream()
-		        .filter(right::containsKey)
-		        .collect(toUnmodifiableMap(id -> id,
-		                id -> transform.apply(left.get(id), right.get(id))));
+				.filter(right::containsKey)
+				.collect(toUnmodifiableMap(id -> id,
+						id -> transform.apply(left.get(id), right.get(id))));
 	}
 
 }

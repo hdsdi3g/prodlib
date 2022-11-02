@@ -30,14 +30,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.authkit.mod.component.AuthKitEndpointsListener;
 import tv.hd3g.authkit.mod.dto.LoggedUserTagsTokenDto;
 import tv.hd3g.authkit.mod.exception.BadRequestException;
@@ -52,8 +51,8 @@ import tv.hd3g.authkit.utility.AnnotatedControllerClass;
 import tv.hd3g.authkit.utility.ControllerType;
 import tv.hd3g.commons.authkit.AuditAfter;
 
+@Slf4j
 public class ControllerInterceptor implements HandlerInterceptor {
-	private static final Logger log = LogManager.getLogger();
 	private static final String PACKAGE_NAME = ControllerInterceptor.class.getPackageName();
 	public static final String USER_UUID_ATTRIBUTE_NAME = PACKAGE_NAME + ".userUUID";
 	public static final String USER_TOKEN_ATTRIBUTE_NAME = PACKAGE_NAME + ".LoggedUserTagsToken";

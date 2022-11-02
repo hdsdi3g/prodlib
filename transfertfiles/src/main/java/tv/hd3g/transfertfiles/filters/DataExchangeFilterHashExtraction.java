@@ -28,28 +28,25 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.BufferVault;
 import tv.hd3g.transfertfiles.filters.DigestFilterHashExtraction.ExtractionInstance;
 
 /**
  * Not reusable
  */
+@Slf4j
 public class DataExchangeFilterHashExtraction implements DataExchangeFilter {
-	private static final Logger log = LogManager.getLogger();
-
 	private static final Set<DigestFilterHashExtraction> avaliableDigests;
 
 	static {
 		avaliableDigests = Stream.of(DigestFilterHashExtraction.values())
-		        .filter(DigestFilterHashExtraction::isAvaliable)
-		        .collect(toUnmodifiableSet());
+				.filter(DigestFilterHashExtraction::isAvaliable)
+				.collect(toUnmodifiableSet());
 
 		final var notAvaliableDigests = Stream.of(DigestFilterHashExtraction.values())
-		        .filter(not(avaliableDigests::contains))
-		        .collect(toUnmodifiableSet());
+				.filter(not(avaliableDigests::contains))
+				.collect(toUnmodifiableSet());
 		log.debug("Avaliable digests: {}, not avaliable digests: {}", avaliableDigests, notAvaliableDigests);
 	}
 
@@ -57,15 +54,15 @@ public class DataExchangeFilterHashExtraction implements DataExchangeFilter {
 
 	public DataExchangeFilterHashExtraction(final DigestFilterHashExtraction... digests) {
 		this(Stream.of(digests)
-		        .filter(Objects::nonNull)
-		        .collect(toUnmodifiableSet()));
+				.filter(Objects::nonNull)
+				.collect(toUnmodifiableSet()));
 	}
 
 	public DataExchangeFilterHashExtraction(final Collection<DigestFilterHashExtraction> digests) {
 		currentDigests = digests.stream()
-		        .filter(avaliableDigests::contains)
-		        .collect(toUnmodifiableMap(d -> d,
-		                DigestFilterHashExtraction::createInstance));
+				.filter(avaliableDigests::contains)
+				.collect(toUnmodifiableMap(d -> d,
+						DigestFilterHashExtraction::createInstance));
 		if (currentDigests.isEmpty()) {
 			throw new IllegalArgumentException("Can't init instances of " + digests);
 		}
@@ -74,21 +71,21 @@ public class DataExchangeFilterHashExtraction implements DataExchangeFilter {
 	@Override
 	public BufferVault applyDataFilter(final boolean last, final BufferVault dataSources) throws IOException {
 		currentDigests.values()
-		        .forEach(md -> md.update(dataSources.readAllToByteBuffer()));
+				.forEach(md -> md.update(dataSources.readAllToByteBuffer()));
 		return new BufferVault();
 	}
 
 	public Map<DigestFilterHashExtraction, byte[]> getResults() {
 		return currentDigests.keySet().stream()
-		        .collect(toUnmodifiableMap(d -> d,
-		                d -> currentDigests.get(d).digest()));
+				.collect(toUnmodifiableMap(d -> d,
+						d -> currentDigests.get(d).digest()));
 	}
 
 	@Override
 	public String getFilterName() {
 		return "HashExtraction:" + currentDigests.keySet().stream()
-		        .map(DigestFilterHashExtraction::toString)
-		        .collect(Collectors.joining("+"));
+				.map(DigestFilterHashExtraction::toString)
+				.collect(Collectors.joining("+"));
 	}
 
 }

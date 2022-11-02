@@ -20,13 +20,12 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class StoppableInputStream extends FilterInputStream implements StoppableIOStream {
 
 	private static final String NOT_IMPLEMENTED = "Not implemented";
-	private static final Logger log = LogManager.getLogger();
 	private volatile boolean stopped;
 
 	public StoppableInputStream(final InputStream in) {

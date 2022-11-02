@@ -66,7 +66,6 @@
         <j2html.version>1.6.0</j2html.version>
         <esapi.version>2.5.2.0</esapi.version>
         <graalvm.version>22.3.1</graalvm.version>
-        <log4j2.version>2.20.0</log4j2.version>
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
         <maven.gpg.version>3.0.1</maven.gpg.version>
@@ -78,12 +77,25 @@
         <maven.jacoco.version>0.8.8</maven.jacoco.version>
         <sonar.version>3.9.1.2184</sonar.version>
 
-        <codepolicyvalidation.version>2.2.0</codepolicyvalidation.version>
+        <codepolicyvalidation.version>3.0.0</codepolicyvalidation.version>
         <setupdb.version>2.0.2</setupdb.version>
         <processlauncher.version>6.0.5</processlauncher.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>tv.hd3g.commons</groupId>
             <artifactId>codepolicyvalidation</artifactId>
@@ -115,14 +127,6 @@
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
         </dependency>
     </dependencies>
 

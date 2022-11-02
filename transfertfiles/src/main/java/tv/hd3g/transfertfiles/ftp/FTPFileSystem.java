@@ -27,14 +27,13 @@ import java.util.stream.IntStream;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.CommonAbstractFileSystem;
 import tv.hd3g.transfertfiles.InvalidURLException;
 
+@Slf4j
 public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
-	protected static final Logger log = LogManager.getLogger();
 
 	protected final InetAddress host;
 	protected final int port;

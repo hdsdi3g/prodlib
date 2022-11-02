@@ -31,14 +31,11 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.commons.jsconfig.mod.JSConfigConfig;
 
+@Slf4j
 public class JSUpdateWatcher extends Thread {
-	private static final Logger log = LogManager.getLogger();
-
 	private final CountDownLatch startupLatch;
 	private final Set<File> fileSrc;
 	private final Set<File> dirSrc;

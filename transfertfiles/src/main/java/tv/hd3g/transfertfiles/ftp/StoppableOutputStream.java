@@ -20,13 +20,12 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class StoppableOutputStream extends FilterOutputStream implements StoppableIOStream {
 
 	static final String MANUALLY_STOP_WRITING = "Manually stop writing";
-	private static final Logger log = LogManager.getLogger();
 	private volatile boolean stopped;
 
 	public StoppableOutputStream(final OutputStream out) {

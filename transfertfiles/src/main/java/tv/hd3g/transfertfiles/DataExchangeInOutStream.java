@@ -29,16 +29,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.filters.DataExchangeFilter;
 
 /**
  * Not reusable
  */
+@Slf4j
 public class DataExchangeInOutStream {
-	private static final Logger log = LogManager.getLogger();
 
 	private final InternalInputStream internalInputStream;
 	private final InternalOutputStream internalOutputStream;
@@ -95,8 +93,8 @@ public class DataExchangeInOutStream {
 			}
 
 			while (readQueue.isEmpty()
-			       && state == State.WORKING
-			       && readerClosed == false) {
+				   && state == State.WORKING
+				   && readerClosed == false) {
 				Thread.onSpinWait();
 			}
 
@@ -115,7 +113,7 @@ public class DataExchangeInOutStream {
 
 			final var toRead = Math.min(buffer.remaining(), len);
 			log.trace("Read from remaining={} toRead={} to b={} off={} len={}",
-			        buffer.remaining(), toRead, b.length, off, len);
+					buffer.remaining(), toRead, b.length, off, len);
 
 			final var now = System.currentTimeMillis();
 			buffer.get(b, off, toRead);
@@ -144,9 +142,9 @@ public class DataExchangeInOutStream {
 				return 0;
 			}
 			return (int) readQueue.stream()
-			        .mapToInt(ByteBuffer::remaining)
-			        .summaryStatistics()
-			        .getSum();
+					.mapToInt(ByteBuffer::remaining)
+					.summaryStatistics()
+					.getSum();
 		}
 
 		@Override
@@ -190,7 +188,7 @@ public class DataExchangeInOutStream {
 
 				final var totalWrited = buffers.getSize();
 				log.trace("Write from b/off/len {}/{}/{} to total writed {}",
-				        b.length, off, len, totalWrited);
+						b.length, off, len, totalWrited);
 
 				if (totalWrited > ensureMinWriteBuffersSize.get()) {
 					processFilters(false);
@@ -251,7 +249,7 @@ public class DataExchangeInOutStream {
 				try {
 					if (log.isTraceEnabled()) {
 						log.trace("Apply filter {} for {} bytes...",
-						        currentFilter.getFilterName(), nextBuffers.getSize());
+								currentFilter.getFilterName(), nextBuffers.getSize());
 					}
 					final var previousBuffers = nextBuffers;
 					nextBuffers = applyFilter(lastCall, nextBuffers, currentFilter, previousBuffers);
@@ -275,9 +273,9 @@ public class DataExchangeInOutStream {
 		}
 
 		private BufferVault applyFilter(final boolean lastCall,
-		                                BufferVault nextBuffers,
-		                                final DataExchangeFilter currentFilter,
-		                                final BufferVault previousBuffers) throws IOException {
+										BufferVault nextBuffers,
+										final DataExchangeFilter currentFilter,
+										final BufferVault previousBuffers) throws IOException {
 			long currentPerformance;
 			long currentDeltaThroughput;
 			long now;
@@ -309,7 +307,7 @@ public class DataExchangeInOutStream {
 				nextBuffers = previousBuffers;
 			} else if (log.isTraceEnabled()) {
 				log.trace("After apply filter {}, provide {} bytes",
-				        currentFilter.getFilterName(), nextBuffers.getSize());
+						currentFilter.getFilterName(), nextBuffers.getSize());
 			}
 			return nextBuffers;
 		}
@@ -352,7 +350,7 @@ public class DataExchangeInOutStream {
 			throw new IllegalStateException("Can't access to transfert stats during processing...");
 		}
 		return new TransfertStats(filterPerformance.computeIfAbsent(filter, f -> 0L),
-		        filterDeltaThroughput.computeIfAbsent(filter, f -> 0L));
+				filterDeltaThroughput.computeIfAbsent(filter, f -> 0L));
 	}
 
 	/**

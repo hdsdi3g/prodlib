@@ -26,11 +26,10 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class FlatJobKitEngine extends JobKitEngine {
-	private static final Logger log = LogManager.getLogger();
 	private static final String AFTER = "AFTER ";
 
 	private final FlatScheduledExecutorService flatShExecutor;

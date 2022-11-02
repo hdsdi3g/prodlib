@@ -39,14 +39,13 @@ import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.owasp.esapi.Encoder;
 import org.owasp.esapi.PropNames;
 import org.owasp.esapi.reference.DefaultEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.authkit.mod.config.ExternalLDAP;
 import tv.hd3g.authkit.mod.config.ExternalLDAP.LDAPEntry;
 import tv.hd3g.authkit.mod.config.ExternalLDAP.LDAPType;
@@ -60,8 +59,8 @@ import tv.hd3g.authkit.mod.exception.UserCantLoginException.NoPasswordUserCantLo
 import tv.hd3g.authkit.mod.exception.UserCantLoginException.UnknownUserCantLoginException;
 
 @Service
+@Slf4j
 public class ExternalAuthClientLDAPServiceImpl implements ExternalAuthClientService {
-	private static Logger log = LogManager.getLogger();
 	private static final Encoder encoder;
 	static {
 		System.setProperty(PropNames.DISCARD_LOGSPECIAL, "true");

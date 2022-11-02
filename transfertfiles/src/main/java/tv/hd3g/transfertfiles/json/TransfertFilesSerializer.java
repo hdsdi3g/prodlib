@@ -23,9 +23,6 @@ import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.time.Instant;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -36,11 +33,12 @@ import com.fasterxml.jackson.databind.node.LongNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.AbstractFile;
 import tv.hd3g.transfertfiles.CachedFileAttributes;
 
+@Slf4j
 public class TransfertFilesSerializer {
-	private static Logger log = LogManager.getLogger();
 	public static final int DEFAULT_HASHCODE = 0;
 
 	private TransfertFilesSerializer() {

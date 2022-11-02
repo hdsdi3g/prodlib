@@ -18,8 +18,6 @@ package tv.hd3g.mailkit.mod.service;
 
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -30,6 +28,7 @@ import org.thymeleaf.context.Context;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.commons.mailkit.SendMailDto;
 import tv.hd3g.commons.mailkit.SendMailService;
 
@@ -38,9 +37,8 @@ import tv.hd3g.commons.mailkit.SendMailService;
  * See https://github.com/dotSwapna/dotEmail.github.io/tree/master/src/main
  */
 @Service
+@Slf4j
 public class SendMailServiceImpl implements SendMailService {
-
-	private static Logger log = LogManager.getLogger();
 
 	@Autowired
 	private JavaMailSender mailSender;
@@ -122,8 +120,8 @@ public class SendMailServiceImpl implements SendMailService {
 
 		mailSender.send(mimeMessage);
 		log.info("Send a mail to {}: \"{}\"",
-				() -> recipients.stream().collect(Collectors.joining(", ")),
-				() -> subjectContent);
+				recipients.stream().collect(Collectors.joining(", ")),
+				subjectContent);
 		htmlTemplateEngine.clearTemplateCache();
 	}
 

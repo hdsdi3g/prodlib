@@ -27,8 +27,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +38,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.authkit.mod.dto.LoggedUserTagsTokenDto;
 import tv.hd3g.authkit.mod.dto.SetupTOTPTokenDto;
 import tv.hd3g.authkit.mod.exception.NotAcceptableSecuredTokenException;
@@ -52,9 +51,8 @@ import tv.hd3g.authkit.mod.exception.NotAcceptableSecuredTokenException.ExpiredS
 import tv.hd3g.authkit.mod.exception.NotAcceptableSecuredTokenException.InvalidFormatSecuredToken;
 
 @Service
+@Slf4j
 public class SecuredTokenServiceImpl implements SecuredTokenService {
-
-	private static Logger log = LogManager.getLogger();
 
 	public static final String TOKEN_TYPE = "JWT";
 	public static final String TOKEN_AUDIENCE = "authkit";
@@ -76,21 +74,21 @@ public class SecuredTokenServiceImpl implements SecuredTokenService {
 		final var now = System.currentTimeMillis();
 
 		return Jwts.builder()
-		        .signWith(Keys.hmacShaKeyFor(secret), HS512)
-		        .setHeaderParam("typ", TOKEN_TYPE)
-		        .setIssuer(TOKEN_ISSUER_FORM)
-		        .setAudience(TOKEN_AUDIENCE)
-		        // .setSubject("(none)")
-		        .setExpiration(new Date(now + expirationDuration.toMillis()))
-		        .claim(CLAIM_FORMNAME, formName)
-		        .compact();
+				.signWith(Keys.hmacShaKeyFor(secret), HS512)
+				.setHeaderParam("typ", TOKEN_TYPE)
+				.setIssuer(TOKEN_ISSUER_FORM)
+				.setAudience(TOKEN_AUDIENCE)
+				// .setSubject("(none)")
+				.setExpiration(new Date(now + expirationDuration.toMillis()))
+				.claim(CLAIM_FORMNAME, formName)
+				.compact();
 	}
 
 	private Jws<Claims> extractToken(final String token,
-	                                 final String expectedIssuer) throws NotAcceptableSecuredTokenException {
+									 final String expectedIssuer) throws NotAcceptableSecuredTokenException {
 		try {
 			final var parsedToken = Jwts.parserBuilder().setSigningKey(secret).build().parseClaimsJws(token);
-			log.debug("Check token: {}", () -> parsedToken);
+			log.debug("Check token: {}", parsedToken);
 
 			final var type = parsedToken.getHeader().getType();
 			if (TOKEN_TYPE.equals(type) == false) {
@@ -131,7 +129,7 @@ public class SecuredTokenServiceImpl implements SecuredTokenService {
 
 	@Override
 	public void simpleFormCheckToken(final String expectedFormName,
-	                                 final String token) throws NotAcceptableSecuredTokenException {
+									 final String token) throws NotAcceptableSecuredTokenException {
 		final var parsedToken = extractToken(token, TOKEN_ISSUER_FORM);
 		final var claims = parsedToken.getBody();
 		final var tokenformName = claims.get(CLAIM_FORMNAME, String.class);
@@ -143,26 +141,26 @@ public class SecuredTokenServiceImpl implements SecuredTokenService {
 
 	@Override
 	public String loggedUserRightsGenerateToken(final String userUUID,
-	                                            final Duration expirationDuration,
-	                                            final Set<String> tags,
-	                                            final String onlyForHost) {
+												final Duration expirationDuration,
+												final Set<String> tags,
+												final String onlyForHost) {
 		final var now = System.currentTimeMillis();
 
 		return Jwts.builder()
-		        .signWith(Keys.hmacShaKeyFor(secret), HS512)
-		        .setHeaderParam("typ", TOKEN_TYPE)
-		        .setIssuer(TOKEN_ISSUER_LOGIN)
-		        .setAudience(TOKEN_AUDIENCE)
-		        .setSubject(userUUID)
-		        .setExpiration(new Date(now + expirationDuration.toMillis()))
-		        .claim("tags", tags)
-		        .claim("host", onlyForHost)
-		        .compact();
+				.signWith(Keys.hmacShaKeyFor(secret), HS512)
+				.setHeaderParam("typ", TOKEN_TYPE)
+				.setIssuer(TOKEN_ISSUER_LOGIN)
+				.setAudience(TOKEN_AUDIENCE)
+				.setSubject(userUUID)
+				.setExpiration(new Date(now + expirationDuration.toMillis()))
+				.claim("tags", tags)
+				.claim("host", onlyForHost)
+				.compact();
 	}
 
 	@Override
 	public LoggedUserTagsTokenDto loggedUserRightsExtractToken(final String token,
-	                                                           final boolean fromCookie) throws NotAcceptableSecuredTokenException {
+															   final boolean fromCookie) throws NotAcceptableSecuredTokenException {
 		final var claims = extractToken(token, TOKEN_ISSUER_LOGIN).getBody();
 		final ArrayList<?> rawTags = claims.get("tags", ArrayList.class);
 		final String host;
@@ -177,45 +175,45 @@ public class SecuredTokenServiceImpl implements SecuredTokenService {
 
 	@Override
 	public String securedRedirectRequestGenerateToken(final String userUUID,
-	                                                  final Duration expirationDuration,
-	                                                  final String target) {
+													  final Duration expirationDuration,
+													  final String target) {
 		final var now = System.currentTimeMillis();
 		return Jwts.builder()
-		        .signWith(Keys.hmacShaKeyFor(secret), HS512)
-		        .setHeaderParam("typ", TOKEN_TYPE)
-		        .setIssuer(TOKEN_ISSUER_SECUREDREQUEST + "/" + target)
-		        .setAudience(TOKEN_AUDIENCE)
-		        .setSubject(userUUID)
-		        .setExpiration(new Date(now + expirationDuration.toMillis()))
-		        .compact();
+				.signWith(Keys.hmacShaKeyFor(secret), HS512)
+				.setHeaderParam("typ", TOKEN_TYPE)
+				.setIssuer(TOKEN_ISSUER_SECUREDREQUEST + "/" + target)
+				.setAudience(TOKEN_AUDIENCE)
+				.setSubject(userUUID)
+				.setExpiration(new Date(now + expirationDuration.toMillis()))
+				.compact();
 	}
 
 	@Override
 	public String securedRedirectRequestExtractToken(final String token,
-	                                                 final String expectedTarget) throws NotAcceptableSecuredTokenException {
+													 final String expectedTarget) throws NotAcceptableSecuredTokenException {
 		return extractToken(token, TOKEN_ISSUER_SECUREDREQUEST + "/" + expectedTarget).getBody().getSubject();
 	}
 
 	@Override
 	public String userFormGenerateToken(final String formName,
-	                                    final String userUUID,
-	                                    final Duration expirationDuration) {
+										final String userUUID,
+										final Duration expirationDuration) {
 		final var now = System.currentTimeMillis();
 
 		return Jwts.builder()
-		        .signWith(Keys.hmacShaKeyFor(secret), HS512)
-		        .setHeaderParam("typ", TOKEN_TYPE)
-		        .setIssuer(TOKEN_ISSUER_FORM)
-		        .setAudience(TOKEN_AUDIENCE)
-		        .setSubject(userUUID)
-		        .setExpiration(new Date(now + expirationDuration.toMillis()))
-		        .claim(CLAIM_FORMNAME, formName)
-		        .compact();
+				.signWith(Keys.hmacShaKeyFor(secret), HS512)
+				.setHeaderParam("typ", TOKEN_TYPE)
+				.setIssuer(TOKEN_ISSUER_FORM)
+				.setAudience(TOKEN_AUDIENCE)
+				.setSubject(userUUID)
+				.setExpiration(new Date(now + expirationDuration.toMillis()))
+				.claim(CLAIM_FORMNAME, formName)
+				.compact();
 	}
 
 	@Override
 	public String userFormExtractTokenUUID(final String formName,
-	                                       final String securetoken) throws NotAcceptableSecuredTokenException {
+										   final String securetoken) throws NotAcceptableSecuredTokenException {
 		final var claims = extractToken(securetoken, TOKEN_ISSUER_FORM).getBody();
 		final var expectedFormName = claims.get(CLAIM_FORMNAME, String.class);
 		if (formName.equals(expectedFormName) == false) {
@@ -227,21 +225,21 @@ public class SecuredTokenServiceImpl implements SecuredTokenService {
 
 	@Override
 	public String setupTOTPGenerateToken(final String userUUID,
-	                                     final Duration expirationDuration,
-	                                     final String secret,
-	                                     final List<String> backupCodes) {
+										 final Duration expirationDuration,
+										 final String secret,
+										 final List<String> backupCodes) {
 		final var now = System.currentTimeMillis();
 
 		return Jwts.builder()
-		        .signWith(Keys.hmacShaKeyFor(this.secret), HS512)
-		        .setHeaderParam("typ", TOKEN_TYPE)
-		        .setIssuer(TOKEN_ISSUER_SETUPTOTP)
-		        .setAudience(TOKEN_AUDIENCE)
-		        .setSubject(userUUID)
-		        .setExpiration(new Date(now + expirationDuration.toMillis()))
-		        .claim("secret", secret)
-		        .claim("backupCodes", backupCodes)
-		        .compact();
+				.signWith(Keys.hmacShaKeyFor(this.secret), HS512)
+				.setHeaderParam("typ", TOKEN_TYPE)
+				.setIssuer(TOKEN_ISSUER_SETUPTOTP)
+				.setAudience(TOKEN_AUDIENCE)
+				.setSubject(userUUID)
+				.setExpiration(new Date(now + expirationDuration.toMillis()))
+				.claim("secret", secret)
+				.claim("backupCodes", backupCodes)
+				.compact();
 	}
 
 	@Override

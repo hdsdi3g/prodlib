@@ -39,13 +39,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Stream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.fasterxml.jackson.databind.JsonNode;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class Supervisable {
-	private static Logger log = LogManager.getLogger();
 
 	static final ThreadLocal<Supervisable> manuallyRegistedSupervisables = new ThreadLocal<>();
 

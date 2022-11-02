@@ -27,19 +27,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Context.Builder;
 import org.graalvm.polyglot.Value;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.commons.jsconfig.mod.JSConfigConfig;
 
 @Getter
+@Slf4j
 public class JSContextLoader {
-	private static final Logger log = LogManager.getLogger();
-
 	private final Context context;
 	private final Value binding;
 

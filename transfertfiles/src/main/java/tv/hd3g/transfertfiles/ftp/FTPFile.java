@@ -46,9 +46,8 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.io.CopyStreamEvent;
 import org.apache.commons.net.io.CopyStreamException;
 import org.apache.commons.net.io.CopyStreamListener;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.AbstractFile;
 import tv.hd3g.transfertfiles.AbstractFileSystem;
 import tv.hd3g.transfertfiles.CachedFileAttributes;
@@ -58,10 +57,9 @@ import tv.hd3g.transfertfiles.SizedStoppableCopyCallback;
 import tv.hd3g.transfertfiles.TransfertObserver;
 import tv.hd3g.transfertfiles.TransfertObserver.TransfertDirection;
 
+@Slf4j
 public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 	private static final String FTP_ERROR_DURING_LIST = "FTP error during list \"";
-
-	private static final Logger log = LogManager.getLogger();
 
 	private final FTPClient ftpClient;
 	private String actualCWD;

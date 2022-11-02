@@ -16,6 +16,9 @@
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
+    <dependencies>
+    </dependencies>
+
     <licenses>
         <license>
             <name>GNU General Public License, Version 3</name>

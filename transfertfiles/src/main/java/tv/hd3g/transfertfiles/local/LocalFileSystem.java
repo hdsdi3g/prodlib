@@ -23,15 +23,13 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Objects;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.AbstractFile;
 import tv.hd3g.transfertfiles.CommonAbstractFileSystem;
 import tv.hd3g.transfertfiles.InvalidURLException;
 
+@Slf4j
 public class LocalFileSystem extends CommonAbstractFileSystem<LocalFile> {
-	private static final Logger log = LogManager.getLogger();
 
 	private final File relativePath;
 

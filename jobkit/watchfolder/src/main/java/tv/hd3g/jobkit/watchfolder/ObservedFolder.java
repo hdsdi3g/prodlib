@@ -28,15 +28,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.EqualsAndHashCode;
 import lombok.EqualsAndHashCode.Include;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.AbstractFile;
 import tv.hd3g.transfertfiles.AbstractFileSystemURL;
 import tv.hd3g.transfertfiles.InvalidURLException;
@@ -45,8 +43,8 @@ import tv.hd3g.transfertfiles.URLAccess;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Slf4j
 public class ObservedFolder {
-	private static final Logger log = LogManager.getLogger();
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String targetFolder;

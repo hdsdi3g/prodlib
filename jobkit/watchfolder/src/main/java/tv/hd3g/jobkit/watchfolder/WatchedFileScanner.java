@@ -28,16 +28,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.AbstractFile;
 import tv.hd3g.transfertfiles.AbstractFileSystemURL;
 import tv.hd3g.transfertfiles.CachedFileAttributes;
 
+@Slf4j
 public class WatchedFileScanner {
-	private static Logger log = LogManager.getLogger();
 
 	@Getter
 	private final int maxDeep;
@@ -120,12 +118,12 @@ public class WatchedFileScanner {
 
 		detected.addAll(result);
 
-		log.debug(() -> "Scanned files/dirs for \"" + aSource.getPath() + "\" (deep " + deep + "): "
-						+ result.stream()
-								.map(CachedFileAttributes::getName)
-								.sorted()
-								.collect(joining(", "))
-						+ " on \"" + aSource.getFileSystem().toString() + "\"");
+		log.debug("Scanned files/dirs for \"" + aSource.getPath() + "\" (deep " + deep + "): "
+				  + result.stream()
+						  .map(CachedFileAttributes::getName)
+						  .sorted()
+						  .collect(joining(", "))
+				  + " on \"" + aSource.getFileSystem().toString() + "\"");
 		if (deep > 0) {
 			result.stream()
 					.filter(CachedFileAttributes::isDirectory)

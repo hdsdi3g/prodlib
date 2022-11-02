@@ -16,6 +16,7 @@
  */
 package tv.hd3g.commons.version.mod;
 
+import static java.util.stream.Collectors.joining;
 import static javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD;
 import static javax.xml.XMLConstants.ACCESS_EXTERNAL_SCHEMA;
 import static javax.xml.xpath.XPathConstants.STRING;
@@ -25,7 +26,6 @@ import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,8 +33,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -42,11 +40,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.xml.sax.SAXException;
 
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.commons.version.EnvironmentVersion;
 
+@Slf4j
 @Configuration
 public class EnvVersionConfigurer {
-	private static final Logger log = LogManager.getLogger();
 
 	@Bean
 	EnvironmentVersion getEnvVersion(final ApplicationContext context) {
@@ -123,8 +122,7 @@ public class EnvVersionConfigurer {
 				Thread.onSpinWait();
 			}
 			if (r.exitValue() != 0) {
-				log.warn("Can't run maven: {}",
-						() -> r.errorReader().lines().collect(Collectors.joining("; ")));
+				log.warn("Can't run maven: {}", r.errorReader().lines().collect(joining("; ")));
 				return Optional.empty();
 			}
 			final var buffer = new byte[256];

@@ -30,9 +30,12 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPSClient;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * FTP TLS/SSL explicit client
  */
+@Slf4j
 public class FTPESFileSystem extends FTPFileSystem {// NOSONAR S2160
 
 	private final boolean ignoreInvalidCertificates;

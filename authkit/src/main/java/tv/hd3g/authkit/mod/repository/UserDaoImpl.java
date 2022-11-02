@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -29,6 +27,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.authkit.mod.component.SqlFileResourceHelper;
 import tv.hd3g.authkit.mod.dto.ressource.UserDto;
 import tv.hd3g.authkit.mod.entity.Credential;
@@ -36,8 +35,8 @@ import tv.hd3g.authkit.mod.entity.User;
 import tv.hd3g.authkit.mod.exception.AuthKitException;
 
 @Repository
+@Slf4j
 public class UserDaoImpl implements UserDao {
-	private static Logger log = LogManager.getLogger();
 
 	private static final String HQL_CLIENT_ADDR = "clientAddr";
 

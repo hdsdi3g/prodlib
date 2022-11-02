@@ -19,13 +19,11 @@ package tv.hd3g.jobkit.watchfolder;
 import java.time.Duration;
 import java.util.Collection;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.transfertfiles.CachedFileAttributes;
 
+@Slf4j
 class FileInMemoryDb {
-	private static final Logger log = LogManager.getLogger();
 
 	private final boolean isDirectory;
 	private final boolean pickUpFiles;
