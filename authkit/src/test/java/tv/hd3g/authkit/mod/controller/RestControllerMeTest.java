@@ -41,8 +41,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -60,6 +58,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.dto.Password;
 import tv.hd3g.authkit.mod.dto.ressource.UserPrivacyDto;
 import tv.hd3g.authkit.mod.dto.validated.AddUserDto;
@@ -109,7 +108,7 @@ class RestControllerMeTest {
 	private String userPassword;
 
 	@BeforeEach
-	private void init() throws Exception {
+	void init() throws Exception {
 		MockitoAnnotations.openMocks(this).close();
 		DataGenerator.setupMock(request);
 
@@ -134,10 +133,10 @@ class RestControllerMeTest {
 		chPasswordDto.setNewpassword(newPassword);
 
 		mvc.perform(post(baseMapping + "/" + "chpasswd")
-		        .headers(baseHeaders)
-		        .contentType(APPLICATION_JSON_VALUE)
-		        .content(objectMapper.writeValueAsString(chPasswordDto)))
-		        .andExpect(statusOk);
+				.headers(baseHeaders)
+				.contentType(APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(chPasswordDto)))
+				.andExpect(statusOk);
 
 		final var loginForm = new LoginFormDto();
 		loginForm.setUserlogin(userLogin);
@@ -150,13 +149,13 @@ class RestControllerMeTest {
 	@Test
 	void prepareTOTP() throws Exception {
 		mvc.perform(get(baseMapping + "/" + "set2auth")
-		        .headers(baseHeaders))
-		        .andExpectAll(statusOkUtf8)
-		        .andExpect(jsonPath("$.secret").isString())
-		        .andExpect(jsonPath("$.totpURI").isString())
-		        .andExpect(jsonPath("$.qrcode").isString())
-		        .andExpect(jsonPath("$.backupCodes").isArray())
-		        .andExpect(jsonPath("$.jwtControl").isString());
+				.headers(baseHeaders))
+				.andExpectAll(statusOkUtf8)
+				.andExpect(jsonPath("$.secret").isString())
+				.andExpect(jsonPath("$.totpURI").isString())
+				.andExpect(jsonPath("$.qrcode").isString())
+				.andExpect(jsonPath("$.backupCodes").isArray())
+				.andExpect(jsonPath("$.jwtControl").isString());
 	}
 
 	@Test
@@ -166,10 +165,10 @@ class RestControllerMeTest {
 		totpService.setupTOTP(secret, backupCodes, userUUID);
 
 		mvc.perform(get(baseMapping + "/" + "set2auth")
-		        .headers(baseHeaders))
-		        .andExpect(statusBadRequest)
-		        .andExpect(contentTypeJsonUtf8)
-		        .andExpect(jsonPath("$.message").isString());
+				.headers(baseHeaders))
+				.andExpect(statusBadRequest)
+				.andExpect(contentTypeJsonUtf8)
+				.andExpect(jsonPath("$.message").isString());
 	}
 
 	@Test
@@ -184,10 +183,10 @@ class RestControllerMeTest {
 		setupDto.setCurrentpassword(userPassword);
 
 		mvc.perform(post(baseMapping + "/" + "set2auth")
-		        .headers(baseHeaders)
-		        .contentType(APPLICATION_JSON_VALUE)
-		        .content(objectMapper.writeValueAsString(setupDto)))
-		        .andExpect(statusOk);
+				.headers(baseHeaders)
+				.contentType(APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(setupDto)))
+				.andExpect(statusOk);
 	}
 
 	@Test
@@ -200,15 +199,15 @@ class RestControllerMeTest {
 		final var checkCodeSecond = makeCodeAtTime(base32.decode(secret), System.currentTimeMillis(), timeStepSeconds);
 		setupDtoSecond.setTwoauthcode(checkCodeSecond);
 		final var controlTokenSecond = securedTokenService.setupTOTPGenerateToken(userUUID, thirtyDays, secret,
-		        backupCodes);
+				backupCodes);
 		setupDtoSecond.setControlToken(controlTokenSecond);
 		setupDtoSecond.setCurrentpassword(userPassword);
 
 		mvc.perform(post(baseMapping + "/" + "set2auth")
-		        .headers(baseHeaders)
-		        .contentType(APPLICATION_JSON_VALUE)
-		        .content(objectMapper.writeValueAsString(setupDtoSecond)))
-		        .andExpect(statusBadRequest);
+				.headers(baseHeaders)
+				.contentType(APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(setupDtoSecond)))
+				.andExpect(statusBadRequest);
 	}
 
 	@Test
@@ -218,19 +217,19 @@ class RestControllerMeTest {
 		totpService.setupTOTP(secret, backupCodes, userUUID);
 
 		mvc.perform(get(baseMapping + "/" + "has2auth")
-		        .headers(baseHeaders))
-		        .andExpectAll(statusOkUtf8)
-		        .andExpect(jsonPath("$.twoAuthEnabled").isBoolean())
-		        .andExpect(jsonPath("$.twoAuthEnabled").value(true));
+				.headers(baseHeaders))
+				.andExpectAll(statusOkUtf8)
+				.andExpect(jsonPath("$.twoAuthEnabled").isBoolean())
+				.andExpect(jsonPath("$.twoAuthEnabled").value(true));
 	}
 
 	@Test
 	void hasATOTP_no() throws Exception {
 		mvc.perform(get(baseMapping + "/" + "has2auth")
-		        .headers(baseHeaders))
-		        .andExpectAll(statusOkUtf8)
-		        .andExpect(jsonPath("$.twoAuthEnabled").isBoolean())
-		        .andExpect(jsonPath("$.twoAuthEnabled").value(false));
+				.headers(baseHeaders))
+				.andExpectAll(statusOkUtf8)
+				.andExpect(jsonPath("$.twoAuthEnabled").isBoolean())
+				.andExpect(jsonPath("$.twoAuthEnabled").value(false));
 	}
 
 	@Test
@@ -245,19 +244,19 @@ class RestControllerMeTest {
 		setupDto.setTwoauthcode(checkCode);
 
 		mvc.perform(delete(baseMapping + "/" + "set2auth")
-		        .headers(baseHeaders)
-		        .contentType(APPLICATION_JSON_VALUE)
-		        .content(objectMapper.writeValueAsString(setupDto)))
-		        .andExpect(statusOk);
+				.headers(baseHeaders)
+				.contentType(APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(setupDto)))
+				.andExpect(statusOk);
 	}
 
 	@Test
 	void isExternalAuth_no() throws Exception {
 		mvc.perform(get(baseMapping + "/" + "is-external-auth")
-		        .headers(baseHeaders))
-		        .andExpectAll(statusOkUtf8)
-		        .andExpect(jsonPath("$.externalAuthEnabled").isBoolean())
-		        .andExpect(jsonPath("$.externalAuthEnabled").value(false));
+				.headers(baseHeaders))
+				.andExpectAll(statusOkUtf8)
+				.andExpect(jsonPath("$.externalAuthEnabled").isBoolean())
+				.andExpect(jsonPath("$.externalAuthEnabled").value(false));
 	}
 
 	@Test
@@ -268,12 +267,12 @@ class RestControllerMeTest {
 		credentialRepository.save(c);
 
 		mvc.perform(get(baseMapping + "/" + "is-external-auth")
-		        .headers(baseHeaders))
-		        .andExpectAll(statusOkUtf8)
-		        .andExpect(jsonPath("$.externalAuthEnabled").isBoolean())
-		        .andExpect(jsonPath("$.externalAuthEnabled").value(true))
-		        .andExpect(jsonPath("$.domain").isString())
-		        .andExpect(jsonPath("$.domain").value(domain));
+				.headers(baseHeaders))
+				.andExpectAll(statusOkUtf8)
+				.andExpect(jsonPath("$.externalAuthEnabled").isBoolean())
+				.andExpect(jsonPath("$.externalAuthEnabled").value(true))
+				.andExpect(jsonPath("$.domain").isString())
+				.andExpect(jsonPath("$.domain").value(domain));
 	}
 
 	@Nested
@@ -300,17 +299,17 @@ class RestControllerMeTest {
 			final var expected = authenticationService.getUserPrivacyList(List.of(userUUID)).get(0);
 
 			mvc.perform(get(baseMapping + "/" + "privacy")
-			        .headers(baseHeaders))
-			        .andExpect(jsonPath("$.address").value(expected.getAddress()))
-			        .andExpect(jsonPath("$.company").value(expected.getCompany()))
-			        .andExpect(jsonPath("$.country").value(expected.getCountry()))
-			        .andExpect(jsonPath("$.email").value(expected.getEmail()))
-			        .andExpect(jsonPath("$.lang").value(expected.getLang()))
-			        .andExpect(jsonPath("$.name").value(expected.getName()))
-			        .andExpect(jsonPath("$.phone").value(expected.getPhone()))
-			        .andExpect(jsonPath("$.postalcode").value(expected.getPostalcode()))
-			        .andExpect(jsonPath("$.userUUID").value(expected.getUserUUID()))
-			        .andExpectAll(statusOkUtf8);
+					.headers(baseHeaders))
+					.andExpect(jsonPath("$.address").value(expected.getAddress()))
+					.andExpect(jsonPath("$.company").value(expected.getCompany()))
+					.andExpect(jsonPath("$.country").value(expected.getCountry()))
+					.andExpect(jsonPath("$.email").value(expected.getEmail()))
+					.andExpect(jsonPath("$.lang").value(expected.getLang()))
+					.andExpect(jsonPath("$.name").value(expected.getName()))
+					.andExpect(jsonPath("$.phone").value(expected.getPhone()))
+					.andExpect(jsonPath("$.postalcode").value(expected.getPostalcode()))
+					.andExpect(jsonPath("$.userUUID").value(expected.getUserUUID()))
+					.andExpectAll(statusOkUtf8);
 		}
 
 		@Test
@@ -326,10 +325,10 @@ class RestControllerMeTest {
 			expected.setPostalcode(StringUtils.abbreviate(makeUserLogin(), 16));
 
 			mvc.perform(put(baseMapping + "/" + "privacy")
-			        .headers(baseHeaders)
-			        .contentType(APPLICATION_JSON_VALUE)
-			        .content(objectMapper.writeValueAsString(expected)))
-			        .andExpect(statusOk);
+					.headers(baseHeaders)
+					.contentType(APPLICATION_JSON_VALUE)
+					.content(objectMapper.writeValueAsString(expected)))
+					.andExpect(statusOk);
 
 			final var afterUpdate = authenticationService.getUserPrivacyList(List.of(userUUID)).get(0);
 			assertEquals(expected, afterUpdate);

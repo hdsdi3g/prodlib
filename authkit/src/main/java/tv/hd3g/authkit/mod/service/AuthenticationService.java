@@ -21,8 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.dto.LoginRequestContentDto;
 import tv.hd3g.authkit.mod.dto.Password;
 import tv.hd3g.authkit.mod.dto.ressource.GroupOrRoleDto;
@@ -51,14 +50,14 @@ public interface AuthenticationService {
 	 * @return sessionToken String
 	 */
 	LoginRequestContentDto userLoginRequest(HttpServletRequest request,
-	                                        LoginFormDto form) throws UserCantLoginException;
+											LoginFormDto form) throws UserCantLoginException;
 
 	/**
 	 * @param request (used by Audit)
 	 * @return sessionToken String
 	 */
 	LoginRequestContentDto userLoginRequest(HttpServletRequest request,
-	                                        TOTPLogonCodeFormDto form) throws UserCantLoginException, NotAcceptableSecuredTokenException;
+											TOTPLogonCodeFormDto form) throws UserCantLoginException, NotAcceptableSecuredTokenException;
 
 	Optional<RejectLoginCause> checkPassword(Password userEnterPassword, Credential credential);
 
@@ -82,7 +81,7 @@ public interface AuthenticationService {
 	void setUserMustChangePassword(String userUUID);
 
 	void changeUserPassword(String userUUID,
-	                        Password newPassword) throws ResetWithSamePasswordException, BlockedUserException;
+							Password newPassword) throws ResetWithSamePasswordException, BlockedUserException;
 
 	List<String> getRightsForUser(String userUUID, String clientAddr);
 

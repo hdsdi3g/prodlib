@@ -34,15 +34,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.util.SharedByteArrayInputStream;
-
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 
+import jakarta.mail.BodyPart;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.SharedByteArrayInputStream;
 import tv.hd3g.commons.mailkit.SendMailDto.MessageGrade;
 
 public class MimeMessageAnalyzer {

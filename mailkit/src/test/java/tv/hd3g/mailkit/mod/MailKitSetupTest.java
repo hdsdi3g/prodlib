@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.spring5.messageresolver.SpringMessageResolver;
+import org.thymeleaf.spring6.messageresolver.SpringMessageResolver;
 
 import tv.hd3g.mailkit.mod.configuration.MailKitSetup;
 

@@ -1,6 +1,6 @@
 package tv.hd3g.authkit.mod;
 
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static tv.hd3g.authkit.tool.DataGenerator.makeRandomString;
 

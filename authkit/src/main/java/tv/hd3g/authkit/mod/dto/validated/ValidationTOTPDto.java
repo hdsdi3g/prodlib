@@ -16,11 +16,10 @@
  */
 package tv.hd3g.authkit.mod.dto.validated;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-
 import org.springframework.lang.Nullable;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import tv.hd3g.authkit.mod.dto.Password;
 
 public class ValidationTOTPDto {

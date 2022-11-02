@@ -18,9 +18,6 @@ package tv.hd3g.mailkit.mod.service;
 
 import java.util.stream.Collectors;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +28,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import tv.hd3g.commons.mailkit.SendMailDto;
 import tv.hd3g.commons.mailkit.SendMailService;
 

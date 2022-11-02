@@ -16,11 +16,9 @@
  */
 package tv.hd3g.authkit.mod.service;
 
-import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
+import static jakarta.transaction.Transactional.TxType.REQUIRES_NEW;
 
 import java.util.Arrays;
-
-import javax.transaction.Transactional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import tv.hd3g.authkit.mod.controller.RestControllerUser;
 import tv.hd3g.authkit.mod.dto.Password;
 import tv.hd3g.authkit.mod.dto.validated.AddGroupOrRoleDto;
@@ -55,7 +54,7 @@ public class CmdLineServiceImpl implements CmdLineService {
 	@Override
 	@Transactional(REQUIRES_NEW)
 	public void addOrUpdateSecurityAdminUser(final String login,
-	                                         final Password password) throws ResetWithSamePasswordException {
+											 final Password password) throws ResetWithSamePasswordException {
 		final var previousUser = credentialRepository.getFromRealmLogin(realm, login);
 		final String userUUID;
 		if (previousUser != null) {
@@ -88,9 +87,9 @@ public class CmdLineServiceImpl implements CmdLineService {
 		authenticationService.addGroupInRole(g.getName(), r.getName());
 
 		Arrays.stream(RestControllerUser.class.getAnnotationsByType(CheckBefore.class)).findFirst().map(
-		        cb -> Arrays.stream(cb.value())).ifPresent(
-		                cb -> cb.forEach(
-		                        rightName -> authenticationService.addRightInRole(r.getName(), rightName)));
+				cb -> Arrays.stream(cb.value())).ifPresent(
+						cb -> cb.forEach(
+								rightName -> authenticationService.addRightInRole(r.getName(), rightName)));
 	}
 
 }

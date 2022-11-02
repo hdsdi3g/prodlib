@@ -16,16 +16,11 @@
  */
 package tv.hd3g.authkit.mod.controller;
 
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 
 import java.time.Duration;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +35,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import tv.hd3g.authkit.mod.ControllerInterceptor;
 import tv.hd3g.authkit.mod.dto.LoginRequestContentDto;
 import tv.hd3g.authkit.mod.dto.validated.LoginFormDto;
@@ -101,10 +100,10 @@ public class ControllerLogin {
 	@PostMapping("/login")
 	@AuditAfter(useSecurity = true, value = "Auth login page")
 	public String doLogin(final Model model,
-	                      @ModelAttribute @Valid final LoginFormDto form,
-	                      final BindingResult bindingResult,
-	                      final HttpServletRequest request,
-	                      final HttpServletResponse response) {
+						  @ModelAttribute @Valid final LoginFormDto form,
+						  final BindingResult bindingResult,
+						  final HttpServletRequest request,
+						  final HttpServletResponse response) {
 
 		if (bindingResult.hasErrors()) {
 			return sendLoginBindingError(model, response);
@@ -122,7 +121,7 @@ public class ControllerLogin {
 			 */
 			final var userUUID = e.getUserUUID();
 			final var token = tokenService.userFormGenerateToken(TOKEN_FORMNAME_ENTER_TOTP, userUUID,
-			        expirationDuration);
+					expirationDuration);
 
 			model.addAttribute("shorttime", form.getShorttime());
 			model.addAttribute(TMPL_ATTR_FORMTOKEN, token);
@@ -130,7 +129,7 @@ public class ControllerLogin {
 		} catch (final UserMustChangePasswordException e) {
 			final var userUUID = e.getUserUUID();
 			final var token = tokenService.userFormGenerateToken(TOKEN_FORMNAME_RESET_PSD, userUUID,
-			        expirationDuration);
+					expirationDuration);
 			model.addAttribute(TMPL_ATTR_FORMTOKEN, token);
 			return TMPL_NAME_RESET_PSD;
 		} catch (final UserCantLoginException e) {
@@ -146,17 +145,17 @@ public class ControllerLogin {
 		response.addCookie(cookie);
 
 		model.addAttribute(BOUNCETO, ServletUriComponentsBuilder
-		        .fromCurrentContextPath()
-		        .path(redirectToAfterLogout)
-		        .toUriString());
+				.fromCurrentContextPath()
+				.path(redirectToAfterLogout)
+				.toUriString());
 		return "bounce-logout";
 	}
 
 	@GetMapping("/reset-password/{token}")
 	public String resetPassword(@PathVariable("token") @NotEmpty final String token,
-	                            final Model model,
-	                            final HttpServletRequest request,
-	                            final HttpServletResponse response) {
+								final Model model,
+								final HttpServletRequest request,
+								final HttpServletResponse response) {
 		final String userUUID;
 		try {
 			userUUID = tokenService.securedRedirectRequestExtractToken(token, TOKEN_REDIRECT_RESET_PSD);
@@ -170,7 +169,7 @@ public class ControllerLogin {
 		}
 
 		final var userFormToken = tokenService.userFormGenerateToken(
-		        TOKEN_FORMNAME_RESET_PSD, userUUID, expirationDuration);
+				TOKEN_FORMNAME_RESET_PSD, userUUID, expirationDuration);
 		model.addAttribute(TMPL_ATTR_FORMTOKEN, userFormToken);
 		return TMPL_NAME_RESET_PSD;
 	}
@@ -178,22 +177,22 @@ public class ControllerLogin {
 	@PostMapping("/reset-password")
 	@AuditAfter(useSecurity = true, value = "Reset password", changeSecurity = true)
 	public String doResetPassword(final Model model,
-	                              @ModelAttribute @Valid final ResetPasswordFormDto form,
-	                              final BindingResult bindingResult,
-	                              final HttpServletRequest request,
-	                              final HttpServletResponse response) {
+								  @ModelAttribute @Valid final ResetPasswordFormDto form,
+								  final BindingResult bindingResult,
+								  final HttpServletRequest request,
+								  final HttpServletResponse response) {
 
 		if (bindingResult.hasErrors()) {
 			response.setStatus(SC_BAD_REQUEST);
 			final var errorMessage = messageSource.getMessage("authkit.reset-password.form-error", null,
-			        getLocale());
+					getLocale());
 			model.addAttribute(TMPL_ATTR_ERROR, errorMessage);
 			model.addAttribute(TMPL_ATTR_FORMTOKEN, form.getSecuretoken());
 			return TMPL_NAME_RESET_PSD;
 		} else if (form.checkSamePasswords() == false) {
 			response.setStatus(SC_BAD_REQUEST);
 			final var errorMessage = messageSource.getMessage("authkit.reset-password.form-error.notsamepass", null,
-			        getLocale());
+					getLocale());
 			model.addAttribute(TMPL_ATTR_ERROR, errorMessage);
 			model.addAttribute(TMPL_ATTR_FORMTOKEN, form.getSecuretoken());
 			return TMPL_NAME_RESET_PSD;
@@ -205,7 +204,7 @@ public class ControllerLogin {
 		} catch (final ResetWithSamePasswordException e) {
 			response.setStatus(SC_BAD_REQUEST);
 			final var errorMessage = messageSource.getMessage("authkit.reset-password.invalidpassword", null,
-			        getLocale());
+					getLocale());
 			model.addAttribute(TMPL_ATTR_ERROR, errorMessage);
 			model.addAttribute(TMPL_ATTR_FORMTOKEN, form.getSecuretoken());
 			return TMPL_NAME_RESET_PSD;
@@ -232,10 +231,10 @@ public class ControllerLogin {
 	@PostMapping("/login-2auth")
 	@AuditAfter(useSecurity = true, value = "TOTP Logon", changeSecurity = false)
 	public String doTOTPLogin(final Model model,
-	                          @ModelAttribute @Valid final TOTPLogonCodeFormDto totpForm,
-	                          final BindingResult bindingResult,
-	                          final HttpServletRequest request,
-	                          final HttpServletResponse response) {
+							  @ModelAttribute @Valid final TOTPLogonCodeFormDto totpForm,
+							  final BindingResult bindingResult,
+							  final HttpServletRequest request,
+							  final HttpServletResponse response) {
 		if (bindingResult.hasErrors()) {
 			return sendLoginBindingError(model, response);
 		}
@@ -259,9 +258,9 @@ public class ControllerLogin {
 	}
 
 	private String prepareResponseAfterLogon(final Model model,
-	                                         final HttpServletRequest request,
-	                                         final HttpServletResponse response,
-	                                         final LoginRequestContentDto userSession) {
+											 final HttpServletRequest request,
+											 final HttpServletResponse response,
+											 final LoginRequestContentDto userSession) {
 		model.addAttribute("jwtsession", userSession.getUserSessionToken());
 		final var cookie = userSession.getUserSessionCookie();
 		cookie.setSecure(true);
@@ -275,22 +274,22 @@ public class ControllerLogin {
 		}
 
 		final var redirectTo = oUserRedirectTo
-		        .map(path -> {
-			        final var builder = ServletUriComponentsBuilder.fromCurrentRequest();
-			        final var qMark = path.indexOf("?");
-			        if (qMark > 0 && qMark + 1 < path.length()) {
-				        return builder
-				                .replacePath(path.substring(0, qMark))
-				                .query(path.substring(qMark + 1));
-			        } else {
-				        return builder.replacePath(path);
-			        }
-		        })
-		        .map(UriComponentsBuilder::toUriString)
-		        .orElseGet(() -> ServletUriComponentsBuilder
-		                .fromCurrentContextPath()
-		                .path(redirectToAfterLogin)
-		                .toUriString());
+				.map(path -> {
+					final var builder = ServletUriComponentsBuilder.fromCurrentRequest();
+					final var qMark = path.indexOf("?");
+					if (qMark > 0 && qMark + 1 < path.length()) {
+						return builder
+								.replacePath(path.substring(0, qMark))
+								.query(path.substring(qMark + 1));
+					} else {
+						return builder.replacePath(path);
+					}
+				})
+				.map(UriComponentsBuilder::toUriString)
+				.orElseGet(() -> ServletUriComponentsBuilder
+						.fromCurrentContextPath()
+						.path(redirectToAfterLogin)
+						.toUriString());
 
 		model.addAttribute(BOUNCETO, redirectTo);
 		return "bounce-session";
@@ -300,8 +299,8 @@ public class ControllerLogin {
 	 * Invalid/expired form token
 	 */
 	private String sendErrorExpiredFormTokenDuringLogin(final Model model,
-	                                                    final HttpServletResponse response,
-	                                                    final NotAcceptableSecuredTokenException e) {
+														final HttpServletResponse response,
+														final NotAcceptableSecuredTokenException e) {
 		response.setStatus(SC_BAD_REQUEST);
 		final var errorMessage = messageSource.getMessage(e.getClass().getSimpleName(), null, getLocale());
 		model.addAttribute(TMPL_ATTR_ERROR, errorMessage);
@@ -314,8 +313,8 @@ public class ControllerLogin {
 	 * Bad Code (TOTP), disabled/blocked user.
 	 */
 	private String sendErrorDisabledBlockedUserDuringLogin(final Model model,
-	                                                       final HttpServletResponse response,
-	                                                       final UserCantLoginException e) {
+														   final HttpServletResponse response,
+														   final UserCantLoginException e) {
 		response.setStatus(e.getHttpReturnCode());
 		final var errorMessage = messageSource.getMessage(e.getClass().getSimpleName(), null, getLocale());
 		model.addAttribute(TMPL_ATTR_ERROR, errorMessage);

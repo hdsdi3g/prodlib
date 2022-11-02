@@ -20,8 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static tv.hd3g.authkit.tool.DataGenerator.makeUserLogin;
 import static tv.hd3g.authkit.tool.DataGenerator.makeUserPassword;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -29,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.dto.Password;
 import tv.hd3g.authkit.mod.dto.validated.AddUserDto;
 import tv.hd3g.authkit.mod.dto.validated.LoginFormDto;

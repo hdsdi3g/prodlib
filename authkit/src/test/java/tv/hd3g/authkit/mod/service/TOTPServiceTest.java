@@ -37,7 +37,6 @@ import java.util.Base64;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base32;
 import org.junit.jupiter.api.Assertions;
@@ -52,6 +51,7 @@ import com.google.zxing.NotFoundException;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.dto.LoggedUserTagsTokenDto;
 import tv.hd3g.authkit.mod.dto.LoginRequestContentDto;
 import tv.hd3g.authkit.mod.dto.Password;
@@ -109,11 +109,11 @@ class TOTPServiceTest {
 	@Test
 	void makeQRCode() throws NotFoundException, IOException, URISyntaxException {
 		final var uri = new URI(
-		        "otpauth://totp/" + makeUserLogin() + "@" + makeUserLogin() + "?secret=" + makeUserLogin());
+				"otpauth://totp/" + makeUserLogin() + "@" + makeUserLogin() + "?secret=" + makeUserLogin());
 		final var qr = totpService.makeQRCode(uri);
 		final var source = new ByteArrayInputStream(Base64.getDecoder().decode(qr));
 		final var binaryBitmap = new BinaryBitmap(new HybridBinarizer(
-		        new BufferedImageLuminanceSource(ImageIO.read(source))));
+				new BufferedImageLuminanceSource(ImageIO.read(source))));
 		final var qrCodeResult = new MultiFormatReader().decode(binaryBitmap);
 		final var decoded = qrCodeResult.getText();
 
@@ -124,7 +124,7 @@ class TOTPServiceTest {
 	void makeBackupCodes() {
 		assertEquals(backupCodeQuantity, totpService.makeBackupCodes().size());
 		assertTrue(totpService.makeBackupCodes().stream()
-		        .allMatch(code -> code.length() == 6 && Integer.parseInt(code) >= 0));
+				.allMatch(code -> code.length() == 6 && Integer.parseInt(code) >= 0));
 	}
 
 	@Test
@@ -182,7 +182,7 @@ class TOTPServiceTest {
 		final var credential = credentialRepository.getByUserUUID(uuid);
 
 		Assertions.assertThrows(BadTOTPCodeCantLoginException.class,
-		        () -> totpService.checkCode(credential, "-1"));
+				() -> totpService.checkCode(credential, "-1"));
 	}
 
 	@Test
@@ -234,7 +234,7 @@ class TOTPServiceTest {
 		final var someRandoms = r.ints(500, 0, 1_000_000).mapToObj(i -> i).collect(toUnmodifiableList());
 		for (final int code : someRandoms) {
 			Assertions.assertThrows(BadTOTPCodeCantLoginException.class,
-			        () -> totpService.checkCode(credential, String.valueOf(code)));
+					() -> totpService.checkCode(credential, String.valueOf(code)));
 		}
 	}
 
@@ -261,7 +261,7 @@ class TOTPServiceTest {
 	}
 
 	private LoggedUserTagsTokenDto checkLoginRequestContent(final LoginRequestContentDto loginRequest,
-	                                                        final String userUUID) {
+															final String userUUID) {
 		assertNotNull(loginRequest);
 		final var token = loginRequest.getUserSessionToken();
 		final var cookie = loginRequest.getUserSessionCookie();

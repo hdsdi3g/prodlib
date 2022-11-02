@@ -16,7 +16,7 @@
  */
 package tv.hd3g.authkit.mod.service;
 
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.owasp.encoder.Encode.forJavaScript;
 

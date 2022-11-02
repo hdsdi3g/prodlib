@@ -20,14 +20,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static tv.hd3g.authkit.tool.DataGenerator.makeRandomString;
 
-import javax.servlet.http.Cookie;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import jakarta.servlet.http.Cookie;
 
 class LoginRequestContentDtoTest {
 	@Mock

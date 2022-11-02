@@ -29,8 +29,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,6 +37,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.entity.Audit;
 import tv.hd3g.authkit.mod.repository.AuditRepository;
 
@@ -65,8 +64,8 @@ public class AuditReportServiceImpl implements AuditReportService {
 
 	public static String getOriginalRemoteAddr(final HttpServletRequest request) {
 		return Optional.ofNullable(request.getHeader("X-Forwarded-For"))
-		        .map(proxyReturn -> Arrays.stream(proxyReturn.split(",")).findFirst().get().trim())
-		        .orElse(request.getRemoteAddr());
+				.map(proxyReturn -> Arrays.stream(proxyReturn.split(",")).findFirst().get().trim())
+				.orElse(request.getRemoteAddr());
 	}
 
 	private static String getFullURLQuery(final HttpServletRequest request) {
@@ -80,11 +79,11 @@ public class AuditReportServiceImpl implements AuditReportService {
 		final var requestlength = request.getContentLengthLong();
 
 		return new Audit(appname, UUID.randomUUID().toString(),
-		        clientsourcehost, request.getRemotePort(),
-		        request.getLocalAddr(), request.getLocalPort(),
-		        eventName, request.getScheme(), request.getMethod(),
-		        getFullURLQuery(request),
-		        requestcontenttype, requestlength);
+				clientsourcehost, request.getRemotePort(),
+				request.getLocalAddr(), request.getLocalPort(),
+				eventName, request.getScheme(), request.getMethod(),
+				getFullURLQuery(request),
+				requestcontenttype, requestlength);
 	}
 
 	@Override
@@ -97,7 +96,7 @@ public class AuditReportServiceImpl implements AuditReportService {
 	public String interceptForbiddenRequest(final HttpServletRequest request) {
 		final var userUUID = getRequestUserUUID(request).orElse(null);
 		log.info("Audit forbiddenRequestException from {} in {} by {}", getOriginalRemoteAddr(request), getFullURLQuery(
-		        request), userUUID);
+				request), userUUID);
 		final var audit = prepareAudit(request, EVENTNAME_FORBIDDEN_REQUEST);
 		audit.setUseruuid(userUUID);
 		return auditRepository.save(audit).getEventref();
@@ -109,11 +108,11 @@ public class AuditReportServiceImpl implements AuditReportService {
 
 	@Override
 	public String onImportantError(final HttpServletRequest request,
-	                               final List<String> names,
-	                               final Exception e) {
+								   final List<String> names,
+								   final Exception e) {
 		final var userUUID = getRequestUserUUID(request).orElse(null);
 		log.info("Audit error from {} in {} by {} [{}]",
-		        getOriginalRemoteAddr(request), getFullURLQuery(request), userUUID, names, e);
+				getOriginalRemoteAddr(request), getFullURLQuery(request), userUUID, names, e);
 
 		final var audit = prepareAudit(request, EVENTNAME_ERROR);
 		audit.setUseruuid(userUUID);
@@ -131,7 +130,7 @@ public class AuditReportServiceImpl implements AuditReportService {
 	public String onChangeSecurity(final HttpServletRequest request, final List<String> names) {
 		final var userUUID = getRequestUserUUID(request).orElse(null);
 		log.info("Audit change security from {} in {} by {} [{}]",
-		        getOriginalRemoteAddr(request), getFullURLQuery(request), userUUID, names);
+				getOriginalRemoteAddr(request), getFullURLQuery(request), userUUID, names);
 		final var audit = prepareAudit(request, EVENTNAME_CHANGE_SECURITY);
 		audit.setUseruuid(userUUID);
 		setAuditNames(audit, names);
@@ -142,7 +141,7 @@ public class AuditReportServiceImpl implements AuditReportService {
 	public String onUseSecurity(final HttpServletRequest request, final List<String> names) {
 		final var userUUID = getRequestUserUUID(request).orElse(null);
 		log.info("Audit use security from {} in {} by {} [{}]",
-		        getOriginalRemoteAddr(request), getFullURLQuery(request), userUUID, names);
+				getOriginalRemoteAddr(request), getFullURLQuery(request), userUUID, names);
 		final var audit = prepareAudit(request, EVENTNAME_USE_SECURITY);
 		audit.setUseruuid(userUUID);
 		setAuditNames(audit, names);
@@ -153,7 +152,7 @@ public class AuditReportServiceImpl implements AuditReportService {
 	public String onSimpleEvent(final HttpServletRequest request, final List<String> names) {
 		final var userUUID = getRequestUserUUID(request).orElse(null);
 		log.info("Audit simple event from {} in {} by {} [{}]",
-		        getOriginalRemoteAddr(request), getFullURLQuery(request), userUUID, names);
+				getOriginalRemoteAddr(request), getFullURLQuery(request), userUUID, names);
 		final var audit = prepareAudit(request, EVENTNAME_SIMPLE_EVENT);
 		audit.setUseruuid(userUUID);
 		setAuditNames(audit, names);
@@ -162,12 +161,12 @@ public class AuditReportServiceImpl implements AuditReportService {
 
 	@Override
 	public String onRejectLogin(final HttpServletRequest request,
-	                            final RejectLoginCause cause,
-	                            final String realm,
-	                            final String what) {
+								final RejectLoginCause cause,
+								final String realm,
+								final String what) {
 		final var userUUID = getRequestUserUUID(request).orElse(null);
 		log.info("Audit rejeted login from {} in {} by {}/{} {}",
-		        getOriginalRemoteAddr(request), getFullURLQuery(request), userUUID, realm, what);
+				getOriginalRemoteAddr(request), getFullURLQuery(request), userUUID, realm, what);
 
 		final var audit = prepareAudit(request, EVENTNAME_REJECT_LOGIN);
 		audit.setUseruuid(userUUID);
@@ -177,28 +176,28 @@ public class AuditReportServiceImpl implements AuditReportService {
 
 	@Override
 	public String onLogin(final HttpServletRequest request,
-	                      final Duration longSessionDuration,
-	                      final Set<String> tags) {
+						  final Duration longSessionDuration,
+						  final Set<String> tags) {
 		final var userUUID = getRequestUserUUID(request).orElse(null);
 		log.info("Audit login from {} in {} by {}, with rights {}, during {}",
-		        getOriginalRemoteAddr(request),
-		        getFullURLQuery(request),
-		        userUUID,
-		        tags,
-		        longSessionDuration);
+				getOriginalRemoteAddr(request),
+				getFullURLQuery(request),
+				userUUID,
+				tags,
+				longSessionDuration);
 
 		final var audit = prepareAudit(request, EVENTNAME_LOGIN);
 		audit.setUseruuid(userUUID);
 		audit.setContext(" during " + longSessionDuration + " with tags: " +
-		                 tags.stream().collect(Collectors.joining(", ")));
+						 tags.stream().collect(Collectors.joining(", ")));
 		return auditRepository.save(audit).getEventref();
 	}
 
 	@Override
 	public String onReport(final HttpServletRequest request,
-	                       final String reportName,
-	                       final String subject,
-	                       final Duration sinceTime) {
+						   final String reportName,
+						   final String subject,
+						   final Duration sinceTime) {
 		final var userUUID = getRequestUserUUID(request).orElse(null);
 		final var audit = prepareAudit(request, EVENTNAME_REPORT);
 		audit.setUseruuid(userUUID);
@@ -212,8 +211,8 @@ public class AuditReportServiceImpl implements AuditReportService {
 
 	@Override
 	public Collection<Audit> reportLastUserActivities(final HttpServletRequest originalRequest,
-	                                                  final String userUUID,
-	                                                  final Duration sinceTime) {
+													  final String userUUID,
+													  final Duration sinceTime) {
 		final var result = auditRepository.getByUserUUID(userUUID, getDateFromTimeAgo(sinceTime));
 		onReport(originalRequest, "ReportLastUserActivities", userUUID, sinceTime);
 		return result;
@@ -221,18 +220,18 @@ public class AuditReportServiceImpl implements AuditReportService {
 
 	@Override
 	public Collection<Audit> reportLastRemoteIPActivity(final HttpServletRequest originalRequest,
-	                                                    final String address,
-	                                                    final Duration sinceTime) {
+														final String address,
+														final Duration sinceTime) {
 		final var result = auditRepository.getByClientsourcehost(
-		        address, getDateFromTimeAgo(sinceTime));
+				address, getDateFromTimeAgo(sinceTime));
 		onReport(originalRequest, "ReportLastRemoteIPActivity", address, sinceTime);
 		return result;
 	}
 
 	@Override
 	public Collection<Audit> reportLastEventActivity(final HttpServletRequest originalRequest,
-	                                                 final String eventName,
-	                                                 final Duration sinceTime) {
+													 final String eventName,
+													 final Duration sinceTime) {
 		final var result = auditRepository.getByEventname(eventName, getDateFromTimeAgo(sinceTime));
 		onReport(originalRequest, "ReportLastEventActivity", eventName, sinceTime);
 		return result;
@@ -247,7 +246,7 @@ public class AuditReportServiceImpl implements AuditReportService {
 
 	@Override
 	public Collection<String> reportLastClientsourcehosts(final HttpServletRequest originalRequest,
-	                                                      final Duration sinceTime) {
+														  final Duration sinceTime) {
 		final var result = auditRepository.getLastClientsourcehosts(getDateFromTimeAgo(sinceTime));
 		onReport(originalRequest, "ReportLastEventsInetAddress", "", sinceTime);
 		return result;

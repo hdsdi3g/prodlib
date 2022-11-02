@@ -16,7 +16,7 @@
  */
 package tv.hd3g.authkit.mod.controller;
 
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.owasp.encoder.Encode.forJavaScript;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -24,8 +24,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.ControllerInterceptor;
 import tv.hd3g.authkit.mod.dto.ressource.IsExternalAuthDto;
 import tv.hd3g.authkit.mod.dto.ressource.IsTOTPEnabledDto;
@@ -76,19 +75,19 @@ public class RestControllerMe {
 
 	private String getCurrentUserUUID(final HttpServletRequest request) {
 		return ControllerInterceptor.getRequestUserUUID(request).orElseThrow(
-		        () -> new AuthKitException(SC_UNAUTHORIZED, "You must be connected before."));
+				() -> new AuthKitException(SC_UNAUTHORIZED, "You must be connected before."));
 	}
 
 	private Credential getCurrentUserCredential(final String userUUID) {
 		return Optional.ofNullable(credentialRepository.getByUserUUID(userUUID)).orElseThrow(
-		        () -> new AuthKitException(SC_UNAUTHORIZED, "Can't found you're user account."));
+				() -> new AuthKitException(SC_UNAUTHORIZED, "Can't found you're user account."));
 	}
 
 	@Transactional(readOnly = false)
 	@PostMapping(value = "chpasswd")
 	@AuditAfter(value = "changeMyPassword", changeSecurity = true)
 	public ResponseEntity<Object> changeMyPassword(@RequestBody @Validated final ChangeMyPasswordDto chPasswordDto,
-	                                               final HttpServletRequest request) {
+												   final HttpServletRequest request) {
 		final var userUUID = getCurrentUserUUID(request);
 		final var credential = getCurrentUserCredential(userUUID);
 		if (credential.getLdapdomain() != null) {
@@ -133,7 +132,7 @@ public class RestControllerMe {
 		final var qrcode = totpService.makeQRCode(totpURI);
 		final var backupCodes = totpService.makeBackupCodes();
 		final var jwtControl = securedTokenService.setupTOTPGenerateToken(
-		        userUUID, expirationDuration, secret, backupCodes);
+				userUUID, expirationDuration, secret, backupCodes);
 
 		final var result = new SetupTOTPDto(secret, totpURI, qrcode, backupCodes, jwtControl);
 		return new ResponseEntity<>(result, OK);
@@ -143,7 +142,7 @@ public class RestControllerMe {
 	@PostMapping(value = "set2auth")
 	@AuditAfter(value = "setTOTP", changeSecurity = true)
 	public ResponseEntity<Object> confirmTOTP(@RequestBody @Validated final ValidationSetupTOTPDto setupDto,
-	                                          final HttpServletRequest request) {
+											  final HttpServletRequest request) {
 		final var userUUID = getCurrentUserUUID(request);
 		final var credential = getCurrentUserCredential(userUUID);
 		if (credential.getTotpkey() != null) {
@@ -166,7 +165,7 @@ public class RestControllerMe {
 	@DeleteMapping(value = "set2auth")
 	@AuditAfter(value = "setTOTP", changeSecurity = true)
 	public ResponseEntity<Object> removeTOTP(@RequestBody @Validated final ValidationTOTPDto validationDto,
-	                                         final HttpServletRequest request) {
+											 final HttpServletRequest request) {
 		final var userUUID = getCurrentUserUUID(request);
 		final var credential = getCurrentUserCredential(userUUID);
 		if (credential.getTotpkey() == null) {
@@ -196,7 +195,7 @@ public class RestControllerMe {
 	@PutMapping(value = "privacy")
 	@AuditAfter(value = "setPrivacy", changeSecurity = true)
 	public ResponseEntity<Object> setPrivacy(@RequestBody @Validated final UserPrivacyDto userPrivacyDto,
-	                                         final HttpServletRequest request) {
+											 final HttpServletRequest request) {
 		final var userUUID = getCurrentUserUUID(request);
 		authenticationService.setUserPrivacy(userUUID, userPrivacyDto);
 		return new ResponseEntity<>(OK);

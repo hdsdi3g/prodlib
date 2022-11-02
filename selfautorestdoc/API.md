@@ -22,7 +22,7 @@ Response: "application/json" {
 
 _Mandatory rights: rightForDelete | alternateRightForDelete_
 
-[Go to the top](#top) &bull; [DemoRestController :: deleteActionController](/blob/master/src/main/java/tv/hd3g/selfautorestdoc/demo/DemoRestController.java#73)
+[Go to the top](#top) &bull; [DemoRestController :: deleteActionController](/blob/master/src/main/java/tv/hd3g/selfautorestdoc/demo/DemoRestController.java#70)
 
 ## <a name="goto3292818944"></a> Get Demo
 **GET** `/serverPath/getActionController/{textValueVarName}/path?numValue=0`
@@ -46,7 +46,7 @@ Response: "application/json" {
 }
 ```
 
-[Go to the top](#top) &bull; [DemoRestController :: getActionController](/blob/master/src/main/java/tv/hd3g/selfautorestdoc/demo/DemoRestController.java#59)
+[Go to the top](#top) &bull; [DemoRestController :: getActionController](/blob/master/src/main/java/tv/hd3g/selfautorestdoc/demo/DemoRestController.java#55)
 
 ## <a name="goto3046218300"></a> Patch Demo
 **PATCH** `/serverPath/patchActionControllerPath`
@@ -60,9 +60,9 @@ Response: "application/json" {
 }
 ```
 
-_Mandatory rights: anotherRightForPatch & rightForPatch_
+_Mandatory rights: rightForPatch & anotherRightForPatch_
 
-[Go to the top](#top) &bull; [DemoRestController :: patchActionController](/blob/master/src/main/java/tv/hd3g/selfautorestdoc/demo/DemoRestController.java#79)
+[Go to the top](#top) &bull; [DemoRestController :: patchActionController](/blob/master/src/main/java/tv/hd3g/selfautorestdoc/demo/DemoRestController.java#76)
 
 ## <a name="goto734994824"></a> Post Demo
 **POST** `/serverPath/postActionControllerPath`
@@ -94,7 +94,7 @@ Response: "application/json" {
 }
 ```
 
-[Go to the top](#top) &bull; [DemoRestController :: postActionController](/blob/master/src/main/java/tv/hd3g/selfautorestdoc/demo/DemoRestController.java#49)
+[Go to the top](#top) &bull; [DemoRestController :: postActionController](/blob/master/src/main/java/tv/hd3g/selfautorestdoc/demo/DemoRestController.java#46)
 
 ## <a name="goto1734623014"></a> Put Demo
 **PUT** `/serverPath/putActionControllerPath`
@@ -108,5 +108,5 @@ Response: "application/json" {
 }
 ```
 
-[Go to the top](#top) &bull; [DemoRestController :: putActionController](/blob/master/src/main/java/tv/hd3g/selfautorestdoc/demo/DemoRestController.java#66)
+[Go to the top](#top) &bull; [DemoRestController :: putActionController](/blob/master/src/main/java/tv/hd3g/selfautorestdoc/demo/DemoRestController.java#63)
 

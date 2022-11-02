@@ -31,8 +31,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.mail.MessagingException;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -43,6 +41,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import jakarta.mail.MessagingException;
 import net.datafaker.Faker;
 import tv.hd3g.commons.mailkit.SendMailDto.MessageGrade;
 import tv.hd3g.jobkit.engine.SupervisableContextExtractor;

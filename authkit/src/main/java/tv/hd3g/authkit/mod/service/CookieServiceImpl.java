@@ -22,14 +22,14 @@ import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class CookieServiceImpl implements CookieService {
@@ -111,10 +111,10 @@ public class CookieServiceImpl implements CookieService {
 			return null;
 		}
 		return Stream.of(cookies)
-		        .filter(cookie -> name.equals(cookie.getName()))
-		        .findFirst()
-		        .map(Cookie::getValue)
-		        .orElse(null);
+				.filter(cookie -> name.equals(cookie.getName()))
+				.findFirst()
+				.map(Cookie::getValue)
+				.orElse(null);
 	}
 
 	@Override

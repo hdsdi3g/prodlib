@@ -36,12 +36,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.text.RandomStringGenerator;
 import org.mockito.Mockito;
 
+import jakarta.servlet.http.HttpServletRequest;
 import net.datafaker.Animal;
 import net.datafaker.service.RandomService;
 
@@ -67,18 +66,18 @@ public class DataGenerator {
 
 	public static String makeUserLogin() {
 		return instance().numerify(animal.name()
-		        .replaceAll(" ", "")
-		        .replaceAll("-", "")
-		        .replaceAll("_", "") + "######")
-		        .toLowerCase();
+				.replaceAll(" ", "")
+				.replaceAll("-", "")
+				.replaceAll("_", "") + "######")
+				.toLowerCase();
 	}
 
 	public static String makeUserPassword() {
 		final var pOrigin = pwdGenerator.generate(2, 4)
-		                    + RandomStringUtils.randomAscii(2, 4)
-		                    + RandomStringUtils.random(3, ",;:!?./§&\"'(-_)=")
-		                    + RandomStringUtils.randomAlphabetic(2).toLowerCase()
-		                    + RandomStringUtils.randomAlphabetic(2).toUpperCase();
+							+ RandomStringUtils.randomAscii(2, 4)
+							+ RandomStringUtils.random(3, ",;:!?./§&\"'(-_)=")
+							+ RandomStringUtils.randomAlphabetic(2).toLowerCase()
+							+ RandomStringUtils.randomAlphabetic(2).toUpperCase();
 
 		final var list = pOrigin.chars().mapToObj(i -> (int) i).collect(Collectors.toList());
 		Collections.shuffle(list);
@@ -152,9 +151,9 @@ public class DataGenerator {
 	public static InetAddress makeRandomIPv4() {
 		try {
 			return getByName(random.nextInt(0, 255) + "." +
-			                 random.nextInt(0, 255) + "." +
-			                 random.nextInt(0, 255) + "." +
-			                 random.nextInt(0, 255));
+							 random.nextInt(0, 255) + "." +
+							 random.nextInt(0, 255) + "." +
+							 random.nextInt(0, 255));
 		} catch (final UnknownHostException e) {
 			return null;
 		}
@@ -173,8 +172,8 @@ public class DataGenerator {
 	}
 
 	public static String setupMock(final HttpServletRequest request,
-	                               final boolean randomRemoteAddr,
-	                               final String userUUID) {
+								   final boolean randomRemoteAddr,
+								   final String userUUID) {
 		final String remoteAddr;
 		if (randomRemoteAddr) {
 			String addr;
@@ -182,9 +181,9 @@ public class DataGenerator {
 			 * Always reject 127.* for addr
 			 */
 			while ((addr = random.nextInt(0, 255) + "."
-			               + random.nextInt(0, 255) + "."
-			               + random.nextInt(0, 255) + "."
-			               + random.nextInt(0, 255)).startsWith("127.")) {
+						   + random.nextInt(0, 255) + "."
+						   + random.nextInt(0, 255) + "."
+						   + random.nextInt(0, 255)).startsWith("127.")) {
 			}
 			remoteAddr = addr;
 		} else {

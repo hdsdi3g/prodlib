@@ -26,8 +26,6 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -37,6 +35,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.service.AuditReportService;
 import tv.hd3g.authkit.tool.DataGenerator;
 

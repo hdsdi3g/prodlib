@@ -16,9 +16,8 @@
  */
 package tv.hd3g.authkit.mod.dto.validated;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import tv.hd3g.authkit.mod.dto.Password;
 
 public class ResetPasswordFormDto {

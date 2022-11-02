@@ -18,7 +18,7 @@ package tv.hd3g.authkit.mod.dto;
 
 import java.util.Objects;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 public class LoginRequestContentDto {
 

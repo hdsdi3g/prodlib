@@ -30,15 +30,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import tv.hd3g.authkit.mod.component.AuthKitEndpointsListener;
 import tv.hd3g.authkit.mod.dto.LoggedUserTagsTokenDto;
 import tv.hd3g.authkit.mod.exception.BadRequestException;

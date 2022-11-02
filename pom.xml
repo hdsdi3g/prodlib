@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.11</version>
+        <version>3.0.0-RC1</version>
         <relativePath />
     </parent>
 
@@ -30,6 +30,7 @@
         <module>jobkit</module>
         <module>transfertfiles</module>
         <module>csvkit</module>
+        <module>demo</module>
     </modules>
 
     <properties>
@@ -42,7 +43,7 @@
         <mockito.version>4.4.0</mockito.version>
         <datafaker.version>1.6.0</datafaker.version>
         <owasp.encoder.version>1.2.3</owasp.encoder.version>
-        <ognl.version>3.2.1</ognl.version>
+        <ognl.version>3.3.4</ognl.version>
         <commons.text.version>1.10.0</commons.text.version>
         <commons.net.version>3.8.0</commons.net.version>
         <commons.io.version>2.11.0</commons.io.version>
@@ -60,7 +61,7 @@
         <spoon.version>10.1.1</spoon.version>
         <j2html.version>1.6.0</j2html.version>
         <esapi.version>2.5.0.0</esapi.version>
-        <log4j2.version>2.17.2</log4j2.version>
+        <log4j2.version>2.19.0</log4j2.version>
         <maven.gpg.version>3.0.1</maven.gpg.version>
         <gpg.skip>true</gpg.skip>
         <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
@@ -68,7 +69,7 @@
         <maven.jacoco.version>0.8.8</maven.jacoco.version>
         <sonar.version>3.9.1.2184</sonar.version>
 
-        <codepolicyvalidation.version>1.1.0</codepolicyvalidation.version>
+        <codepolicyvalidation.version>2.0.0</codepolicyvalidation.version>
         <setupdb.version>2.0.2</setupdb.version>
         <processlauncher.version>6.0.5</processlauncher.version>
     </properties>
@@ -321,4 +322,25 @@
             <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 </project>

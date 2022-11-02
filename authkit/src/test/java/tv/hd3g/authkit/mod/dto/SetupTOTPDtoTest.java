@@ -43,7 +43,7 @@ class SetupTOTPDtoTest extends HashCodeEqualsTest {
 	private String jwtControl;
 
 	@BeforeEach
-	private void init() throws URISyntaxException {
+	void init() throws URISyntaxException {
 		secret = makeRandomString();
 		totpURI = new URI("fff://" + makeUserLogin() + ".com?ddd");
 		qrcode = makeRandomString();
@@ -80,7 +80,7 @@ class SetupTOTPDtoTest extends HashCodeEqualsTest {
 	@Override
 	protected Object[] makeSameInstances() {
 		return new Object[] { new SetupTOTPDto(secret, totpURI, qrcode, backupCodes, jwtControl),
-		                      new SetupTOTPDto(secret, totpURI, qrcode, backupCodes, jwtControl) };
+							  new SetupTOTPDto(secret, totpURI, qrcode, backupCodes, jwtControl) };
 	}
 
 }

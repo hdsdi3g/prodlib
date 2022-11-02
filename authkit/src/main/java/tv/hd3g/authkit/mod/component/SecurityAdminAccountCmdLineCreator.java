@@ -18,13 +18,12 @@ package tv.hd3g.authkit.mod.component;
 
 import java.util.Optional;
 
-import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+import jakarta.transaction.Transactional;
 import tv.hd3g.authkit.mod.dto.Password;
 import tv.hd3g.authkit.mod.service.CmdLineService;
 
@@ -51,15 +50,15 @@ public class SecurityAdminAccountCmdLineCreator implements ApplicationRunner {
 		}
 
 		final var newadmin = Optional.ofNullable(System.getenv(AUTHKIT_NEWADMIN_ENVKEY))
-		        .or(() -> Optional.ofNullable(System.getProperty(AUTHKIT_NEWADMIN_ENVKEY)))
-		        .orElseThrow(
-		                () -> new IllegalArgumentException(
-		                        "You must set a \"" + AUTHKIT_NEWADMIN_ENVKEY + "\" as environment var"));
+				.or(() -> Optional.ofNullable(System.getProperty(AUTHKIT_NEWADMIN_ENVKEY)))
+				.orElseThrow(
+						() -> new IllegalArgumentException(
+								"You must set a \"" + AUTHKIT_NEWADMIN_ENVKEY + "\" as environment var"));
 		final var password = Optional.ofNullable(System.getenv(AUTHKIT_PASSWORD_ENVKEY))
-		        .or(() -> Optional.ofNullable(System.getProperty(AUTHKIT_PASSWORD_ENVKEY)))
-		        .orElseThrow(
-		                () -> new IllegalArgumentException(
-		                        "You must set a \"" + AUTHKIT_PASSWORD_ENVKEY + "\" as environment var"));
+				.or(() -> Optional.ofNullable(System.getProperty(AUTHKIT_PASSWORD_ENVKEY)))
+				.orElseThrow(
+						() -> new IllegalArgumentException(
+								"You must set a \"" + AUTHKIT_PASSWORD_ENVKEY + "\" as environment var"));
 
 		cmdLineService.addOrUpdateSecurityAdminUser(newadmin, new Password(password));
 

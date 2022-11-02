@@ -16,11 +16,11 @@
  */
 package tv.hd3g.authkit.mod.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "audit")
@@ -98,17 +98,17 @@ public class Audit extends BaseEntity {
 	}
 
 	public Audit(final String appname,
-	             final String eventref,
-	             final String clientsourcehost,
-	             final Integer clientsourceport,
-	             final String requestserverhost,
-	             final Integer requestserverport,
-	             final String eventname,
-	             final String requestprotocol,
-	             final String requestmethod,
-	             final String requestpath,
-	             final String requestcontenttype,
-	             final long requestlength) {
+				 final String eventref,
+				 final String clientsourcehost,
+				 final Integer clientsourceport,
+				 final String requestserverhost,
+				 final Integer requestserverport,
+				 final String eventname,
+				 final String requestprotocol,
+				 final String requestmethod,
+				 final String requestpath,
+				 final String requestcontenttype,
+				 final long requestlength) {
 		initCreate();
 		this.appname = pSize(appname, 60);
 		this.eventref = pSize(eventref, 38);

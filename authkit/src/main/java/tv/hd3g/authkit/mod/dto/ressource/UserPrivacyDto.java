@@ -20,11 +20,10 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.function.Function;
 
-import javax.validation.constraints.Size;
-
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.lang.Nullable;
 
+import jakarta.validation.constraints.Size;
 import tv.hd3g.authkit.mod.dto.ExternalAuthUserDto;
 import tv.hd3g.authkit.mod.entity.Userprivacy;
 
@@ -124,7 +123,7 @@ public class UserPrivacyDto extends RepresentationModel<UserPrivacyDto> {
 		final var prime = 31;
 		var result = super.hashCode();
 		result = prime * result + Objects.hash(address, company, country, created, email, lang, name,
-		        phone, postalcode, userUUID);
+				phone, postalcode, userUUID);
 		return result;
 	}
 
@@ -141,10 +140,10 @@ public class UserPrivacyDto extends RepresentationModel<UserPrivacyDto> {
 		}
 		final var other = (UserPrivacyDto) obj;
 		return Objects.equals(address, other.address) && Objects.equals(company, other.company) && Objects.equals(
-		        country, other.country) && Objects.equals(created, other.created) && Objects.equals(email, other.email)
-		       && Objects.equals(lang, other.lang) && Objects.equals(
-		               name, other.name) && Objects.equals(phone, other.phone) && Objects.equals(postalcode,
-		                       other.postalcode) && Objects.equals(userUUID, other.userUUID);
+				country, other.country) && Objects.equals(created, other.created) && Objects.equals(email, other.email)
+			   && Objects.equals(lang, other.lang) && Objects.equals(
+					   name, other.name) && Objects.equals(phone, other.phone) && Objects.equals(postalcode,
+							   other.postalcode) && Objects.equals(userUUID, other.userUUID);
 	}
 
 	public Date getCreated() {
