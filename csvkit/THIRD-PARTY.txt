@@ -1,5 +1,5 @@
 
-Lists of 40 third-party dependencies.
+Lists of 41 third-party dependencies.
      (The Apache Software License, Version 2.0) Jackson-annotations (com.fasterxml.jackson.core:jackson-annotations:2.13.3 - http://github.com/FasterXML/jackson)
      (The Apache Software License, Version 2.0) Jackson-core (com.fasterxml.jackson.core:jackson-core:2.13.3 - https://github.com/FasterXML/jackson-core)
      (The Apache Software License, Version 2.0) jackson-databind (com.fasterxml.jackson.core:jackson-databind:2.13.3 - http://github.com/FasterXML/jackson)
@@ -16,7 +16,7 @@ Lists of 40 third-party dependencies.
      (Eclipse Distribution License v. 1.0) (Eclipse Public License v1.0) javax.persistence-api (javax.persistence:javax.persistence-api:2.2 - https://github.com/javaee/jpa-spec)
      (Apache License, Version 2.0) Byte Buddy (without dependencies) (net.bytebuddy:byte-buddy:1.11.22 - https://bytebuddy.net/byte-buddy)
      (Apache License, Version 2.0) Byte Buddy agent (net.bytebuddy:byte-buddy-agent:1.11.22 - https://bytebuddy.net/byte-buddy-agent)
-     (The Apache Software License, Version 2.0) Data Faker (net.datafaker:datafaker:1.3.0 - https://www.datafaker.net)
+     (The Apache Software License, Version 2.0) Data Faker (net.datafaker:datafaker:1.6.0 - https://www.datafaker.net)
      (Apache License, Version 2.0) Apache Commons Collections (org.apache.commons:commons-collections4:4.4 - https://commons.apache.org/proper/commons-collections/)
      (Apache License, Version 2.0) Apache Commons Compress (org.apache.commons:commons-compress:1.21 - https://commons.apache.org/proper/commons-compress/)
      (Apache License, Version 2.0) Apache Commons Lang (org.apache.commons:commons-lang3:3.12.0 - https://commons.apache.org/proper/commons-lang/)
@@ -36,7 +36,8 @@ Lists of 40 third-party dependencies.
      (Eclipse Public License v2.0) JUnit Platform Commons (org.junit.platform:junit-platform-commons:1.8.2 - https://junit.org/junit5/)
      (Eclipse Public License v2.0) JUnit Platform Engine API (org.junit.platform:junit-platform-engine:1.8.2 - https://junit.org/junit5/)
      (The MIT License) mockito-core (org.mockito:mockito-core:4.4.0 - https://github.com/mockito/mockito)
+     (The MIT License) mockito-inline (org.mockito:mockito-inline:4.4.0 - https://github.com/mockito/mockito)
      (Apache License, Version 2.0) Objenesis (org.objenesis:objenesis:3.2 - http://objenesis.org/objenesis)
      (The Apache License, Version 2.0) org.opentest4j:opentest4j (org.opentest4j:opentest4j:1.2.0 - https://github.com/ota4j-team/opentest4j)
      (MIT License) SLF4J API Module (org.slf4j:slf4j-api:1.7.36 - http://www.slf4j.org)
-     (GNU Lesser General Public License, Version 3) CodePolicyValidation (tv.hd3g.commons:codepolicyvalidation:1.0.4 - https://github.com/hdsdi3g/codepolicyvalidation)
+     (GNU Lesser General Public License, Version 3) CodePolicyValidation (tv.hd3g.commons:codepolicyvalidation:1.1.0 - https://github.com/hdsdi3g/codepolicyvalidation)
