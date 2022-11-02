@@ -5,7 +5,7 @@
     <groupId>tv.hd3g.commons</groupId>
     <artifactId>starter</artifactId>
     <packaging>pom</packaging>
-    <version>11.0.0</version>
+    <version>11.0.1-SNAPSHOT</version>
 
     <name>Commons Maven starter project</name>
     <url>https://github.com/hdsdi3g/prodlib</url>
