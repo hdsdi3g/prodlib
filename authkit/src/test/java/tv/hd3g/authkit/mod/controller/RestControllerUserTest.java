@@ -46,8 +46,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -64,6 +62,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.component.AuthKitEndpointsListener;
 import tv.hd3g.authkit.mod.dto.Password;
 import tv.hd3g.authkit.mod.dto.ressource.UserPrivacyDto;
@@ -118,9 +117,9 @@ class RestControllerUserTest {
 	private static final ResultMatcher[] statusOkUtf8 = new ResultMatcher[] { statusOk, contentTypeJsonUtf8 };
 
 	@BeforeEach
-	private void init() {
+	void init() {
 		final var authToken = securedTokenService.loggedUserRightsGenerateToken(
-		        makeUUID(), Duration.ofDays(1), authKitEndpointsListener.getAllRights(), null);
+				makeUUID(), Duration.ofDays(1), authKitEndpointsListener.getAllRights(), null);
 		baseHeaders = new HttpHeaders();
 		baseHeaders.set(AUTHORIZATION, "bearer " + authToken);
 		baseHeaders.setAccept(Arrays.asList(APPLICATION_JSON));
@@ -133,14 +132,14 @@ class RestControllerUserTest {
 			final var addUser = new AddUserTestDto();
 
 			mvc.perform(post(baseMapping + "/" + "users")
-			        .headers(baseHeaders)
-			        .contentType(APPLICATION_JSON_VALUE)
-			        .content(objectMapper.writeValueAsString(addUser)))
-			        .andExpect(statusCreated)
-			        .andExpect(contentTypeJsonUtf8)
-			        .andExpect(jsonPath("$.userName", is(addUser.getUserLogin())))
-			        .andExpect(jsonPath("$.uuid").isString())
-			        .andExpect(jsonPath("$.realm", is(realm)));
+					.headers(baseHeaders)
+					.contentType(APPLICATION_JSON_VALUE)
+					.content(objectMapper.writeValueAsString(addUser)))
+					.andExpect(statusCreated)
+					.andExpect(contentTypeJsonUtf8)
+					.andExpect(jsonPath("$.userName", is(addUser.getUserLogin())))
+					.andExpect(jsonPath("$.uuid").isString())
+					.andExpect(jsonPath("$.realm", is(realm)));
 		}
 
 		@Test
@@ -149,28 +148,28 @@ class RestControllerUserTest {
 			final var uuid = authenticationService.addUser(addUser.makeClassicDto());
 
 			mvc.perform(get(baseMapping + "/" + "users" + "/" + uuid)
-			        .headers(baseHeaders))
-			        .andExpect(statusOk)
-			        .andExpect(contentTypeJsonUtf8)
-			        .andExpect(jsonPath("$.created").exists())
-			        .andExpect(jsonPath("$.uuid", is(uuid)))
-			        .andExpect(jsonPath("$.login", is(addUser.getUserLogin())))
-			        .andExpect(jsonPath("$.realm", is(realm)))
-			        .andExpect(jsonPath("$.enabled", is(true)))
-			        .andExpect(jsonPath("$.totpEnabled", is(false)))
-			        .andExpect(jsonPath("$.mustChangePassword", is(false)));
+					.headers(baseHeaders))
+					.andExpect(statusOk)
+					.andExpect(contentTypeJsonUtf8)
+					.andExpect(jsonPath("$.created").exists())
+					.andExpect(jsonPath("$.uuid", is(uuid)))
+					.andExpect(jsonPath("$.login", is(addUser.getUserLogin())))
+					.andExpect(jsonPath("$.realm", is(realm)))
+					.andExpect(jsonPath("$.enabled", is(true)))
+					.andExpect(jsonPath("$.totpEnabled", is(false)))
+					.andExpect(jsonPath("$.mustChangePassword", is(false)));
 		}
 
 		@Test
 		void listUserSimple() throws Exception {
 			assertHasSomeUsersInDb();
 			final var response = mvc.perform(get(baseMapping + "/" + "users")
-			        .headers(baseHeaders))
-			        .andExpect(statusPartial)
-			        .andExpect(contentTypeJsonUtf8)
-			        .andExpect(jsonPath("$.items").isArray())
-			        .andExpect(jsonPath("$.items.length()", is(dbMaxFetchSize)))
-			        .andReturn().getResponse();
+					.headers(baseHeaders))
+					.andExpect(statusPartial)
+					.andExpect(contentTypeJsonUtf8)
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpect(jsonPath("$.items.length()", is(dbMaxFetchSize)))
+					.andReturn().getResponse();
 
 			final var finalCount = (int) userRepository.count();
 			assertEquals("user " + dbMaxFetchSize, response.getHeader("Accept-Range"));
@@ -181,12 +180,12 @@ class RestControllerUserTest {
 		void listUserRange() throws Exception {
 			assertHasSomeUsersInDb();
 			final var response = mvc.perform(get(baseMapping + "/" + "users?pos=1&size=5")
-			        .headers(baseHeaders))
-			        .andExpect(statusPartial)
-			        .andExpect(contentTypeJsonUtf8)
-			        .andExpect(jsonPath("$.items").isArray())
-			        .andExpect(jsonPath("$.items.length()", is(5)))
-			        .andReturn().getResponse();
+					.headers(baseHeaders))
+					.andExpect(statusPartial)
+					.andExpect(contentTypeJsonUtf8)
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpect(jsonPath("$.items.length()", is(5)))
+					.andReturn().getResponse();
 
 			final var finalCount = (int) userRepository.count();
 			assertEquals("user " + dbMaxFetchSize, response.getHeader("Accept-Range"));
@@ -198,8 +197,8 @@ class RestControllerUserTest {
 			final var userUUID = authenticationService.addUser(new AddUserTestDto().makeClassicDto());
 
 			mvc.perform(put(baseMapping + "/users/" + userUUID + "/disable")
-			        .headers(baseHeaders))
-			        .andExpect(statusOk);
+					.headers(baseHeaders))
+					.andExpect(statusOk);
 
 			final var user = userDao.getUserByUUID(UUID.fromString(userUUID)).get();
 			assertFalse(user.isEnabled());
@@ -211,8 +210,8 @@ class RestControllerUserTest {
 			authenticationService.disableUser(userUUID);
 
 			mvc.perform(put(baseMapping + "/users/" + userUUID + "/enable")
-			        .headers(baseHeaders))
-			        .andExpect(statusOk);
+					.headers(baseHeaders))
+					.andExpect(statusOk);
 
 			final var user = userDao.getUserByUUID(UUID.fromString(userUUID)).get();
 			assertTrue(user.isEnabled());
@@ -223,8 +222,8 @@ class RestControllerUserTest {
 			final var userUUID = authenticationService.addUser(new AddUserTestDto().makeClassicDto());
 
 			mvc.perform(put(baseMapping + "/users/" + userUUID + "/switchresetpassword")
-			        .headers(baseHeaders))
-			        .andExpect(statusOk);
+					.headers(baseHeaders))
+					.andExpect(statusOk);
 
 			final var user = userDao.getUserByUUID(UUID.fromString(userUUID)).get();
 			assertTrue(user.isMustChangePassword());
@@ -246,8 +245,8 @@ class RestControllerUserTest {
 			assertEquals(1, credentialRepository.getByUserUUID(userUUID).getLogontrial());
 
 			mvc.perform(put(baseMapping + "/users/" + userUUID + "/resetlogontrials")
-			        .headers(baseHeaders))
-			        .andExpect(statusOk);
+					.headers(baseHeaders))
+					.andExpect(statusOk);
 
 			assertEquals(0, credentialRepository.getByUserUUID(userUUID).getLogontrial());
 		}
@@ -257,8 +256,8 @@ class RestControllerUserTest {
 			final var userUUID = authenticationService.addUser(new AddUserTestDto().makeClassicDto());
 
 			mvc.perform(delete(baseMapping + "/users/" + userUUID)
-			        .headers(baseHeaders))
-			        .andExpect(statusOk);
+					.headers(baseHeaders))
+					.andExpect(statusOk);
 
 			final var userPresence = userDao.getUserByUUID(UUID.fromString(userUUID)).isPresent();
 			assertFalse(userPresence);
@@ -283,10 +282,10 @@ class RestControllerUserTest {
 			addGroup.setDescription(makeRandomThing());
 
 			mvc.perform(post(baseMapping + "/" + "groups")
-			        .headers(baseHeaders)
-			        .contentType(APPLICATION_JSON_VALUE)
-			        .content(objectMapper.writeValueAsString(addGroup)))
-			        .andExpect(statusCreated);
+					.headers(baseHeaders)
+					.contentType(APPLICATION_JSON_VALUE)
+					.content(objectMapper.writeValueAsString(addGroup)))
+					.andExpect(statusCreated);
 		}
 
 		@Test
@@ -300,10 +299,10 @@ class RestControllerUserTest {
 			rename.setNewname(makeUserLogin());
 
 			mvc.perform(post(baseMapping + "/" + "groups/rename")
-			        .headers(baseHeaders)
-			        .contentType(APPLICATION_JSON_VALUE)
-			        .content(objectMapper.writeValueAsString(rename)))
-			        .andExpect(statusOk);
+					.headers(baseHeaders)
+					.contentType(APPLICATION_JSON_VALUE)
+					.content(objectMapper.writeValueAsString(rename)))
+					.andExpect(statusOk);
 		}
 
 		@Test
@@ -318,10 +317,10 @@ class RestControllerUserTest {
 			change.setDescription(makeRandomThing());
 
 			mvc.perform(put(baseMapping + "/" + "groups/description")
-			        .headers(baseHeaders)
-			        .contentType(APPLICATION_JSON_VALUE)
-			        .content(objectMapper.writeValueAsString(change)))
-			        .andExpect(statusOk);
+					.headers(baseHeaders)
+					.contentType(APPLICATION_JSON_VALUE)
+					.content(objectMapper.writeValueAsString(change)))
+					.andExpect(statusOk);
 		}
 
 		@Test
@@ -336,8 +335,8 @@ class RestControllerUserTest {
 			authenticationService.addGroup(g);
 
 			mvc.perform(post(baseMapping + "/" + "users/" + uuid + "/ingroup/" + g.getName())
-			        .headers(baseHeaders))
-			        .andExpect(statusCreated);
+					.headers(baseHeaders))
+					.andExpect(statusCreated);
 		}
 
 		@Test
@@ -353,8 +352,8 @@ class RestControllerUserTest {
 			authenticationService.addUserInGroup(uuid, g.getName());
 
 			mvc.perform(delete(baseMapping + "/" + "users/" + uuid + "/ingroup/" + g.getName())
-			        .headers(baseHeaders))
-			        .andExpect(statusOk);
+					.headers(baseHeaders))
+					.andExpect(statusOk);
 		}
 
 		@Test
@@ -364,8 +363,8 @@ class RestControllerUserTest {
 			authenticationService.addGroup(g);
 
 			mvc.perform(delete(baseMapping + "/" + "groups/" + g.getName())
-			        .headers(baseHeaders))
-			        .andExpect(statusOk);
+					.headers(baseHeaders))
+					.andExpect(statusOk);
 		}
 
 		@Test
@@ -375,9 +374,9 @@ class RestControllerUserTest {
 			authenticationService.addGroup(g);
 
 			mvc.perform(get(baseMapping + "/" + "groups")
-			        .headers(baseHeaders))
-			        .andExpect(jsonPath("$.items").isArray())
-			        .andExpectAll(statusOkUtf8);
+					.headers(baseHeaders))
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpectAll(statusOkUtf8);
 		}
 
 		@Test
@@ -392,10 +391,10 @@ class RestControllerUserTest {
 			authenticationService.addUserInGroup(uuid, g.getName());
 
 			mvc.perform(get(baseMapping + "/" + "users/" + uuid + "/groups")
-			        .headers(baseHeaders))
-			        .andExpect(jsonPath("$.items").isArray())
-			        .andExpect(jsonPath("$.items.length()", is(1)))
-			        .andExpectAll(statusOkUtf8);
+					.headers(baseHeaders))
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpect(jsonPath("$.items.length()", is(1)))
+					.andExpectAll(statusOkUtf8);
 		}
 
 	}
@@ -409,10 +408,10 @@ class RestControllerUserTest {
 			addRole.setDescription(makeRandomThing());
 
 			mvc.perform(post(baseMapping + "/" + "roles")
-			        .headers(baseHeaders)
-			        .contentType(APPLICATION_JSON_VALUE)
-			        .content(objectMapper.writeValueAsString(addRole)))
-			        .andExpect(statusCreated);
+					.headers(baseHeaders)
+					.contentType(APPLICATION_JSON_VALUE)
+					.content(objectMapper.writeValueAsString(addRole)))
+					.andExpect(statusCreated);
 		}
 
 		@Test
@@ -426,10 +425,10 @@ class RestControllerUserTest {
 			rename.setNewname(makeUserLogin());
 
 			mvc.perform(post(baseMapping + "/" + "roles/rename")
-			        .headers(baseHeaders)
-			        .contentType(APPLICATION_JSON_VALUE)
-			        .content(objectMapper.writeValueAsString(rename)))
-			        .andExpect(statusOk);
+					.headers(baseHeaders)
+					.contentType(APPLICATION_JSON_VALUE)
+					.content(objectMapper.writeValueAsString(rename)))
+					.andExpect(statusOk);
 		}
 
 		@Test
@@ -444,10 +443,10 @@ class RestControllerUserTest {
 			change.setDescription(makeRandomThing());
 
 			mvc.perform(put(baseMapping + "/" + "roles/description")
-			        .headers(baseHeaders)
-			        .contentType(APPLICATION_JSON_VALUE)
-			        .content(objectMapper.writeValueAsString(change)))
-			        .andExpect(statusOk);
+					.headers(baseHeaders)
+					.contentType(APPLICATION_JSON_VALUE)
+					.content(objectMapper.writeValueAsString(change)))
+					.andExpect(statusOk);
 		}
 
 		@Test
@@ -461,10 +460,10 @@ class RestControllerUserTest {
 			change.setIp(ip);
 
 			mvc.perform(put(baseMapping + "/" + "roles/" + r.getName() + "/setOnlyForClient")
-			        .headers(baseHeaders)
-			        .contentType(APPLICATION_JSON_VALUE)
-			        .content(objectMapper.writeValueAsString(change)))
-			        .andExpect(statusOk);
+					.headers(baseHeaders)
+					.contentType(APPLICATION_JSON_VALUE)
+					.content(objectMapper.writeValueAsString(change)))
+					.andExpect(statusOk);
 		}
 
 		@Test
@@ -477,8 +476,8 @@ class RestControllerUserTest {
 			authenticationService.addRole(r);
 
 			mvc.perform(post(baseMapping + "/" + "groups/" + g.getName() + "/inrole/" + r.getName())
-			        .headers(baseHeaders))
-			        .andExpect(statusCreated);
+					.headers(baseHeaders))
+					.andExpect(statusCreated);
 		}
 
 		@Test
@@ -493,8 +492,8 @@ class RestControllerUserTest {
 			authenticationService.addGroupInRole(g.getName(), r.getName());
 
 			mvc.perform(delete(baseMapping + "/" + "groups/" + g.getName() + "/inrole/" + r.getName())
-			        .headers(baseHeaders))
-			        .andExpect(statusOk);
+					.headers(baseHeaders))
+					.andExpect(statusOk);
 		}
 
 		@Test
@@ -504,8 +503,8 @@ class RestControllerUserTest {
 			authenticationService.addRole(r);
 
 			mvc.perform(delete(baseMapping + "/" + "roles/" + r.getName())
-			        .headers(baseHeaders))
-			        .andExpect(statusOk);
+					.headers(baseHeaders))
+					.andExpect(statusOk);
 		}
 
 		@Test
@@ -515,9 +514,9 @@ class RestControllerUserTest {
 			authenticationService.addRole(r);
 
 			mvc.perform(get(baseMapping + "/" + "roles")
-			        .headers(baseHeaders))
-			        .andExpect(jsonPath("$.items").isArray())
-			        .andExpectAll(statusOkUtf8);
+					.headers(baseHeaders))
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpectAll(statusOkUtf8);
 		}
 
 		@Test
@@ -531,10 +530,10 @@ class RestControllerUserTest {
 			authenticationService.addGroupInRole(g.getName(), r.getName());
 
 			mvc.perform(get(baseMapping + "/" + "groups/" + g.getName() + "/roles")
-			        .headers(baseHeaders))
-			        .andExpect(jsonPath("$.items").isArray())
-			        .andExpect(jsonPath("$.items.length()", is(1)))
-			        .andExpectAll(statusOkUtf8);
+					.headers(baseHeaders))
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpect(jsonPath("$.items.length()", is(1)))
+					.andExpectAll(statusOkUtf8);
 		}
 
 	}
@@ -550,8 +549,8 @@ class RestControllerUserTest {
 			final var rightName = makeUserLogin();
 
 			mvc.perform(post(baseMapping + "/" + "roles/" + r.getName() + "/rights/" + rightName)
-			        .headers(baseHeaders))
-			        .andExpect(statusCreated);
+					.headers(baseHeaders))
+					.andExpect(statusCreated);
 		}
 
 		@Test
@@ -563,16 +562,16 @@ class RestControllerUserTest {
 			authenticationService.addRightInRole(r.getName(), rightName);
 
 			mvc.perform(delete(baseMapping + "/" + "roles/" + r.getName() + "/rights/" + rightName)
-			        .headers(baseHeaders))
-			        .andExpect(statusOk);
+					.headers(baseHeaders))
+					.andExpect(statusOk);
 		}
 
 		@Test
 		void getAllRights() throws Exception {
 			mvc.perform(get(baseMapping + "/" + "rights")
-			        .headers(baseHeaders))
-			        .andExpect(jsonPath("$.items").isArray())
-			        .andExpectAll(statusOkUtf8);
+					.headers(baseHeaders))
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpectAll(statusOkUtf8);
 		}
 
 		@Test
@@ -584,10 +583,10 @@ class RestControllerUserTest {
 			authenticationService.addRightInRole(r.getName(), rightName);
 
 			mvc.perform(get(baseMapping + "/" + "roles/" + r.getName() + "/rights")
-			        .headers(baseHeaders))
-			        .andExpect(jsonPath("$.items").isArray())
-			        .andExpect(jsonPath("$.items.length()", is(1)))
-			        .andExpectAll(statusOkUtf8);
+					.headers(baseHeaders))
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpect(jsonPath("$.items.length()", is(1)))
+					.andExpectAll(statusOkUtf8);
 		}
 
 		@Test
@@ -601,10 +600,10 @@ class RestControllerUserTest {
 			authenticationService.addContextInRight(r.getName(), rightName, context);
 
 			mvc.perform(get(baseMapping + "/" + "roles/" + r.getName() + "/rights/" + rightName + "/contexts")
-			        .headers(baseHeaders))
-			        .andExpect(jsonPath("$.items").isArray())
-			        .andExpect(jsonPath("$.items.length()", is(1)))
-			        .andExpectAll(statusOkUtf8);
+					.headers(baseHeaders))
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpect(jsonPath("$.items.length()", is(1)))
+					.andExpectAll(statusOkUtf8);
 		}
 
 		@Test
@@ -617,9 +616,9 @@ class RestControllerUserTest {
 			final var context = makeUserLogin();
 
 			mvc.perform(post(baseMapping + "/" + "roles/" + r.getName() + "/rights/" + rightName + "/contexts/"
-			                 + context)
-			                         .headers(baseHeaders))
-			        .andExpect(statusCreated);
+							 + context)
+									 .headers(baseHeaders))
+					.andExpect(statusCreated);
 		}
 
 		@Test
@@ -633,8 +632,8 @@ class RestControllerUserTest {
 			authenticationService.addContextInRight(r.getName(), rightName, context);
 
 			mvc.perform(delete(baseMapping + "/" + "roles/" + r.getName() + "/rights/" + rightName + "/contexts/"
-			                   + context).headers(baseHeaders))
-			        .andExpect(statusOk);
+							   + context).headers(baseHeaders))
+					.andExpect(statusOk);
 		}
 	}
 
@@ -650,10 +649,10 @@ class RestControllerUserTest {
 		authenticationService.addUserInGroup(uuid, g.getName());
 
 		mvc.perform(get(baseMapping + "/" + "groups/" + g.getName() + "/users")
-		        .headers(baseHeaders))
-		        .andExpect(jsonPath("$.items").isArray())
-		        .andExpect(jsonPath("$.items.length()", is(1)))
-		        .andExpectAll(statusOkUtf8);
+				.headers(baseHeaders))
+				.andExpect(jsonPath("$.items").isArray())
+				.andExpect(jsonPath("$.items.length()", is(1)))
+				.andExpectAll(statusOkUtf8);
 	}
 
 	@Test
@@ -667,10 +666,10 @@ class RestControllerUserTest {
 		authenticationService.addGroupInRole(g.getName(), r.getName());
 
 		mvc.perform(get(baseMapping + "/" + "roles/" + r.getName() + "/groups")
-		        .headers(baseHeaders))
-		        .andExpect(jsonPath("$.items").isArray())
-		        .andExpect(jsonPath("$.items.length()", is(1)))
-		        .andExpectAll(statusOkUtf8);
+				.headers(baseHeaders))
+				.andExpect(jsonPath("$.items").isArray())
+				.andExpect(jsonPath("$.items.length()", is(1)))
+				.andExpectAll(statusOkUtf8);
 	}
 
 	@Nested
@@ -705,17 +704,17 @@ class RestControllerUserTest {
 			final var expected = authenticationService.getUserPrivacyList(List.of(uuid)).get(0);
 
 			mvc.perform(get(baseMapping + "/" + "users/" + uuid + "/privacy")
-			        .headers(baseHeaders))
-			        .andExpect(jsonPath("$.address").value(expected.getAddress()))
-			        .andExpect(jsonPath("$.company").value(expected.getCompany()))
-			        .andExpect(jsonPath("$.country").value(expected.getCountry()))
-			        .andExpect(jsonPath("$.email").value(expected.getEmail()))
-			        .andExpect(jsonPath("$.lang").value(expected.getLang()))
-			        .andExpect(jsonPath("$.name").value(expected.getName()))
-			        .andExpect(jsonPath("$.phone").value(expected.getPhone()))
-			        .andExpect(jsonPath("$.postalcode").value(expected.getPostalcode()))
-			        .andExpect(jsonPath("$.userUUID").value(expected.getUserUUID()))
-			        .andExpectAll(statusOkUtf8);
+					.headers(baseHeaders))
+					.andExpect(jsonPath("$.address").value(expected.getAddress()))
+					.andExpect(jsonPath("$.company").value(expected.getCompany()))
+					.andExpect(jsonPath("$.country").value(expected.getCountry()))
+					.andExpect(jsonPath("$.email").value(expected.getEmail()))
+					.andExpect(jsonPath("$.lang").value(expected.getLang()))
+					.andExpect(jsonPath("$.name").value(expected.getName()))
+					.andExpect(jsonPath("$.phone").value(expected.getPhone()))
+					.andExpect(jsonPath("$.postalcode").value(expected.getPostalcode()))
+					.andExpect(jsonPath("$.userUUID").value(expected.getUserUUID()))
+					.andExpectAll(statusOkUtf8);
 		}
 
 		@Test
@@ -724,12 +723,12 @@ class RestControllerUserTest {
 			userUUIDList.setList(uuidList);
 
 			mvc.perform(get(baseMapping + "/" + "users/privacy")
-			        .headers(baseHeaders)
-			        .contentType(APPLICATION_JSON_VALUE)
-			        .content(objectMapper.writeValueAsString(userUUIDList)))
-			        .andExpect(jsonPath("$.items").isArray())
-			        .andExpect(jsonPath("$.items.length()", is(uuidList.size())))
-			        .andExpectAll(statusOkUtf8);
+					.headers(baseHeaders)
+					.contentType(APPLICATION_JSON_VALUE)
+					.content(objectMapper.writeValueAsString(userUUIDList)))
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpect(jsonPath("$.items.length()", is(uuidList.size())))
+					.andExpectAll(statusOkUtf8);
 		}
 
 		@Test
@@ -746,10 +745,10 @@ class RestControllerUserTest {
 			expected.setPostalcode(StringUtils.abbreviate(makeUserLogin(), 16));
 
 			mvc.perform(put(baseMapping + "/" + "users/" + uuid + "/privacy")
-			        .headers(baseHeaders)
-			        .contentType(APPLICATION_JSON_VALUE)
-			        .content(objectMapper.writeValueAsString(expected)))
-			        .andExpect(statusOk);
+					.headers(baseHeaders)
+					.contentType(APPLICATION_JSON_VALUE)
+					.content(objectMapper.writeValueAsString(expected)))
+					.andExpect(statusOk);
 
 			final var afterUpdate = authenticationService.getUserPrivacyList(List.of(uuid)).get(0);
 			assertEquals(expected, afterUpdate);

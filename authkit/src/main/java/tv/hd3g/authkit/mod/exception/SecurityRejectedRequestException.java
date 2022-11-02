@@ -19,10 +19,9 @@ package tv.hd3g.authkit.mod.exception;
 import java.io.IOException;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.HttpStatus;
 
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.service.AuditReportService;
 
 public abstract class SecurityRejectedRequestException extends RuntimeException {
@@ -31,15 +30,15 @@ public abstract class SecurityRejectedRequestException extends RuntimeException 
 	private final UUID userUUID;
 
 	protected SecurityRejectedRequestException(final String logMessage,
-	                                           final HttpStatus status,
-	                                           final UUID userUUID) {
+											   final HttpStatus status,
+											   final UUID userUUID) {
 		super(logMessage);
 		this.status = status;
 		this.userUUID = userUUID;
 	}
 
 	protected SecurityRejectedRequestException(final String logMessage,
-	                                           final HttpStatus status) {
+											   final HttpStatus status) {
 		this(logMessage, status, null);
 	}
 

@@ -9,8 +9,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.mail.MessagingException;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import jakarta.mail.MessagingException;
 import tv.hd3g.commons.mailkit.SendMailDto;
 import tv.hd3g.commons.mailkit.SendMailDto.MessageGrade;
 import tv.hd3g.commons.mailkit.SendMailService;

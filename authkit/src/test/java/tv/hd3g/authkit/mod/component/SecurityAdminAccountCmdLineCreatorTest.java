@@ -24,8 +24,6 @@ import static tv.hd3g.authkit.tool.DataGenerator.makeUserPassword;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.dto.Password;
 import tv.hd3g.authkit.mod.dto.validated.AddUserDto;
 import tv.hd3g.authkit.mod.dto.validated.LoginFormDto;

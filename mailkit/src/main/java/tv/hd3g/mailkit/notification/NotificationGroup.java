@@ -20,7 +20,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
-import org.springframework.boot.context.properties.ConstructorBinding;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
 
 public record NotificationGroup(Set<String> addrList,
 								Locale lang) {

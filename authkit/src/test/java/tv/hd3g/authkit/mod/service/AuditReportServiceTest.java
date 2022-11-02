@@ -42,8 +42,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -52,6 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.entity.Audit;
 import tv.hd3g.authkit.mod.repository.AuditRepository;
 import tv.hd3g.authkit.mod.service.AuditReportService.RejectLoginCause;
@@ -114,7 +113,7 @@ class AuditReportServiceTest {
 	void testOnImportantError() {
 		final var thing = DataGenerator.makeRandomThing();
 		final var eventref = auditReportService.onImportantError(
-		        request, List.of(), new Exception("Normal test error : " + thing));
+				request, List.of(), new Exception("Normal test error : " + thing));
 		final var audit = postChecks(eventref, EVENTNAME_ERROR);
 		assertNotNull(audit.getTriggeredexception());
 		assertTrue(audit.getTriggeredexception().contains(thing));

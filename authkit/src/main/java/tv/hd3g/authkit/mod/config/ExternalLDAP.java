@@ -21,12 +21,11 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotEmpty;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.NotEmpty;
 import tv.hd3g.authkit.utility.CIDRUtils;
 
 @Configuration
@@ -89,7 +88,7 @@ public class ExternalLDAP {
 			ldapCommonName = setOptional(ldapCommonName, "cn");
 			ldapMailName = setOptional(ldapMailName, "mail");
 			ldapSearchLogonQuery = setOptional(ldapSearchLogonQuery,
-			        "(& (sAMAccountName=<ldapTenantName>)(objectClass=user))");
+					"(& (sAMAccountName=<ldapTenantName>)(objectClass=user))");
 			organizationalUnitsAttributeName = setOptional(organizationalUnitsAttributeName, "distinguishedName");
 
 			if (allowedCreate == null) {
@@ -197,8 +196,8 @@ public class ExternalLDAP {
 			return Optional.empty();
 		}
 		return getServers().stream()
-		        .filter(server -> server.getDomain().equalsIgnoreCase(domain))
-		        .findFirst();
+				.filter(server -> server.getDomain().equalsIgnoreCase(domain))
+				.findFirst();
 	}
 
 	public List<LDAPEntry> getServers() {

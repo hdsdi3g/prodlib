@@ -35,10 +35,6 @@ import static tv.hd3g.authkit.utility.ControllerType.REST;
 import java.io.IOException;
 import java.util.UUID;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +44,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import tv.hd3g.authkit.mod.exception.ForbiddenRequestException;
 import tv.hd3g.authkit.mod.exception.SecurityRejectedRequestException;
 import tv.hd3g.authkit.mod.exception.UnauthorizedRequestException;
@@ -102,11 +101,11 @@ class SecurityRejectedRequestMappingExceptionResolverTest {
 	@AfterEach
 	void end() {
 		Mockito.verifyNoMoreInteractions(auditService,
-		        cookieService,
-		        request,
-		        response,
-		        handler,
-		        requestException);
+				cookieService,
+				request,
+				response,
+				handler,
+				requestException);
 	}
 
 	@Test
@@ -120,7 +119,7 @@ class SecurityRejectedRequestMappingExceptionResolverTest {
 		when(requestException.getStatusCode()).thenReturn(statusCode);
 		when(requestException.getUserUUID()).thenReturn(userUUID);
 		when(cookieService.createRedirectAfterLoginCookie(fullURIQueryString))
-		        .thenReturn(cookieRedirect);
+				.thenReturn(cookieRedirect);
 
 		final var mav = s.doResolveException(request, response, handler, requestException);
 		assertNotNull(mav);
@@ -177,7 +176,7 @@ class SecurityRejectedRequestMappingExceptionResolverTest {
 		when(request.getQueryString()).thenReturn(requestQueryString);
 		when(requestException.getStatusCode()).thenReturn(statusCode);
 		when(cookieService.createRedirectAfterLoginCookie(fullURIQueryString))
-		        .thenReturn(cookieRedirect);
+				.thenReturn(cookieRedirect);
 
 		final var mav = s.doResolveException(request, response, handler, requestException);
 		assertNotNull(mav);

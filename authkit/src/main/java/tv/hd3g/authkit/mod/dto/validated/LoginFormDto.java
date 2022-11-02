@@ -20,9 +20,8 @@ import static tv.hd3g.authkit.utility.LogSanitizer.sanitize;
 
 import java.util.Optional;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import tv.hd3g.authkit.mod.dto.Password;
 
 public class LoginFormDto {

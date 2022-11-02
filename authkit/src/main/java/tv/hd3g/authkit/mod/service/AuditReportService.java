@@ -21,8 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.entity.Audit;
 
 public interface AuditReportService {
@@ -71,26 +70,26 @@ public interface AuditReportService {
 	 * @return Event ref
 	 */
 	String onReport(HttpServletRequest request,
-	                String reportName,
-	                String subject,
-	                Duration sinceTime);
+					String reportName,
+					String subject,
+					Duration sinceTime);
 
 	Collection<Audit> reportLastUserActivities(HttpServletRequest originalRequest,
-	                                           String userUUID,
-	                                           Duration sinceTime);
+											   String userUUID,
+											   Duration sinceTime);
 
 	Collection<Audit> reportLastRemoteIPActivity(HttpServletRequest originalRequest,
-	                                             String address,
-	                                             Duration sinceTime);
+												 String address,
+												 Duration sinceTime);
 
 	Collection<Audit> reportLastEventActivity(HttpServletRequest originalRequest,
-	                                          String eventName,
-	                                          Duration sinceTime);
+											  String eventName,
+											  Duration sinceTime);
 
 	Collection<String> reportAllEventNames(HttpServletRequest originalRequest);
 
 	Collection<String> reportLastClientsourcehosts(HttpServletRequest originalRequest,
-	                                               Duration sinceTime);
+												   Duration sinceTime);
 
 	public enum RejectLoginCause {
 		USER_NOT_FOUND("Can't found user from login name and realm", false),

@@ -24,12 +24,11 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.mail.MessagingException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
+import jakarta.mail.MessagingException;
 import tv.hd3g.commons.mailkit.SendMailDto.MessageGrade;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 import tv.hd3g.mailkit.notification.NotificationGroup;

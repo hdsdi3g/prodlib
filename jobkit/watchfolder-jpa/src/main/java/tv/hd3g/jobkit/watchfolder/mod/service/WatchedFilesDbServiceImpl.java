@@ -27,13 +27,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import tv.hd3g.jobkit.watchfolder.ObservedFolder;
 import tv.hd3g.jobkit.watchfolder.WatchFolderPickupType;
 import tv.hd3g.jobkit.watchfolder.WatchedFileSetupManager;

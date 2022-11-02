@@ -20,79 +20,84 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.springframework.lang.Nullable;
+
 public class OutputDto extends BaseRepresentationModel {
 
-	private String textValue;
-	private Map<String, String> subMap;
-	private List<String> subList;
-	private SubOutputDto subInputDto;
+    private String textValue;
+    private Map<String, String> subMap;
+    private List<String> subList;
+    private SubOutputDto subInputDto;
 
-	public static class SubOutputDto {
-		private String subTextValue;
+    public static class SubOutputDto {
+        private String subTextValue;
 
-		public String getSubTextValue() {
-			return subTextValue;
-		}
+        public String getSubTextValue() {
+            return subTextValue;
+        }
 
-		public void setSubTextValue(final String subTextValue) {
-			this.subTextValue = subTextValue;
-		}
-	}
+        public void setSubTextValue(final String subTextValue) {
+            this.subTextValue = subTextValue;
+        }
+    }
 
-	public String getTextValue() {
-		return textValue;
-	}
+    public String getTextValue() {
+        return textValue;
+    }
 
-	public Map<String, String> getSubMap() {
-		return subMap;
-	}
+    public Map<String, String> getSubMap() {
+        return subMap;
+    }
 
-	public void setSubMap(final Map<String, String> subMap) {
-		this.subMap = subMap;
-	}
+    public void setSubMap(final Map<String, String> subMap) {
+        this.subMap = subMap;
+    }
 
-	public List<String> getSubList() {
-		return subList;
-	}
+    public List<String> getSubList() {
+        return subList;
+    }
 
-	public void setSubList(final List<String> subList) {
-		this.subList = subList;
-	}
+    public void setSubList(final List<String> subList) {
+        this.subList = subList;
+    }
 
-	public SubOutputDto getSubInputDto() {
-		return subInputDto;
-	}
+    public SubOutputDto getSubInputDto() {
+        return subInputDto;
+    }
 
-	public void setSubInputDto(final SubOutputDto subInputDto) {
-		this.subInputDto = subInputDto;
-	}
+    public void setSubInputDto(final SubOutputDto subInputDto) {
+        this.subInputDto = subInputDto;
+    }
 
-	public void setTextValue(final String textValue) {
-		this.textValue = textValue;
-	}
+    public void setTextValue(final String textValue) {
+        this.textValue = textValue;
+    }
 
-	@Override
-	public int hashCode() {
-		final var prime = 31;
-		var result = super.hashCode();
-		result = prime * result + Objects.hash(subInputDto, subList, subMap, textValue);
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final var prime = 31;
+        var result = super.hashCode();
+        result = prime * result + Objects.hash(subInputDto, subList, subMap, textValue);
+        return result;
+    }
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final var other = (OutputDto) obj;
-		return Objects.equals(subInputDto, other.subInputDto) && Objects.equals(subList, other.subList) && Objects
-		        .equals(subMap, other.subMap) && Objects.equals(textValue, other.textValue);
-	}
+    @Override
+    public boolean equals(final @Nullable Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final var other = (OutputDto) obj;
+        return Objects.equals(subInputDto, other.subInputDto) && Objects.equals(subList, other.subList) && Objects
+                .equals(subMap, other.subMap) && Objects.equals(textValue, other.textValue);
+    }
 
 }

@@ -25,14 +25,13 @@ import static tv.hd3g.authkit.utility.ControllerType.REST;
 import java.io.IOException;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import tv.hd3g.authkit.mod.exception.SecurityRejectedRequestException;
 import tv.hd3g.authkit.mod.exception.UnauthorizedRequestException;
 import tv.hd3g.authkit.mod.service.AuditReportService;
@@ -47,8 +46,8 @@ public class SecurityRejectedRequestMappingExceptionResolver extends SimpleMappi
 	private final String authErrorViewName;
 
 	public SecurityRejectedRequestMappingExceptionResolver(final AuditReportService auditService,
-	                                                       final CookieService cookieService,
-	                                                       final String authErrorViewName) {
+														   final CookieService cookieService,
+														   final String authErrorViewName) {
 		this.auditService = auditService;
 		this.cookieService = cookieService;
 		this.authErrorViewName = authErrorViewName;
@@ -56,20 +55,20 @@ public class SecurityRejectedRequestMappingExceptionResolver extends SimpleMappi
 
 	@Override
 	protected ModelAndView doResolveException(final HttpServletRequest request,
-	                                          final HttpServletResponse response,
-	                                          final Object handler,
-	                                          final Exception e) {
+											  final HttpServletResponse response,
+											  final Object handler,
+											  final Exception e) {
 		final var controllerTypeObject = request.getAttribute(CONTROLLER_TYPE_ATTRIBUTE_NAME);
 		if (controllerTypeObject == null) {
 			if (log.isTraceEnabled()) {
 				log.trace("{} request exception ({}) is not managed here (controllerType is not set)",
-				        request.getRequestURI(), e.getClass());
+						request.getRequestURI(), e.getClass());
 			}
 			return null;
 		} else if (e instanceof SecurityRejectedRequestException == false) {
 			if (log.isTraceEnabled()) {
 				log.trace("{} request exception ({}) is not managed here",
-				        request.getRequestURI(), e.getClass());
+						request.getRequestURI(), e.getClass());
 			}
 			return null;
 		}
@@ -91,9 +90,9 @@ public class SecurityRejectedRequestMappingExceptionResolver extends SimpleMappi
 		if (controllerType == CLASSIC) {
 			if (requestException instanceof UnauthorizedRequestException) {
 				final var redirectURL = removeSpecialChars(request.getRequestURI()
-				                                           + Optional.ofNullable(request.getQueryString())
-				                                                   .map("?"::concat)
-				                                                   .orElse(""));
+														   + Optional.ofNullable(request.getQueryString())
+																   .map("?"::concat)
+																   .orElse(""));
 				final var cookieRedirect = cookieService.createRedirectAfterLoginCookie(redirectURL);
 				cookieRedirect.setSecure(true);
 				response.addCookie(cookieRedirect);

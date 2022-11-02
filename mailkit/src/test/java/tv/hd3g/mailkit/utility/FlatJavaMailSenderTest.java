@@ -36,9 +36,6 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.function.Function;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -50,6 +47,8 @@ import org.mockito.internal.util.MockUtil;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import net.datafaker.Faker;
 
 class FlatJavaMailSenderTest {

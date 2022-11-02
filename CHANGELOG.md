@@ -1,5 +1,11 @@
 # All ProdLib projects upgrades
 
+## 15.0.0
+
+Switch Spring Boot parent version to v3.0.6, setup Native Image, update codepolicyvalidation, update native-image jsons, fix Hibernate and J2E old calls #59.
+
+Small bug fix: correct equals impl on UserPrivacyDto after Sonatype-lift review.
+
 ## 14.2.1
 
 Bug fix: the FTP uploads don't manage subdirs path #119

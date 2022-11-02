@@ -18,8 +18,7 @@ package tv.hd3g.authkit.mod.exception;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.service.AuditReportService;
 
 public class BadRequestException extends SecurityRejectedRequestException {

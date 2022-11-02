@@ -33,7 +33,7 @@ class IsTOTPEnabledDtoTest extends HashCodeEqualsTest {
 	private Credential credential;
 
 	@BeforeEach
-	private void init() throws URISyntaxException {
+	void init() throws URISyntaxException {
 		credential = Mockito.mock(Credential.class);
 		final var key = new byte[0];
 		Mockito.when(credential.getTotpkey()).thenReturn(key);

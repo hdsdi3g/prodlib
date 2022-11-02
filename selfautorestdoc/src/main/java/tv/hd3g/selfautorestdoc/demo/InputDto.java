@@ -19,61 +19,61 @@ package tv.hd3g.selfautorestdoc.demo;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 public class InputDto {
 
-	@NotEmpty
-	private String text;
-	@NotNull
-	private Map<String, String> subMap;
-	@NotNull
-	private List<String> subList;
-	private SubInputDto subInputDto;
+    @NotEmpty
+    private String text;
+    @NotNull
+    private Map<String, String> subMap;
+    @NotNull
+    private List<String> subList;
+    private SubInputDto subInputDto;
 
-	public static class SubInputDto {
-		private final String subTextValue;
+    public static class SubInputDto {
+        private final String subTextValue;
 
-		public SubInputDto(final String subTextValue) {
-			this.subTextValue = subTextValue;
-		}
+        public SubInputDto(final String subTextValue) {
+            this.subTextValue = subTextValue;
+        }
 
-		public String getSubTextValue() {
-			return subTextValue;
-		}
-	}
+        public String getSubTextValue() {
+            return subTextValue;
+        }
+    }
 
-	public String getText() {
-		return text;
-	}
+    public String getText() {
+        return text;
+    }
 
-	public void setText(final String text) {
-		this.text = text;
-	}
+    public void setText(final String text) {
+        this.text = text;
+    }
 
-	public Map<String, String> getSubMap() {
-		return subMap;
-	}
+    public Map<String, String> getSubMap() {
+        return subMap;
+    }
 
-	public void setSubMap(final Map<String, String> subMap) {
-		this.subMap = subMap;
-	}
+    public void setSubMap(final Map<String, String> subMap) {
+        this.subMap = subMap;
+    }
 
-	public List<String> getSubList() {
-		return subList;
-	}
+    public List<String> getSubList() {
+        return subList;
+    }
 
-	public void setSubList(final List<String> subList) {
-		this.subList = subList;
-	}
+    public void setSubList(final List<String> subList) {
+        this.subList = subList;
+    }
 
-	public SubInputDto getSubInputDto() {
-		return subInputDto;
-	}
+    public SubInputDto getSubInputDto() {
+        return subInputDto;
+    }
 
-	public void setSubInputDto(final SubInputDto subInputDto) {
-		this.subInputDto = subInputDto;
-	}
+    public void setSubInputDto(final SubInputDto subInputDto) {
+        this.subInputDto = subInputDto;
+    }
 
 }

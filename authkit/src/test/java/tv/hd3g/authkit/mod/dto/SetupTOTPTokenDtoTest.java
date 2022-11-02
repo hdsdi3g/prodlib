@@ -35,7 +35,7 @@ class SetupTOTPTokenDtoTest {
 	private Set<String> backupCodes;
 
 	@BeforeEach
-	private void init() throws URISyntaxException {
+	void init() throws URISyntaxException {
 		userUUID = makeRandomString();
 		secret = makeRandomString();
 		backupCodes = makeRandomThings().limit(6).collect(toUnmodifiableSet());

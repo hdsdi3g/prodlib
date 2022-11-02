@@ -18,8 +18,7 @@ package tv.hd3g.authkit.mod.dto.validated;
 
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
+import jakarta.validation.constraints.NotNull;
 import tv.hd3g.authkit.utility.LogSanitizer;
 
 /**

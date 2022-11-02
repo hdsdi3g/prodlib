@@ -18,9 +18,6 @@ package tv.hd3g.selfautorestdoc.demo;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotEmpty;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.NotEmpty;
 import tv.hd3g.commons.authkit.CheckBefore;
 
 /**
@@ -43,41 +42,39 @@ import tv.hd3g.commons.authkit.CheckBefore;
 @RequestMapping(value = "/serverPath", produces = APPLICATION_JSON_VALUE)
 public class DemoRestController {
 
-	@PostMapping(name = "Post Demo",
-	             value = "postActionControllerPath",
-	             consumes = "text/xml")
-	public ResponseEntity<OutputDto> postActionController(@RequestBody @Validated final InputDto chPasswordDto,
-	                                                      final HttpServletRequest request) {
-		return null;
-	}
+    @PostMapping(name = "Post Demo", value = "postActionControllerPath", consumes = "text/xml")
+    public ResponseEntity<OutputDto> postActionController(@RequestBody @Validated final InputDto chPasswordDto,
+            final HttpServletRequest request) {
+        return null;
+    }
 
-	/**
-	 * A comment for get demo
-	 */
-	@GetMapping(name = "Get Demo",
-	            value = "getActionController/{textValueVarName}/path")
-	public ResponseEntity<OutputDto> getActionController(@PathVariable("textValueVarName") @NotEmpty final String textValue,
-	                                                     @RequestParam(defaultValue = "0") final int numValue,
-	                                                     final HttpServletRequest request) {
-		return null;
-	}
+    /**
+     * A comment for get demo
+     */
+    @GetMapping(name = "Get Demo", value = "getActionController/{textValueVarName}/path")
+    public ResponseEntity<OutputDto> getActionController(
+            @PathVariable("textValueVarName") @NotEmpty final String textValue,
+            @RequestParam(defaultValue = "0") final int numValue,
+            final HttpServletRequest request) {
+        return null;
+    }
 
-	@PutMapping(name = "Put Demo", value = "putActionControllerPath")
-	public ResponseEntity<BaseRepresentationModel> putActionController() {
-		return null;
-	}
+    @PutMapping(name = "Put Demo", value = "putActionControllerPath")
+    public ResponseEntity<BaseRepresentationModel> putActionController() {
+        return null;
+    }
 
-	@DeleteMapping(name = "Delete Demo", value = "deleteActionControllerPath")
-	@CheckBefore("rightForDelete")
-	@CheckBefore("alternateRightForDelete")
-	public ResponseEntity<BaseRepresentationModel> deleteActionController() {
-		return null;
-	}
+    @DeleteMapping(name = "Delete Demo", value = "deleteActionControllerPath")
+    @CheckBefore("rightForDelete")
+    @CheckBefore("alternateRightForDelete")
+    public ResponseEntity<BaseRepresentationModel> deleteActionController() {
+        return null;
+    }
 
-	@PatchMapping(name = "Patch Demo", value = "patchActionControllerPath")
-	@CheckBefore({ "rightForPatch", "anotherRightForPatch" })
-	public ResponseEntity<BaseRepresentationModel> patchActionController() {
-		return null;
-	}
+    @PatchMapping(name = "Patch Demo", value = "patchActionControllerPath")
+    @CheckBefore({ "rightForPatch", "anotherRightForPatch" })
+    public ResponseEntity<BaseRepresentationModel> patchActionController() {
+        return null;
+    }
 
 }

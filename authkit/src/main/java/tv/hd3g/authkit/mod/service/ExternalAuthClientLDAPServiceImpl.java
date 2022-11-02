@@ -16,8 +16,8 @@
  */
 package tv.hd3g.authkit.mod.service;
 
+import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static javax.naming.directory.SearchControls.SUBTREE_SCOPE;
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 import java.net.InetAddress;
 import java.util.Arrays;

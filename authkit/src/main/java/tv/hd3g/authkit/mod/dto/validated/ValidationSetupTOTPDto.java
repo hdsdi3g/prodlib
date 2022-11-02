@@ -16,7 +16,7 @@
  */
 package tv.hd3g.authkit.mod.dto.validated;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 public class ValidationSetupTOTPDto extends ValidationTOTPDto {
 

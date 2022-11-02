@@ -16,8 +16,8 @@
  */
 package tv.hd3g.authkit.mod.service;
 
+import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static java.util.stream.Collectors.toUnmodifiableSet;
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static tv.hd3g.authkit.mod.controller.ControllerLogin.TOKEN_FORMNAME_ENTER_TOTP;
 import static tv.hd3g.authkit.mod.service.AuditReportService.RejectLoginCause.DISABLED_LOGIN;
 import static tv.hd3g.authkit.mod.service.AuditReportService.RejectLoginCause.EMPTY_PASSWORD;
@@ -40,8 +40,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.component.AuthKitEndpointsListener;
 import tv.hd3g.authkit.mod.dto.LoginRequestContentDto;
 import tv.hd3g.authkit.mod.dto.Password;

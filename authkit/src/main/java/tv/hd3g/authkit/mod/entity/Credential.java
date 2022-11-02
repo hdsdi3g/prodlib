@@ -20,19 +20,18 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.Type; // NOSONAR S1874 (https://hibernate.atlassian.net/browse/HHH-14935)
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "credential")
@@ -52,7 +51,7 @@ public class Credential extends BaseEntity {
 	private String realm;
 
 	@NotNull
-	@Type(type = "org.hibernate.type.NumericBooleanType") // NOSONAR S1874 (https://hibernate.atlassian.net/browse/HHH-14935)
+	@Convert(converter = org.hibernate.type.NumericBooleanConverter.class)
 	@Column(columnDefinition = "TINYINT")
 	private boolean enabled;
 
@@ -71,7 +70,7 @@ public class Credential extends BaseEntity {
 	private User user;
 
 	@NotNull
-	@Type(type = "org.hibernate.type.NumericBooleanType") // NOSONAR S1874 (https://hibernate.atlassian.net/browse/HHH-14935)
+	@Convert(converter = org.hibernate.type.NumericBooleanConverter.class)
 	@Column(columnDefinition = "TINYINT")
 	private boolean mustchangepassword;
 
@@ -90,11 +89,11 @@ public class Credential extends BaseEntity {
 	 * Internal password user
 	 */
 	public Credential(final User user,
-	                  final String login,
-	                  final byte[] passwordhash,
-	                  final String realm,
-	                  final boolean enabled,
-	                  final boolean mustchangepassword) {
+					  final String login,
+					  final byte[] passwordhash,
+					  final String realm,
+					  final boolean enabled,
+					  final boolean mustchangepassword) {
 		initCreate();
 		this.user = user;
 		this.login = login;
@@ -109,10 +108,10 @@ public class Credential extends BaseEntity {
 	 * External LDAP user
 	 */
 	public Credential(final User user,
-	                  final String login,
-	                  final String ldapdomain,
-	                  final String realm,
-	                  final boolean enabled) {
+					  final String login,
+					  final String ldapdomain,
+					  final String realm,
+					  final boolean enabled) {
 		initCreate();
 		this.user = user;
 		this.login = login;

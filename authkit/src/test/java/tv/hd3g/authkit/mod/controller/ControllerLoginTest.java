@@ -55,8 +55,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -77,6 +75,7 @@ import org.springframework.web.util.UriUtils;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.dto.Password;
 import tv.hd3g.authkit.mod.dto.validated.AddUserDto;
 import tv.hd3g.authkit.mod.dto.validated.LoginFormDto;
@@ -144,43 +143,43 @@ class ControllerLoginTest {
 	@Test
 	void login() throws Exception {
 		mvc.perform(get("/login")
-		        .accept(TEXT_HTML))
-		        .andExpect(statusOk)
-		        .andExpect(loginView)
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasFormtokenAttr)
-		        .andExpect(notAuthCookie);
+				.accept(TEXT_HTML))
+				.andExpect(statusOk)
+				.andExpect(loginView)
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoErrors)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasFormtokenAttr)
+				.andExpect(notAuthCookie);
 	}
 
 	@Test
 	void doLogin_NothingSend() throws Exception {
 		mvc.perform(post("/login")
-		        .accept(TEXT_HTML))
-		        .andExpect(statusBadRequest)
-		        .andExpect(loginView)
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasErrors)
-		        .andExpect(modelHasErrorAttr)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasFormtokenAttr)
-		        .andExpect(notAuthCookie);
+				.accept(TEXT_HTML))
+				.andExpect(statusBadRequest)
+				.andExpect(loginView)
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasErrors)
+				.andExpect(modelHasErrorAttr)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasFormtokenAttr)
+				.andExpect(notAuthCookie);
 	}
 
 	@Test
 	void doLogin_InvalidUserPassword() throws Exception {
 		final var validToken = tokenService.simpleFormGenerateToken(TOKEN_FORMNAME_LOGIN, thirtyDays);
 		mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createUserBadPassword(validToken).makeForm())
-		        .accept(TEXT_HTML))
-		        .andExpect(statusUnauthorized)
-		        .andExpect(loginView)
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasErrorAttr)
-		        .andExpect(notAuthCookie);
+				.content(createUserBadPassword(validToken).makeForm())
+				.accept(TEXT_HTML))
+				.andExpect(statusUnauthorized)
+				.andExpect(loginView)
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoErrors)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasErrorAttr)
+				.andExpect(notAuthCookie);
 	}
 
 	@Test
@@ -190,41 +189,41 @@ class ControllerLoginTest {
 		final var addUser = new AddUserTestDto();
 		final var uuid = authenticationService.addUser(addUser.makeClassicDto());
 		final var userBadPasswordForm = new FormHandler(addUser.getUserLogin(), makeUserPassword(),
-		        validToken, uuid);
+				validToken, uuid);
 		final var userValidPasswordForm = new FormHandler(addUser.getUserLogin(), addUser.getUserPassword(),
-		        validToken, uuid);
+				validToken, uuid);
 
 		for (var pos = 0; pos < maxLogonTrial; pos++) {
 			mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-			        .content(userBadPasswordForm.makeForm())
-			        .accept(TEXT_HTML)).andExpect(statusUnauthorized);
+					.content(userBadPasswordForm.makeForm())
+					.accept(TEXT_HTML)).andExpect(statusUnauthorized);
 		}
 
 		mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(userValidPasswordForm.makeForm())
-		        .accept(TEXT_HTML))
-		        .andExpect(statusUnauthorized)
-		        .andExpect(loginView)
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasErrorAttr)
-		        .andExpect(notAuthCookie);
+				.content(userValidPasswordForm.makeForm())
+				.accept(TEXT_HTML))
+				.andExpect(statusUnauthorized)
+				.andExpect(loginView)
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoErrors)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasErrorAttr)
+				.andExpect(notAuthCookie);
 	}
 
 	@Test
 	void doLogin_EmptyForm() throws Exception {
 		mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createFormLoginContent("", "", ""))
-		        .accept(TEXT_HTML))
-		        .andExpect(statusBadRequest)
-		        .andExpect(loginView)
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasErrors)
-		        .andExpect(modelHasErrorAttr)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasFormtokenAttr)
-		        .andExpect(notAuthCookie);
+				.content(createFormLoginContent("", "", ""))
+				.accept(TEXT_HTML))
+				.andExpect(statusBadRequest)
+				.andExpect(loginView)
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasErrors)
+				.andExpect(modelHasErrorAttr)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasFormtokenAttr)
+				.andExpect(notAuthCookie);
 	}
 
 	@Test
@@ -232,31 +231,31 @@ class ControllerLoginTest {
 		final var validToken = tokenService.simpleFormGenerateToken(TOKEN_FORMNAME_LOGIN, thirtyDays);
 
 		mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createFormLoginContent("", "", validToken))
-		        .accept(TEXT_HTML))
-		        .andExpect(statusBadRequest)
-		        .andExpect(loginView)
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasErrors)
-		        .andExpect(modelHasErrorAttr)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasFormtokenAttr)
-		        .andExpect(notAuthCookie);
+				.content(createFormLoginContent("", "", validToken))
+				.accept(TEXT_HTML))
+				.andExpect(statusBadRequest)
+				.andExpect(loginView)
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasErrors)
+				.andExpect(modelHasErrorAttr)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasFormtokenAttr)
+				.andExpect(notAuthCookie);
 	}
 
 	@Test
 	void doLogin_EmptyToken() throws Exception {
 		mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createUser("").makeForm())
-		        .accept(TEXT_HTML))
-		        .andExpect(statusBadRequest)
-		        .andExpect(loginView)
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasErrors)
-		        .andExpect(modelHasErrorAttr)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasFormtokenAttr)
-		        .andExpect(notAuthCookie);
+				.content(createUser("").makeForm())
+				.accept(TEXT_HTML))
+				.andExpect(statusBadRequest)
+				.andExpect(loginView)
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasErrors)
+				.andExpect(modelHasErrorAttr)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasFormtokenAttr)
+				.andExpect(notAuthCookie);
 	}
 
 	@Test
@@ -265,26 +264,26 @@ class ControllerLoginTest {
 		final var secret = makeRandomBytes(128);
 
 		final var invalidToken = Jwts.builder()
-		        .signWith(Keys.hmacShaKeyFor(secret), HS512)
-		        .setHeaderParam("typ", TOKEN_TYPE)
-		        .setIssuer(TOKEN_ISSUER_FORM)
-		        .setAudience(TOKEN_AUDIENCE)
-		        // .setSubject("(none)")
-		        .setExpiration(new Date(now + thirtyDays.toMillis()))
-		        .claim("formname", TOKEN_FORMNAME_LOGIN)
-		        .compact();
+				.signWith(Keys.hmacShaKeyFor(secret), HS512)
+				.setHeaderParam("typ", TOKEN_TYPE)
+				.setIssuer(TOKEN_ISSUER_FORM)
+				.setAudience(TOKEN_AUDIENCE)
+				// .setSubject("(none)")
+				.setExpiration(new Date(now + thirtyDays.toMillis()))
+				.claim("formname", TOKEN_FORMNAME_LOGIN)
+				.compact();
 
 		mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createUser(invalidToken).makeForm())
-		        .accept(TEXT_HTML))
-		        .andExpect(statusBadRequest)
-		        .andExpect(loginView)
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(modelHasErrorAttr)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasFormtokenAttr)
-		        .andExpect(notAuthCookie);
+				.content(createUser(invalidToken).makeForm())
+				.accept(TEXT_HTML))
+				.andExpect(statusBadRequest)
+				.andExpect(loginView)
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoErrors)
+				.andExpect(modelHasErrorAttr)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasFormtokenAttr)
+				.andExpect(notAuthCookie);
 	}
 
 	@Test
@@ -292,16 +291,16 @@ class ControllerLoginTest {
 		final var oldToken = tokenService.simpleFormGenerateToken(TOKEN_FORMNAME_LOGIN, ZERO);
 
 		mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createUser(oldToken).makeForm())
-		        .accept(TEXT_HTML))
-		        .andExpect(statusBadRequest)
-		        .andExpect(loginView)
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(modelHasErrorAttr)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasFormtokenAttr)
-		        .andExpect(notAuthCookie);
+				.content(createUser(oldToken).makeForm())
+				.accept(TEXT_HTML))
+				.andExpect(statusBadRequest)
+				.andExpect(loginView)
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoErrors)
+				.andExpect(modelHasErrorAttr)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasFormtokenAttr)
+				.andExpect(notAuthCookie);
 	}
 
 	@Test
@@ -309,16 +308,16 @@ class ControllerLoginTest {
 		final var validToken = tokenService.simpleFormGenerateToken(TOKEN_FORMNAME_LOGIN, thirtyDays);
 
 		mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createUser(validToken).makeForm())
-		        .accept(TEXT_HTML))
-		        .andExpect(statusOk)
-		        .andExpect(view().name("bounce-session"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasSessionAttr)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(model().attribute("bounceto", urlRedirectAfterLogin))
-		        .andExpect(content().string(new TextContentPresenceMatcher(urlRedirectAfterLogin)))
-		        .andExpect(authCookie);
+				.content(createUser(validToken).makeForm())
+				.accept(TEXT_HTML))
+				.andExpect(statusOk)
+				.andExpect(view().name("bounce-session"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasSessionAttr)
+				.andExpect(modelHasNoErrors)
+				.andExpect(model().attribute("bounceto", urlRedirectAfterLogin))
+				.andExpect(content().string(new TextContentPresenceMatcher(urlRedirectAfterLogin)))
+				.andExpect(authCookie);
 	}
 
 	@Test
@@ -329,18 +328,18 @@ class ControllerLoginTest {
 		final var urlRedirect = "http://localhost" + pathRedirect;
 
 		mvc.perform(post("/login")
-		        .contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createUser(validToken).makeForm())
-		        .cookie(cookieRedirect)
-		        .accept(TEXT_HTML))
-		        .andExpect(statusOk)
-		        .andExpect(view().name("bounce-session"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasSessionAttr)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(model().attribute("bounceto", urlRedirect))
-		        .andExpect(content().string(new TextContentPresenceMatcher(urlRedirect)))
-		        .andExpect(authCookie);
+				.contentType(APPLICATION_FORM_URLENCODED)
+				.content(createUser(validToken).makeForm())
+				.cookie(cookieRedirect)
+				.accept(TEXT_HTML))
+				.andExpect(statusOk)
+				.andExpect(view().name("bounce-session"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasSessionAttr)
+				.andExpect(modelHasNoErrors)
+				.andExpect(model().attribute("bounceto", urlRedirect))
+				.andExpect(content().string(new TextContentPresenceMatcher(urlRedirect)))
+				.andExpect(authCookie);
 	}
 
 	@Test
@@ -351,34 +350,34 @@ class ControllerLoginTest {
 		final var urlRedirect = "http://localhost" + pathRedirect;
 
 		mvc.perform(post("/login")
-		        .contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createUser(validToken).makeForm())
-		        .cookie(cookieRedirect)
-		        .accept(TEXT_HTML))
-		        .andExpect(statusOk)
-		        .andExpect(view().name("bounce-session"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasSessionAttr)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(model().attribute("bounceto", urlRedirect))
-		        .andExpect(content().string(new TextContentPresenceMatcher(urlRedirect)))
-		        .andExpect(authCookie);
+				.contentType(APPLICATION_FORM_URLENCODED)
+				.content(createUser(validToken).makeForm())
+				.cookie(cookieRedirect)
+				.accept(TEXT_HTML))
+				.andExpect(statusOk)
+				.andExpect(view().name("bounce-session"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasSessionAttr)
+				.andExpect(modelHasNoErrors)
+				.andExpect(model().attribute("bounceto", urlRedirect))
+				.andExpect(content().string(new TextContentPresenceMatcher(urlRedirect)))
+				.andExpect(authCookie);
 	}
 
 	@Test
 	void doLogin_Disabled() throws Exception {
 		final var validToken = tokenService.simpleFormGenerateToken(TOKEN_FORMNAME_LOGIN, thirtyDays);
 		mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createDisabledUser(validToken).makeForm())
-		        .accept(TEXT_HTML))
-		        .andExpect(statusUnauthorized)
-		        .andExpect(loginView)
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(modelHasErrorAttr)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasFormtokenAttr)
-		        .andExpect(notAuthCookie);
+				.content(createDisabledUser(validToken).makeForm())
+				.accept(TEXT_HTML))
+				.andExpect(statusUnauthorized)
+				.andExpect(loginView)
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoErrors)
+				.andExpect(modelHasErrorAttr)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasFormtokenAttr)
+				.andExpect(notAuthCookie);
 	}
 
 	@Test
@@ -386,15 +385,15 @@ class ControllerLoginTest {
 		final var validToken = tokenService.simpleFormGenerateToken(TOKEN_FORMNAME_LOGIN, thirtyDays);
 		final var form = createUserMustChangePassword(validToken);
 		final var resultActions = mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(form.makeForm())
-		        .accept(TEXT_HTML))
-		        .andExpect(statusOk)
-		        .andExpect(view().name("reset-password"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(notAuthCookie)
-		        .andReturn();
+				.content(form.makeForm())
+				.accept(TEXT_HTML))
+				.andExpect(statusOk)
+				.andExpect(view().name("reset-password"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasNoErrors)
+				.andExpect(notAuthCookie)
+				.andReturn();
 
 		final var resetPasswordToken = (String) resultActions.getModelAndView().getModel().get("formtoken");
 		final var uuid = tokenService.userFormExtractTokenUUID(TOKEN_FORMNAME_RESET_PSD, resetPasswordToken);
@@ -404,27 +403,27 @@ class ControllerLoginTest {
 	@Test
 	void logout() throws Exception {
 		final var authToken = tokenService.loggedUserRightsGenerateToken(
-		        makeUUID(), Duration.ofDays(1), Set.of(), null);
+				makeUUID(), Duration.ofDays(1), Set.of(), null);
 		final var cookie = cookieService.createLogonCookie(authToken, Duration.ofDays(1));
 
 		mvc.perform(get("/logout")
-		        .cookie(cookie)
-		        .accept(TEXT_HTML))
-		        .andExpect(statusOk)
-		        .andExpect(view().name("bounce-logout"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(content().string(new TextContentPresenceMatcher(urlRedirectAfterLogout)))
-		        .andExpect(deletedCookie);
+				.cookie(cookie)
+				.accept(TEXT_HTML))
+				.andExpect(statusOk)
+				.andExpect(view().name("bounce-logout"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasNoErrors)
+				.andExpect(content().string(new TextContentPresenceMatcher(urlRedirectAfterLogout)))
+				.andExpect(deletedCookie);
 	}
 
 	@Test
 	void logout_NotLogged() throws Exception {
 		mvc.perform(get("/logout")
-		        .accept(TEXT_HTML))
-		        .andExpect(statusUnauthorized)
-		        .andExpect(notAuthCookie);
+				.accept(TEXT_HTML))
+				.andExpect(statusUnauthorized)
+				.andExpect(notAuthCookie);
 	}
 
 	@Test
@@ -437,35 +436,35 @@ class ControllerLoginTest {
 		authenticationService.setUserMustChangePassword(userUUID);
 
 		final var resetPasswordToken = tokenService.userFormGenerateToken(
-		        TOKEN_FORMNAME_RESET_PSD, userUUID, thirtyDays);
+				TOKEN_FORMNAME_RESET_PSD, userUUID, thirtyDays);
 		final var newUserPassword = makeUserPassword();
 
 		final var resultActions = mvc.perform(post("/reset-password").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createResetPasswordFormContent(newUserPassword, resetPasswordToken))
-		        .accept(TEXT_HTML))
-		        .andExpect(statusOk)
-		        .andExpect(view().name("login"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasActionDoneAttr)
-		        .andExpect(modelHasFormtokenAttr)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(notAuthCookie)
-		        .andReturn();
+				.content(createResetPasswordFormContent(newUserPassword, resetPasswordToken))
+				.accept(TEXT_HTML))
+				.andExpect(statusOk)
+				.andExpect(view().name("login"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasActionDoneAttr)
+				.andExpect(modelHasFormtokenAttr)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasNoErrors)
+				.andExpect(notAuthCookie)
+				.andReturn();
 
 		/**
 		 * Test login with the new password
 		 */
 		final var validToken = (String) resultActions.getModelAndView().getModel().get("formtoken");
 		mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createFormLoginContent(addUser.getUserLogin(), newUserPassword, validToken))
-		        .accept(TEXT_HTML))
-		        .andExpect(statusOk)
-		        .andExpect(view().name("bounce-session"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasSessionAttr)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(authCookie);
+				.content(createFormLoginContent(addUser.getUserLogin(), newUserPassword, validToken))
+				.accept(TEXT_HTML))
+				.andExpect(statusOk)
+				.andExpect(view().name("bounce-session"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasSessionAttr)
+				.andExpect(modelHasNoErrors)
+				.andExpect(authCookie);
 	}
 
 	@Test
@@ -478,35 +477,35 @@ class ControllerLoginTest {
 		authenticationService.setUserMustChangePassword(userUUID);
 
 		final var resetPasswordToken = tokenService.userFormGenerateToken(
-		        TOKEN_FORMNAME_RESET_PSD, userUUID, thirtyDays);
+				TOKEN_FORMNAME_RESET_PSD, userUUID, thirtyDays);
 		mvc.perform(post("/reset-password").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createFormContent(Map.of(
-		                "newuserpassword", userPassword,
-		                "newuserpassword2", makeUserPassword(),
-		                "securetoken", resetPasswordToken)))
-		        .accept(TEXT_HTML))
-		        .andExpect(statusBadRequest)
-		        .andExpect(view().name("reset-password"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasErrorAttr)
-		        .andExpect(modelHasFormtokenAttr)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(notAuthCookie)
-		        .andReturn();
+				.content(createFormContent(Map.of(
+						"newuserpassword", userPassword,
+						"newuserpassword2", makeUserPassword(),
+						"securetoken", resetPasswordToken)))
+				.accept(TEXT_HTML))
+				.andExpect(statusBadRequest)
+				.andExpect(view().name("reset-password"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasErrorAttr)
+				.andExpect(modelHasFormtokenAttr)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasNoErrors)
+				.andExpect(notAuthCookie)
+				.andReturn();
 
 		/**
 		 * Test login with the same password, but without reset it before.
 		 */
 		final var validToken = tokenService.simpleFormGenerateToken(TOKEN_FORMNAME_LOGIN, thirtyDays);
 		mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createFormLoginContent(addUser.getUserLogin(), userPassword, validToken))
-		        .accept(TEXT_HTML))
-		        .andExpect(statusOk)
-		        .andExpect(view().name("reset-password"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasNoErrors);
+				.content(createFormLoginContent(addUser.getUserLogin(), userPassword, validToken))
+				.accept(TEXT_HTML))
+				.andExpect(statusOk)
+				.andExpect(view().name("reset-password"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasNoErrors);
 	}
 
 	@Test
@@ -519,32 +518,32 @@ class ControllerLoginTest {
 		authenticationService.setUserMustChangePassword(userUUID);
 
 		final var resetPasswordToken = tokenService.userFormGenerateToken(
-		        TOKEN_FORMNAME_RESET_PSD, userUUID, thirtyDays);
+				TOKEN_FORMNAME_RESET_PSD, userUUID, thirtyDays);
 		mvc.perform(post("/reset-password").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createResetPasswordFormContent(userPassword, resetPasswordToken))
-		        .accept(TEXT_HTML))
-		        .andExpect(statusBadRequest)
-		        .andExpect(view().name("reset-password"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasErrorAttr)
-		        .andExpect(modelHasFormtokenAttr)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(notAuthCookie)
-		        .andReturn();
+				.content(createResetPasswordFormContent(userPassword, resetPasswordToken))
+				.accept(TEXT_HTML))
+				.andExpect(statusBadRequest)
+				.andExpect(view().name("reset-password"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasErrorAttr)
+				.andExpect(modelHasFormtokenAttr)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasNoErrors)
+				.andExpect(notAuthCookie)
+				.andReturn();
 
 		/**
 		 * Test login with the same password, but without reset it before.
 		 */
 		final var validToken = tokenService.simpleFormGenerateToken(TOKEN_FORMNAME_LOGIN, thirtyDays);
 		mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createFormLoginContent(addUser.getUserLogin(), userPassword, validToken))
-		        .accept(TEXT_HTML))
-		        .andExpect(statusOk)
-		        .andExpect(view().name("reset-password"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasNoErrors);
+				.content(createFormLoginContent(addUser.getUserLogin(), userPassword, validToken))
+				.accept(TEXT_HTML))
+				.andExpect(statusOk)
+				.andExpect(view().name("reset-password"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasNoErrors);
 	}
 
 	@Test
@@ -567,17 +566,17 @@ class ControllerLoginTest {
 		}
 
 		final var resetPasswordToken = tokenService.userFormGenerateToken(
-		        TOKEN_FORMNAME_RESET_PSD, userUUID, thirtyDays);
+				TOKEN_FORMNAME_RESET_PSD, userUUID, thirtyDays);
 		mvc.perform(post("/reset-password").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createResetPasswordFormContent(userPassword, resetPasswordToken))
-		        .accept(TEXT_HTML))
-		        .andExpect(statusUnauthorized)
-		        .andExpect(loginView)
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasErrorAttr)
-		        .andExpect(notAuthCookie);
+				.content(createResetPasswordFormContent(userPassword, resetPasswordToken))
+				.accept(TEXT_HTML))
+				.andExpect(statusUnauthorized)
+				.andExpect(loginView)
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoErrors)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasErrorAttr)
+				.andExpect(notAuthCookie);
 	}
 
 	@Test
@@ -586,14 +585,14 @@ class ControllerLoginTest {
 		final var uuid = authenticationService.addUser(addUser.makeClassicDto());
 		final var token = tokenService.securedRedirectRequestGenerateToken(uuid, thirtyDays, TOKEN_REDIRECT_RESET_PSD);
 		final var resultActions = mvc.perform(get("/reset-password/" + token)
-		        .accept(TEXT_HTML))
-		        .andExpect(statusOk)
-		        .andExpect(view().name("reset-password"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(modelHasFormtokenAttr)
-		        .andExpect(notAuthCookie)
-		        .andReturn();
+				.accept(TEXT_HTML))
+				.andExpect(statusOk)
+				.andExpect(view().name("reset-password"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoErrors)
+				.andExpect(modelHasFormtokenAttr)
+				.andExpect(notAuthCookie)
+				.andReturn();
 		final var userFormToken = (String) resultActions.getModelAndView().getModel().get("formtoken");
 		assertEquals(uuid, tokenService.userFormExtractTokenUUID(TOKEN_FORMNAME_RESET_PSD, userFormToken));
 	}
@@ -609,20 +608,20 @@ class ControllerLoginTest {
 
 		final var tokenAuth = tokenService.userFormGenerateToken(TOKEN_FORMNAME_ENTER_TOTP, userUUID, thirtyDays);
 		final var form2auth = createFormContent(Map.of(
-		        "code", checkCode,
-		        "securetoken", tokenAuth,
-		        "shorttime", "false"));
+				"code", checkCode,
+				"securetoken", tokenAuth,
+				"shorttime", "false"));
 
 		mvc.perform(post("/login-2auth").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(form2auth)
-		        .accept(TEXT_HTML))
-		        .andExpect(statusOk)
-		        .andExpect(view().name("bounce-session"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasSessionAttr)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(content().string(new TextContentPresenceMatcher(urlRedirectAfterLogin)))
-		        .andExpect(authCookie);
+				.content(form2auth)
+				.accept(TEXT_HTML))
+				.andExpect(statusOk)
+				.andExpect(view().name("bounce-session"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasSessionAttr)
+				.andExpect(modelHasNoErrors)
+				.andExpect(content().string(new TextContentPresenceMatcher(urlRedirectAfterLogin)))
+				.andExpect(authCookie);
 	}
 
 	@Test
@@ -635,15 +634,15 @@ class ControllerLoginTest {
 		totpService.setupTOTP(secret, backupCodes, uuid);
 
 		mvc.perform(post("/login").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(createUser.makeForm())
-		        .accept(TEXT_HTML))
-		        .andExpect(statusOk)
-		        .andExpect(view().name("totp-challenge"))
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(modelHasFormtokenAttr)
-		        .andExpect(notAuthCookie);
+				.content(createUser.makeForm())
+				.accept(TEXT_HTML))
+				.andExpect(statusOk)
+				.andExpect(view().name("totp-challenge"))
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasNoErrors)
+				.andExpect(modelHasFormtokenAttr)
+				.andExpect(notAuthCookie);
 	}
 
 	@Test
@@ -656,41 +655,41 @@ class ControllerLoginTest {
 
 		final var tokenAuth = tokenService.userFormGenerateToken(TOKEN_FORMNAME_ENTER_TOTP, uuid, thirtyDays);
 		final var form2auth = createFormContent(Map.of(
-		        "code", StringUtils.rightPad(String.valueOf(DataGenerator.random.nextInt(0, 1_000_000)), 6, "0"),
-		        "securetoken", tokenAuth,
-		        "shorttime", "false"));
+				"code", StringUtils.rightPad(String.valueOf(DataGenerator.random.nextInt(0, 1_000_000)), 6, "0"),
+				"securetoken", tokenAuth,
+				"shorttime", "false"));
 
 		mvc.perform(post("/login-2auth").contentType(APPLICATION_FORM_URLENCODED)
-		        .content(form2auth)
-		        .accept(TEXT_HTML))
-		        .andExpect(statusUnauthorized)
-		        .andExpect(loginView)
-		        .andExpect(contentTypeHtmlUtf8)
-		        .andExpect(modelHasNoErrors)
-		        .andExpect(modelHasNoSessionAttr)
-		        .andExpect(modelHasErrorAttr)
-		        .andExpect(notAuthCookie);
+				.content(form2auth)
+				.accept(TEXT_HTML))
+				.andExpect(statusUnauthorized)
+				.andExpect(loginView)
+				.andExpect(contentTypeHtmlUtf8)
+				.andExpect(modelHasNoErrors)
+				.andExpect(modelHasNoSessionAttr)
+				.andExpect(modelHasErrorAttr)
+				.andExpect(notAuthCookie);
 	}
 
 	private String createFormContent(final Map<String, String> content) throws Exception {
 		final var inputList = content.entrySet().stream().map(formInput -> new BasicNameValuePair(formInput.getKey(),
-		        UriUtils.encode(formInput.getValue(), UTF_8))).collect(Collectors.toUnmodifiableList());
+				UriUtils.encode(formInput.getValue(), UTF_8))).collect(Collectors.toUnmodifiableList());
 		return EntityUtils.toString(new UrlEncodedFormEntity(inputList), UTF_8);
 	}
 
 	private String createResetPasswordFormContent(final String newUserPassword,
-	                                              final String resetPasswordToken) throws Exception {
+												  final String resetPasswordToken) throws Exception {
 		return createFormContent(Map.of(
-		        "newuserpassword", newUserPassword,
-		        "newuserpassword2", newUserPassword,
-		        "securetoken", resetPasswordToken));
+				"newuserpassword", newUserPassword,
+				"newuserpassword2", newUserPassword,
+				"securetoken", resetPasswordToken));
 	}
 
 	private String createFormLoginContent(final String userlogin,
-	                                      final String userpassword,
-	                                      final String securetoken) throws Exception {
+										  final String userpassword,
+										  final String securetoken) throws Exception {
 		return createFormContent(
-		        Map.of("userlogin", userlogin, "userpassword", userpassword, "securetoken", securetoken));
+				Map.of("userlogin", userlogin, "userpassword", userpassword, "securetoken", securetoken));
 	}
 
 	private class FormHandler {
@@ -752,7 +751,7 @@ class ControllerLoginTest {
 			}
 			try {
 				final var payload = tokenService.loggedUserRightsExtractToken((String) arg0,
-				        false);
+						false);
 				assertEquals(userUUID, payload.getUserUUID());
 				assertTrue(payload.getTimeout().after(new Date()));
 			} catch (final NotAcceptableSecuredTokenException e) {

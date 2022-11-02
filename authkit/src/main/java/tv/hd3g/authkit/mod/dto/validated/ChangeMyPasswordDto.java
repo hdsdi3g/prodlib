@@ -16,8 +16,7 @@
  */
 package tv.hd3g.authkit.mod.dto.validated;
 
-import javax.validation.constraints.NotNull;
-
+import jakarta.validation.constraints.NotNull;
 import tv.hd3g.authkit.mod.dto.Password;
 
 public class ChangeMyPasswordDto extends ValidationTOTPDto {

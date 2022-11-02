@@ -21,16 +21,15 @@ import static java.lang.Math.min;
 import java.sql.Timestamp;
 import java.time.Duration;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 import org.apache.commons.codec.digest.DigestUtils;
-import org.hibernate.annotations.Type;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import tv.hd3g.jobkit.watchfolder.ObservedFolder;
@@ -49,7 +48,7 @@ public class WatchedFileEntity extends BaseEntity {
 	public static final String TABLE_NAME = "jobkit_wf_watchedfile";
 
 	@NotNull
-	@Type(type = "org.hibernate.type.NumericBooleanType")
+	@Convert(converter = org.hibernate.type.NumericBooleanConverter.class)
 	@Column(columnDefinition = "TINYINT")
 	private boolean directory;
 
@@ -82,19 +81,19 @@ public class WatchedFileEntity extends BaseEntity {
 
 	@Setter
 	@NotNull
-	@Type(type = "org.hibernate.type.NumericBooleanType")
+	@Convert(converter = org.hibernate.type.NumericBooleanConverter.class)
 	@Column(name = "marked_as_done", columnDefinition = "TINYINT")
 	private boolean markedAsDone;
 
 	@Setter
 	@NotNull
-	@Type(type = "org.hibernate.type.NumericBooleanType")
+	@Convert(converter = org.hibernate.type.NumericBooleanConverter.class)
 	@Column(name = "last_is_same", columnDefinition = "TINYINT")
 	private boolean lastIsSame;
 
 	@Setter
 	@NotNull
-	@Type(type = "org.hibernate.type.NumericBooleanType")
+	@Convert(converter = org.hibernate.type.NumericBooleanConverter.class)
 	@Column(name = "done_but_changed", columnDefinition = "TINYINT")
 	private boolean doneButChanged;
 

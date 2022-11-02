@@ -25,8 +25,6 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -35,6 +33,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 import tv.hd3g.mailkit.mod.configuration.MailKitConfig;
 

@@ -37,8 +37,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.mail.MessagingException;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +46,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 
+import jakarta.mail.MessagingException;
 import net.datafaker.Faker;
 import tv.hd3g.commons.mailkit.SendMailDto.MessageGrade;
 import tv.hd3g.jobkit.engine.JobKitEngine;

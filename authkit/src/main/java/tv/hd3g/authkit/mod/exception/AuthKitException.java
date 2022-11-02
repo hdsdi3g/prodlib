@@ -16,7 +16,7 @@
  */
 package tv.hd3g.authkit.mod.exception;
 
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
 public class AuthKitException extends RuntimeException {
 

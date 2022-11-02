@@ -20,8 +20,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.service.AuditReportService;
 
 public class ForbiddenRequestException extends SecurityRejectedRequestException {

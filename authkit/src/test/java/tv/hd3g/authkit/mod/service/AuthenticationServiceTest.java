@@ -45,8 +45,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -57,6 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import jakarta.servlet.http.HttpServletRequest;
 import tv.hd3g.authkit.mod.dto.LoggedUserTagsTokenDto;
 import tv.hd3g.authkit.mod.dto.LoginRequestContentDto;
 import tv.hd3g.authkit.mod.dto.Password;
@@ -445,7 +444,7 @@ class AuthenticationServiceTest {
 	}
 
 	private LoggedUserTagsTokenDto checkLoginRequestContent(final LoginRequestContentDto loginRequest,
-	                                                        final String userUUID) {
+															final String userUUID) {
 		assertNotNull(loginRequest);
 		final var token = loginRequest.getUserSessionToken();
 		final var cookie = loginRequest.getUserSessionCookie();
@@ -618,12 +617,12 @@ class AuthenticationServiceTest {
 
 				final var secret = totpService.makeSecret();
 				final var checkCode = makeCodeAtTime(base32.decode(secret), System.currentTimeMillis(),
-				        timeStepSeconds);
+						timeStepSeconds);
 				final var backupCodes = totpService.makeBackupCodes();
 				totpService.setupTOTP(secret, backupCodes, uuid);
 
 				final var tokenAuth = securedTokenService.userFormGenerateToken(TOKEN_FORMNAME_ENTER_TOTP, uuid,
-				        thirtyDays);
+						thirtyDays);
 				final var formTOTPDto = new TOTPLogonCodeFormDto();
 				formTOTPDto.setCode(checkCode);
 				formTOTPDto.setSecuretoken(tokenAuth);
@@ -706,7 +705,7 @@ class AuthenticationServiceTest {
 			 * Test if login still ok after short duration time
 			 */
 			assertTrue(loggedUser.getTimeout().after(
-			        new Date(System.currentTimeMillis() + shortSessionDuration.getSeconds() * 1000)));
+					new Date(System.currentTimeMillis() + shortSessionDuration.getSeconds() * 1000)));
 		}
 
 		@Test
@@ -717,13 +716,13 @@ class AuthenticationServiceTest {
 			loginForm.setUserpassword(new Password(userPassword));
 			loginForm.setShorttime(true);
 			final var loggedUser = checkLoginRequestContent(authenticationService
-			        .userLoginRequest(request, loginForm), uuid);
+					.userLoginRequest(request, loginForm), uuid);
 
 			/**
 			 * Test if not logged before long duration time
 			 */
 			assertTrue(loggedUser.getTimeout().before(
-			        new Date(System.currentTimeMillis() + longSessionDuration.getSeconds() * 1000)));
+					new Date(System.currentTimeMillis() + longSessionDuration.getSeconds() * 1000)));
 		}
 
 		@Test
@@ -813,7 +812,7 @@ class AuthenticationServiceTest {
 			totpService.setupTOTP(secret, backupCodes, uuid);
 
 			final var tokenAuth = securedTokenService.userFormGenerateToken(TOKEN_FORMNAME_ENTER_TOTP, uuid,
-			        thirtyDays);
+					thirtyDays);
 			final var formTOTPDto = new TOTPLogonCodeFormDto();
 			formTOTPDto.setCode(checkCode);
 			formTOTPDto.setSecuretoken(tokenAuth);
@@ -860,7 +859,7 @@ class AuthenticationServiceTest {
 			loginForm.setUserpassword(new Password(userPassword));
 
 			final var loggedDto = checkLoginRequestContent(authenticationService
-			        .userLoginRequest(request, loginForm), uuid);
+					.userLoginRequest(request, loginForm), uuid);
 			assertNull(loggedDto.getOnlyForHost());
 			assertTrue(loggedDto.getTags().isEmpty());
 		}
@@ -887,7 +886,7 @@ class AuthenticationServiceTest {
 			loginForm.setUserpassword(new Password(userPassword));
 
 			final var loggedDto = checkLoginRequestContent(authenticationService
-			        .userLoginRequest(request, loginForm), uuid);
+					.userLoginRequest(request, loginForm), uuid);
 			assertEquals(addr, loggedDto.getOnlyForHost());
 			assertTrue(loggedDto.getTags().contains(rightName));
 		}
@@ -1096,7 +1095,7 @@ class AuthenticationServiceTest {
 			final var list = authenticationService.listAllGroups();
 			assertNotNull(list);
 			final var groups = list.stream().filter(gg -> gg.getName().equals(g.getName()))
-			        .collect(Collectors.toUnmodifiableList());
+					.collect(Collectors.toUnmodifiableList());
 			assertEquals(1, groups.size());
 		}
 
@@ -1202,7 +1201,7 @@ class AuthenticationServiceTest {
 			final var name = r.getName();
 			final var thing = makeRandomThing();
 			Assertions.assertThrows(IllegalArgumentException.class,
-			        () -> authenticationService.setRoleOnlyForClient(name, thing));
+					() -> authenticationService.setRoleOnlyForClient(name, thing));
 		}
 
 		@Test
@@ -1255,7 +1254,7 @@ class AuthenticationServiceTest {
 			final var list = authenticationService.listAllRoles();
 			assertNotNull(list);
 			final var roles = list.stream().filter(rr -> rr.getName().equals(r.getName()))
-			        .collect(Collectors.toUnmodifiableList());
+					.collect(Collectors.toUnmodifiableList());
 			assertEquals(1, roles.size());
 		}
 

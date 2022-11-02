@@ -16,7 +16,7 @@
  */
 package tv.hd3g.authkit.mod.controller;
 
-import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static org.owasp.encoder.Encode.forJavaScript;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -26,8 +26,6 @@ import static tv.hd3g.authkit.utility.LogSanitizer.sanitize;
 
 import java.util.List;
 import java.util.UUID;
-
-import javax.validation.constraints.NotEmpty;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.constraints.NotEmpty;
 import tv.hd3g.authkit.mod.dto.ressource.CreatedUserDto;
 import tv.hd3g.authkit.mod.dto.ressource.GroupOrRoleDto;
 import tv.hd3g.authkit.mod.dto.ressource.ItemListDto;
@@ -94,7 +93,7 @@ public class RestControllerUser {
 	public ResponseEntity<UserDto> getUser(@PathVariable("uuid") @NotEmpty final String _uuid) {
 		final var uuid = sanitize(_uuid);
 		final var result = userDao.getUserByUUID(UUID.fromString(uuid))
-		        .orElseThrow(() -> new AuthKitException(SC_NOT_FOUND, "Can't found user " + uuid));
+				.orElseThrow(() -> new AuthKitException(SC_NOT_FOUND, "Can't found user " + uuid));
 		return new ResponseEntity<>(result, OK);
 	}
 
@@ -102,7 +101,7 @@ public class RestControllerUser {
 	@GetMapping(value = "users")
 	@AuditAfter(value = "listUser", changeSecurity = false)
 	public ResponseEntity<ItemListDto<UserDto>> listUsers(@RequestParam(defaultValue = "0") final int pos,
-	                                                      @RequestParam(defaultValue = "0") final int size) {
+														  @RequestParam(defaultValue = "0") final int size) {
 		final var total = (int) userRepository.count();
 		final int limit;
 		final int selectedPos;
@@ -207,7 +206,7 @@ public class RestControllerUser {
 	@AuditAfter(value = "addUserInGroup", changeSecurity = true)
 	@PostMapping(value = "users/{uuid}/ingroup/{name}")
 	public ResponseEntity<Object> addUserInGroup(@PathVariable("uuid") @NotEmpty final String _userUUID,
-	                                             @PathVariable("name") @NotEmpty final String _groupName) {
+												 @PathVariable("name") @NotEmpty final String _groupName) {
 		final var userUUID = sanitize(_userUUID);
 		final var groupName = sanitize(_groupName);
 		authenticationService.addUserInGroup(userUUID, groupName);
@@ -218,7 +217,7 @@ public class RestControllerUser {
 	@AuditAfter(value = "removeUserInGroup", changeSecurity = true)
 	@DeleteMapping(value = "users/{uuid}/ingroup/{name}")
 	public ResponseEntity<Object> removeUserInGroup(@PathVariable("uuid") @NotEmpty final String _userUUID,
-	                                                @PathVariable("name") @NotEmpty final String _groupName) {
+													@PathVariable("name") @NotEmpty final String _groupName) {
 		final var userUUID = sanitize(_userUUID);
 		final var groupName = sanitize(_groupName);
 		authenticationService.removeUserInGroup(userUUID, groupName);
@@ -281,7 +280,7 @@ public class RestControllerUser {
 	@AuditAfter(value = "setRoleOnlyForClients", changeSecurity = true)
 	@PutMapping(value = "roles/{rolename}/setOnlyForClient")
 	public ResponseEntity<Object> setRoleOnlyForClient(@PathVariable("rolename") @NotEmpty final String _roleName,
-	                                                   @RequestBody @Validated final ChangeIPDto setIp) {
+													   @RequestBody @Validated final ChangeIPDto setIp) {
 		final var roleName = sanitize(_roleName);
 		authenticationService.setRoleOnlyForClient(roleName, setIp.getIp());
 		return new ResponseEntity<>(OK);
@@ -291,7 +290,7 @@ public class RestControllerUser {
 	@AuditAfter(value = "addGroupInRole", changeSecurity = true)
 	@PostMapping(value = "groups/{groupname}/inrole/{rolename}")
 	public ResponseEntity<Object> addGroupInRole(@PathVariable("groupname") @NotEmpty final String _groupName,
-	                                             @PathVariable("rolename") @NotEmpty final String _roleName) {
+												 @PathVariable("rolename") @NotEmpty final String _roleName) {
 		final var roleName = sanitize(_roleName);
 		final var groupName = sanitize(_groupName);
 		authenticationService.addGroupInRole(groupName, roleName);
@@ -302,7 +301,7 @@ public class RestControllerUser {
 	@AuditAfter(value = "removeGroupInRole", changeSecurity = true)
 	@DeleteMapping(value = "groups/{groupname}/inrole/{rolename}")
 	public ResponseEntity<Object> removeGroupInRole(@PathVariable("groupname") @NotEmpty final String _groupName,
-	                                                @PathVariable("rolename") @NotEmpty final String _roleName) {
+													@PathVariable("rolename") @NotEmpty final String _roleName) {
 		final var roleName = sanitize(_roleName);
 		final var groupName = sanitize(_groupName);
 		authenticationService.removeGroupInRole(groupName, roleName);
@@ -341,7 +340,7 @@ public class RestControllerUser {
 	@AuditAfter(value = "addRightInRole", changeSecurity = true)
 	@PostMapping(value = "roles/{rolename}/rights/{rightname}")
 	public ResponseEntity<Object> addRightInRole(@PathVariable("rolename") @NotEmpty final String _roleName,
-	                                             @PathVariable("rightname") @NotEmpty final String _rightName) {
+												 @PathVariable("rightname") @NotEmpty final String _rightName) {
 		final var roleName = sanitize(_roleName);
 		final var rightName = sanitize(_rightName);
 		authenticationService.addRightInRole(roleName, rightName);
@@ -352,7 +351,7 @@ public class RestControllerUser {
 	@AuditAfter(value = "removeRightInRole", changeSecurity = true)
 	@DeleteMapping(value = "roles/{rolename}/rights/{rightname}")
 	public ResponseEntity<Object> removeRightInRole(@PathVariable("rolename") @NotEmpty final String _roleName,
-	                                                @PathVariable("rightname") @NotEmpty final String _rightName) {
+													@PathVariable("rightname") @NotEmpty final String _rightName) {
 		final var roleName = sanitize(_roleName);
 		final var rightName = sanitize(_rightName);
 		authenticationService.removeRightInRole(roleName, rightName);
@@ -382,8 +381,8 @@ public class RestControllerUser {
 	@AuditAfter(value = "addContextInRight", changeSecurity = true)
 	@PostMapping(value = "roles/{rolename}/rights/{rightname}/contexts/{context}")
 	public ResponseEntity<Object> addContextInRight(@PathVariable("rolename") @NotEmpty final String _roleName,
-	                                                @PathVariable("rightname") @NotEmpty final String _rightName,
-	                                                @PathVariable("context") @NotEmpty final String _context) {
+													@PathVariable("rightname") @NotEmpty final String _rightName,
+													@PathVariable("context") @NotEmpty final String _context) {
 		final var roleName = sanitize(_roleName);
 		final var rightName = sanitize(_rightName);
 		final var context = sanitize(_context);
@@ -395,8 +394,8 @@ public class RestControllerUser {
 	@AuditAfter(value = "removeContextInRight", changeSecurity = true)
 	@DeleteMapping(value = "roles/{rolename}/rights/{rightname}/contexts/{context}")
 	public ResponseEntity<Object> removeContextInRight(@PathVariable("rolename") @NotEmpty final String _roleName,
-	                                                   @PathVariable("rightname") @NotEmpty final String _rightName,
-	                                                   @PathVariable("context") @NotEmpty final String _context) {
+													   @PathVariable("rightname") @NotEmpty final String _rightName,
+													   @PathVariable("context") @NotEmpty final String _context) {
 		final var roleName = sanitize(_roleName);
 		final var rightName = sanitize(_rightName);
 		final var context = sanitize(_context);
@@ -409,7 +408,7 @@ public class RestControllerUser {
 	@AuditAfter(value = "listContextsForRight", changeSecurity = false)
 	@GetMapping(value = "roles/{rolename}/rights/{rightname}/contexts")
 	public ResponseEntity<ItemListDto<String>> listContextsForRight(@PathVariable("rolename") @NotEmpty final String _roleName,
-	                                                                @PathVariable("rightname") @NotEmpty final String _rightName) {
+																	@PathVariable("rightname") @NotEmpty final String _rightName) {
 		final var roleName = sanitize(_roleName);
 		final var rightName = sanitize(_rightName);
 		final var result = new ItemListDto<>(authenticationService.listContextsForRight(roleName, rightName));
@@ -466,7 +465,7 @@ public class RestControllerUser {
 	@PutMapping(value = "users/{uuid}/privacy")
 	@AuditAfter(value = "setUserPrivacy", changeSecurity = true)
 	public ResponseEntity<Object> setUserPrivacy(@RequestBody @Validated final UserPrivacyDto userPrivacyDto,
-	                                             @PathVariable("uuid") @NotEmpty final String _userUUID) {
+												 @PathVariable("uuid") @NotEmpty final String _userUUID) {
 		final var userUUID = sanitize(_userUUID);
 		authenticationService.setUserPrivacy(userUUID, userPrivacyDto);
 		return new ResponseEntity<>(OK);

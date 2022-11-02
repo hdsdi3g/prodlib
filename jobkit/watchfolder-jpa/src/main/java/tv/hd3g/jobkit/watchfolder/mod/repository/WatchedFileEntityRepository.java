@@ -32,7 +32,7 @@ public interface WatchedFileEntityRepository extends JpaRepository<WatchedFileEn
 	@Query("""
 			SELECT w FROM WatchedFileEntity w
 			WHERE w.markedAsDone = 0
-			AND ((w.directory = 1 AND :pickUpDirs IS true) OR (w.directory = 0 AND :pickUpFiles IS true))
+			AND ((w.directory = 1 AND :pickUpDirs = true) OR (w.directory = 0 AND :pickUpFiles = true))
 			AND w.hashPath NOT IN :detectedHashPath
 			AND w.folderLabel = :folderLabel
 			""")
@@ -44,7 +44,7 @@ public interface WatchedFileEntityRepository extends JpaRepository<WatchedFileEn
 	@Query("""
 			SELECT w FROM WatchedFileEntity w
 			WHERE w.markedAsDone = 0
-			AND ((w.directory = 1 AND :pickUpDirs IS true) OR (w.directory = 0 AND :pickUpFiles IS true))
+			AND ((w.directory = 1 AND :pickUpDirs = true) OR (w.directory = 0 AND :pickUpFiles = true))
 			AND w.folderLabel = :folderLabel
 			""")
 	Set<WatchedFileEntity> getLostedForEmptyDir(boolean pickUpDirs,
@@ -63,7 +63,7 @@ public interface WatchedFileEntityRepository extends JpaRepository<WatchedFileEn
 
 	@Query("""
 			SELECT COUNT(w) FROM WatchedFileEntity w
-			WHERE ((w.directory = 1 AND :pickUpDirs IS true) OR (w.directory = 0 AND :pickUpFiles IS true))
+			WHERE ((w.directory = 1 AND :pickUpDirs = true) OR (w.directory = 0 AND :pickUpFiles = true))
 			AND w.folderLabel = :folderLabel
 			""")
 	int countByFolderLabel(boolean pickUpDirs, boolean pickUpFiles, String folderLabel);

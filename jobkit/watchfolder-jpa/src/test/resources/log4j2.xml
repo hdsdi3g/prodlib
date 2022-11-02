@@ -24,8 +24,8 @@
 
 	<Loggers>
 		<Logger name="tv.hd3g" level="error" />
-        <Logger name="tv.hd3g.jobkit.watchfolder" level="debug" />
-        <Logger name="tv.hd3g.jobkit.watchfolder.mod.service.WatchedFilesDbServiceImpl" level="debug" />
+        <Logger name="tv.hd3g.jobkit.watchfolder" level="info" />
+        <Logger name="tv.hd3g.jobkit.watchfolder.mod.service.WatchedFilesDbServiceImpl" level="info" />
 
 		<Root level="warn">
 			<AppenderRef ref="Console OUT Light" />
