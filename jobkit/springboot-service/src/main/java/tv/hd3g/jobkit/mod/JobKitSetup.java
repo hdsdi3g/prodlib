@@ -16,6 +16,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import tv.hd3g.jobkit.engine.BackgroundServiceEvent;
 import tv.hd3g.jobkit.engine.ExecutionEvent;
 import tv.hd3g.jobkit.engine.JobKitEngine;
@@ -39,7 +41,8 @@ public class JobKitSetup {
 	}
 
 	@Bean
-	public SupervisableManager getSupervisableManager(final ApplicationContext applicationContext) {
+	public SupervisableManager getSupervisableManager(final ApplicationContext applicationContext,
+													  final ObjectMapper jacksonObjectMapper) {
 		var appName = applicationContext.getApplicationName();
 		if (appName.isEmpty()) {
 			appName = "Default";
@@ -51,7 +54,7 @@ public class JobKitSetup {
 				.map(s -> s.collect(joining(", ")))
 				.orElse("");
 
-		return new SupervisableManager((appName + " " + env).trim());
+		return new SupervisableManager((appName + " " + env).trim(), jacksonObjectMapper);
 	}
 
 	@Bean
