@@ -1,5 +1,17 @@
 # All ProdLib projects upgrades needs
 
+## 11.1.0
+
+### Maintenance version, no break changes
+
+Display full file path on logs during missing message file writing failback operation on MailKit/Translate
+
+Better error for Supervisable error messages with "{}"
+
+Add isFolderActivityEvent on Watchfolder for simplier checks with AppNotificationService.isStateChangeEvent implementations.
+
+Add SpringBoot ObjectMapper Supervisable via JobKit service (it embbed a jackson-datatype-jsr310): correct #54
+
 ## 11.0.0
 
 __Strong evolution on JobKit and MailKit: add Supervisable and Notification tools.__
