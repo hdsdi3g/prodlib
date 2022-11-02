@@ -36,6 +36,7 @@ public record SupervisableMessage(String code,
 							   final String defaultResult,
 							   final Object[] vars) {
 		this(code, defaultResult, extractVars(vars));
+		checkDefaultResult();
 	}
 
 	private static List<String> extractVars(final Object[] vars) {
@@ -55,6 +56,13 @@ public record SupervisableMessage(String code,
 
 	public String[] getVarsArray() {
 		return vars.toArray(new String[] {});
+	}
+
+	private void checkDefaultResult() {
+		if (defaultResult.contains("{}")) {
+			throw new IllegalArgumentException("Never use \"{}\" as defaultResult on \""
+											   + code + "\", always add a number like {0}");
+		}
 	}
 
 }

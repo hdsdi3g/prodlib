@@ -17,6 +17,7 @@
 package tv.hd3g.jobkit.engine;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +54,12 @@ class SupervisableMessageTest {
 	void testGetVarsArray_Empty() {
 		supervisableMessage = new SupervisableMessage(code, defaultResult, new String[] {});
 		assertArrayEquals(new String[] {}, supervisableMessage.getVarsArray());
+	}
+
+	@Test
+	void testBadDefaultResult() {
+		assertThrows(IllegalArgumentException.class,
+				() -> new SupervisableMessage(code, defaultResult + "{}" + defaultResult, vars));
 	}
 
 }

@@ -85,7 +85,9 @@ public class Translate {
 			 */
 		}
 		if (defaultResult.contains("{}")) {
-			throw new IllegalArgumentException("Never use \"{}\" as defaultResult, always add a number like {0}");
+			throw new IllegalArgumentException("Never use \"{}\" as defaultResult on \""
+											   + eventTypeName + "." +
+											   code + "\", always add a number like {0}");
 		}
 
 		final var keyDefault = MAILKIT_NOTIFICATION + code;
