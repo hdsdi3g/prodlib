@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
+import tv.hd3g.jobkit.engine.SupervisableEndEvent;
+
 public interface FolderActivity {
 
 	void onAfterScan(final ObservedFolder observedFolder,
@@ -62,4 +64,9 @@ public interface FolderActivity {
 		return RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
 	}
 
+	static boolean isFolderActivityEvent(final SupervisableEndEvent event) {
+		return event.isInternalStateChangeMarked() &&
+			   ("ObservedFolder".equalsIgnoreCase(event.typeName())
+				|| "ObservedFolders".equalsIgnoreCase(event.typeName()));
+	}
 }

@@ -19,8 +19,12 @@ package tv.hd3g.jobkit.watchfolder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
+import static org.mockito.internal.verification.VerificationModeFactory.only;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static tv.hd3g.jobkit.engine.SupervisableResultState.WORKS_DONE;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
 import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.FILES_ONLY;
@@ -32,6 +36,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import net.datafaker.Faker;
 import tv.hd3g.jobkit.engine.FlatJobKitEngine;
@@ -74,6 +79,7 @@ class FolderActivityTest {
 		assertTrue(event.isInternalStateChangeMarked());
 		assertEquals(WORKS_DONE, event.result().state());
 		assertEquals("ObservedFolders", event.typeName());
+		assertTrue(FolderActivity.isFolderActivityEvent(event));
 	}
 
 	@Test
@@ -84,6 +90,7 @@ class FolderActivityTest {
 		assertTrue(event.isInternalStateChangeMarked());
 		assertEquals(WORKS_DONE, event.result().state());
 		assertEquals("ObservedFolders", event.typeName());
+		assertTrue(FolderActivity.isFolderActivityEvent(event));
 	}
 
 	@Test
@@ -91,6 +98,7 @@ class FolderActivityTest {
 		run(() -> a.onBeforeScan(observedFolder));
 		event = jobKit.getEndEventsList().get(0);
 		assertFalse(event.isNotTrivialMarked());
+		assertFalse(FolderActivity.isFolderActivityEvent(event));
 	}
 
 	@Test
@@ -106,11 +114,33 @@ class FolderActivityTest {
 		assertTrue(event.isInternalStateChangeMarked());
 		assertEquals(exception, event.error());
 		assertEquals("ObservedFolder", event.typeName());
+		assertTrue(FolderActivity.isFolderActivityEvent(event));
 	}
 
 	@Test
 	void testRetryScanPolicyOnUserError() {
 		assertEquals(RETRY_FOUNDED_FILE, a.retryScanPolicyOnUserError(null, null, null));
+	}
+
+	@Test
+	void testIsFolderActivityEvent_nopeIsInternalStateChangeMarked() {
+		event = Mockito.mock(SupervisableEndEvent.class);
+		when(event.isInternalStateChangeMarked()).thenReturn(false);
+		assertFalse(FolderActivity.isFolderActivityEvent(event));
+		verify(event, only()).isInternalStateChangeMarked();
+	}
+
+	@Test
+	void testIsFolderActivityEvent_badType() {
+		event = Mockito.mock(SupervisableEndEvent.class);
+		when(event.isInternalStateChangeMarked()).thenReturn(true);
+		when(event.typeName()).thenReturn(faker.numerify("type###"));
+
+		assertFalse(FolderActivity.isFolderActivityEvent(event));
+
+		verify(event, times(1)).isInternalStateChangeMarked();
+		verify(event, times(2)).typeName();
+		verifyNoMoreInteractions(event);
 	}
 
 	void run(final RunnableWithException r) {
