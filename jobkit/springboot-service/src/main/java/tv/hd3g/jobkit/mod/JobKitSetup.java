@@ -2,10 +2,10 @@ package tv.hd3g.jobkit.mod;
 
 import static java.lang.Thread.MIN_PRIORITY;
 import static java.util.stream.Collectors.joining;
+import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_METHODS;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,6 @@ import tv.hd3g.jobkit.engine.BackgroundServiceEvent;
 import tv.hd3g.jobkit.engine.ExecutionEvent;
 import tv.hd3g.jobkit.engine.JobKitEngine;
 import tv.hd3g.jobkit.engine.SupervisableManager;
-import tv.hd3g.jobkit.engine.SupervisableServiceSupplier;
 
 @Configuration
 @Slf4j
@@ -31,8 +30,9 @@ public class JobKitSetup {
 	private int maxEndEventsRetention;
 
 	@Bean
-	ScheduledExecutorService getScheduledExecutor() {
+	ScheduledThreadPoolExecutor getSchTaskStarter() {
 		return new ScheduledThreadPoolExecutor(1, r -> {
+			System.out.println("µµµµµµµµµµµµµµµµµµµµµµµµµ");
 			final var t = new Thread(r);
 			t.setDaemon(false);
 			t.setPriority(MIN_PRIORITY + 1);
@@ -60,13 +60,8 @@ public class JobKitSetup {
 	}
 
 	@Bean
-	SupervisableServiceSupplier getSupervisableSupplier(final SupervisableManager supervisableManager) {
-		return new SupervisableServiceSupplier(supervisableManager);
-	}
-
-	@Bean
 	@Autowired
-	JobKitEngine getJobKitEngine(final ScheduledExecutorService scheduledExecutor,
+	JobKitEngine getJobKitEngine(final ScheduledThreadPoolExecutor scheduledExecutor,
 								 final ExecutionEvent executionEvent,
 								 final BackgroundServiceEvent backgroundServiceEvent,
 								 final SupervisableManager supervisableManager,
@@ -78,6 +73,18 @@ public class JobKitSetup {
 		watchdogConfig.getLimitedExecTime().forEach(watchdog::addPolicies);
 		watchdogConfig.getLimitedServiceExecTime().forEach(watchdog::addPolicies);
 		return jobKit;
+	}
+
+	static class SupervisableAspectRuntimeHints implements RuntimeHintsRegistrar {//TODO register
+
+		@Override
+		public void registerHints(final RuntimeHints hints, final ClassLoader classLoader) {
+			hints.reflection().registerType(WithSupervisable.class,
+					builder -> builder.withMembers(INVOKE_DECLARED_METHODS));
+			// hints.proxies().registerJdkProxy(FactoryBean.class, BeanClassLoaderAware.class, ApplicationListener.class);
+			// hints.proxies().registerJdkProxy(ApplicationAvailability.class, ApplicationListener.class);
+			hints.resources().registerResourceBundle("org.aspectj.weaver.weaver-messages");
+		}
 	}
 
 }

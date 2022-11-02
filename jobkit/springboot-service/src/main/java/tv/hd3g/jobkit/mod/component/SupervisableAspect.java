@@ -20,21 +20,18 @@ import java.util.Optional;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.stereotype.Component;
 
 import tv.hd3g.jobkit.WithSupervisable;
 import tv.hd3g.jobkit.engine.Supervisable;
 import tv.hd3g.jobkit.engine.SupervisableServiceSupplier;
 
-@Aspect
-@Component
-@EnableAspectJAutoProxy
+// @Aspect
+// @Component
 public class SupervisableAspect {
+
 	@Autowired
 	private SupervisableServiceSupplier supervisableServiceSupplier;
 

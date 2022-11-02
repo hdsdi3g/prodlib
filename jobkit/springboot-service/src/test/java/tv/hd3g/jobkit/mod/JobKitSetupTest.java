@@ -16,6 +16,7 @@
  */
 package tv.hd3g.jobkit.mod;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
@@ -38,6 +41,8 @@ import tv.hd3g.jobkit.engine.JobKitEngine;
 import tv.hd3g.jobkit.engine.watchdog.LimitedExecTimePolicy;
 import tv.hd3g.jobkit.engine.watchdog.LimitedServiceExecTimePolicy;
 import tv.hd3g.jobkit.engine.watchdog.MaxSpoolQueueSizePolicy;
+
+import tv.hd3g.jobkit.WithSupervisable;
 
 @SpringBootTest
 class JobKitSetupTest {
@@ -109,4 +114,10 @@ class JobKitSetupTest {
 
 	}
 
+	void shouldSupervisableAspectRuntimeHints() {
+		final var hints = new RuntimeHints();
+		final var expectSupervisable = RuntimeHintsPredicates.reflection().onType(WithSupervisable.class);
+		new JobKitSetup.SupervisableAspectRuntimeHints().registerHints(hints, getClass().getClassLoader());
+		assertThat(expectSupervisable).accepts(hints);
+	}
 }

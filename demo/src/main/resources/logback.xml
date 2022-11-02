@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!--
+                %d{HH:mm:ss.SSS} %-5level %logger{0} &#8249;%thread&#8250;&#9;&#8220;%msg&#8221;%n &#8227; %C.%M\(%F:%L\)%n%n
+    -->
+    <appender name="Console OUT" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %-5level %msg%n
+            </pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>DENY</onMatch>
+        </filter>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>DENY</onMatch>
+        </filter>
+    </appender>
+    <appender name="Console ERR" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %-5level %msg%n
+            </pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+    <appender name="LogFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>target/service.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>target/service-%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
+            <maxHistory>20</maxHistory>
+            <maxFileSize>50MB</maxFileSize>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{ISO8601} %-5level %logger{0} &#8249;%thread&#8250; %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.apache.catalina.startup.DigesterFactory" level="error" />
+    <logger name="org.apache.catalina.util.LifecycleBase" level="error" />
+    <logger name="org.apache.coyote.http11.Http11NioProtocol" level="warn" />
+    <logger name="org.apache.sshd.common.util.SecurityUtils" level="warn" />
+    <logger name="org.apache.tomcat.util.net.NioSelectorPool" level="warn" />
+    <logger name="org.eclipse.jetty.util.component.AbstractLifeCycle" level="error" />
+    <logger name="org.hibernate.validator.internal.util.Version" level="warn" />
+    <logger name="org.springframework.boot.actuate.endpoint.jmx" level="warn" />
+    <logger name="org.springframework.boot.web.embedded.tomcat.TomcatWebServer" level="info" />
+    <logger name="org.apache.catalina.valves.AccessLogValve" level="trace" />
+    <logger name="org.hibernate.SQL" level="info" />
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="error" />
+    <logger name="tv.hd3g.authkit.mod.SecurityRejectedRequestMappingExceptionResolver" level="trace" />
+
+    <logger name="tv.hd3g" level="trace" />
+
+    <root level="warn">
+        <appender-ref ref="Console OUT" />
+        <appender-ref ref="Console ERR" />
+        <appender-ref ref="LogFile" />
+    </root>
+</configuration>

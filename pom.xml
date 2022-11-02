@@ -32,6 +32,7 @@
         <module>jobkit</module>
         <module>transfertfiles</module>
         <module>csvkit</module>
+        <module>demo</module>
     </modules>
 
     <properties>
