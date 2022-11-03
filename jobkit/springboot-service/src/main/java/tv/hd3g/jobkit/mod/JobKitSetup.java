@@ -11,6 +11,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,9 @@ import tv.hd3g.jobkit.engine.SupervisableManager;
 public class JobKitSetup {
 
 	private static final Logger log = LogManager.getLogger();
+
+	@Value("${jobkit.supervisable.maxEndEventsRetention:100}")
+	private int maxEndEventsRetention;
 
 	@Bean
 	ScheduledExecutorService getScheduledExecutor() {
@@ -54,7 +58,7 @@ public class JobKitSetup {
 				.map(s -> s.collect(joining(", ")))
 				.orElse("");
 
-		return new SupervisableManager((appName + " " + env).trim(), jacksonObjectMapper);
+		return new SupervisableManager((appName + " " + env).trim(), jacksonObjectMapper, maxEndEventsRetention);
 	}
 
 	@Bean

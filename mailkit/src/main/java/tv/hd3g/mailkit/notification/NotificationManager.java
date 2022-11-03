@@ -39,6 +39,7 @@ public class NotificationManager {
 		if (routers.isEmpty()) {
 			throw new IllegalStateException("Can't register SupervisableManager: no Router is registed.");
 		}
+		log.info("Register SupervisableManager: {}", supervisable);
 
 		supervisable.registerOnEndEventConsumer(event -> {
 			log.trace("Send event to router(s): {}", event);
@@ -49,6 +50,7 @@ public class NotificationManager {
 
 	public NotificationManager register(final NotificationRouter router) {
 		Objects.requireNonNull(router, "\"router\" can't to be null");
+		log.debug("Register NotificationRouter: {}", router);
 		routers.add(router);
 		return this;
 	}

@@ -60,12 +60,14 @@ class SupervisableManagerTest {
 	SupervisableOnEndEventConsumer eventConsumer;
 	@Mock
 	SupervisableEndEvent supervisableEndEvent;
+	@Mock
+	SupervisableOnEndEventConsumer eventConsumer2;
 
 	@BeforeEach
 	void init() throws Exception {
 		MockitoAnnotations.openMocks(this).close();
 		name = faker.company().name();
-		s = new SupervisableManager(name, objectMapper);
+		s = new SupervisableManager(name, objectMapper, 1);
 	}
 
 	@AfterEach
@@ -77,7 +79,8 @@ class SupervisableManagerTest {
 				supervisable,
 				oError,
 				eventConsumer,
-				supervisableEndEvent);
+				supervisableEndEvent,
+				eventConsumer2);
 	}
 
 	@Test
@@ -162,6 +165,53 @@ class SupervisableManagerTest {
 	@Test
 	void testCreateContextExtractor() {
 		assertNotNull(s.createContextExtractor(supervisableEndEvent));
+	}
+
+	@Test
+	void testGetLifeCycle_onEnd_retention() {
+		final var lf = s.getLifeCycle();
+
+		when(supervisable.getEndEvent(oError, name)).thenReturn(supervisableEndEvent);
+		lf.onEnd(supervisable, oError);
+		s.registerOnEndEventConsumer(eventConsumer);
+
+		verify(eventConsumer, times(1)).afterProcess(supervisableEndEvent);
+		verify(supervisable, times(1)).getEndEvent(oError, name);
+	}
+
+	@Test
+	void testGetLifeCycle_onEnd_limited_retention() {
+		final var lf = s.getLifeCycle();
+
+		when(supervisable.getEndEvent(oError, name)).thenReturn(supervisableEndEvent);
+		lf.onEnd(supervisable, oError);
+		lf.onEnd(supervisable, oError);
+		s.registerOnEndEventConsumer(eventConsumer);
+
+		verify(eventConsumer, times(1)).afterProcess(supervisableEndEvent);
+		verify(supervisable, times(2)).getEndEvent(oError, name);
+	}
+
+	@Test
+	void testGetLifeCycle_onEnd_non_limited_retention() {
+		final var iterations = faker.random().nextInt(5, 100);
+
+		s = new SupervisableManager(name, objectMapper, iterations);
+		final var lf = s.getLifeCycle();
+
+		when(supervisable.getEndEvent(oError, name)).thenReturn(supervisableEndEvent);
+		for (var pos = 0; pos < iterations; pos++) {
+			lf.onEnd(supervisable, oError);
+		}
+		lf.onEnd(supervisable, oError);
+
+		s.registerOnEndEventConsumer(eventConsumer);
+
+		verify(eventConsumer, times(iterations)).afterProcess(supervisableEndEvent);
+		verify(supervisable, times(iterations + 1)).getEndEvent(oError, name);
+
+		s.registerOnEndEventConsumer(eventConsumer2);
+		verify(eventConsumer2, times(iterations)).afterProcess(supervisableEndEvent);
 	}
 
 }

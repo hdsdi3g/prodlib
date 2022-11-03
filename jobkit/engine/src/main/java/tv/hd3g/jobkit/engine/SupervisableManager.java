@@ -16,6 +16,7 @@
  */
 package tv.hd3g.jobkit.engine;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -38,17 +39,21 @@ public class SupervisableManager {
 	private final LifeCycle lifeCycle;
 	private final AtomicBoolean shutdown;
 	private final Set<SupervisableOnEndEventConsumer> onEndEventConsumers;
+	private final ArrayDeque<SupervisableEndEvent> lastEndEvents;
+	private final int maxEndEventsRetention;
 
-	public SupervisableManager(final String name, final ObjectMapper objectMapper) {
+	public SupervisableManager(final String name, final ObjectMapper objectMapper, final int maxEndEventsRetention) {
 		this.name = Objects.requireNonNull(name, "\"name\" can't to be null");
 		this.objectMapper = Objects.requireNonNull(objectMapper, "\"objectMapper\" can't to be null");
 		lifeCycle = new LifeCycle();
 		shutdown = new AtomicBoolean(false);
 		onEndEventConsumers = Collections.synchronizedSet(new HashSet<>());
+		this.maxEndEventsRetention = maxEndEventsRetention;
+		lastEndEvents = new ArrayDeque<>();
 	}
 
 	public SupervisableManager(final String name) {
-		this(name, new ObjectMapper());
+		this(name, new ObjectMapper(), 10);
 	}
 
 	public SupervisableContextExtractor createContextExtractor(final SupervisableEndEvent event) {
@@ -74,6 +79,10 @@ public class SupervisableManager {
 	public void registerOnEndEventConsumer(final SupervisableOnEndEventConsumer onEndEventConsumer) {
 		Objects.requireNonNull(onEndEventConsumer, "\"onEndEventConsumer\" can't to be null");
 		onEndEventConsumers.add(onEndEventConsumer);
+
+		synchronized (lastEndEvents) {
+			lastEndEvents.forEach(onEndEventConsumer::afterProcess);
+		}
 	}
 
 	class LifeCycle implements SupervisableEvents {
@@ -89,6 +98,14 @@ public class SupervisableManager {
 			}
 			final var endEvent = supervisable.getEndEvent(oError, name);
 			log.trace("Queue end event for {}", supervisable);
+
+			synchronized (lastEndEvents) {
+				while (lastEndEvents.size() >= maxEndEventsRetention) {
+					lastEndEvents.pollLast();
+				}
+				lastEndEvents.push(endEvent);
+			}
+
 			try {
 				onEndEventConsumers.forEach(event -> event.afterProcess(endEvent));
 			} catch (final Exception e) {
