@@ -1,4 +1,14 @@
-# All ProdLib projects upgrades needs
+# All ProdLib projects upgrades
+
+## 11.2.0
+
+### Bug fixes, no break changes
+
+Update messages for Notification (FR+EN) #58
+
+Correct MailKit Notification templates #61
+
+Correct race condition with Supervisable/Notification and external code, add logs for Notification #63
 
 ## 11.1.0
 

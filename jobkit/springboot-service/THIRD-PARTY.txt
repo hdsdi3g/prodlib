@@ -75,6 +75,6 @@ Lists of 78 third-party dependencies.
      (Apache License, Version 2.0) spring-boot-test-autoconfigure (org.springframework.boot:spring-boot-test-autoconfigure:2.6.11 - https://spring.io/projects/spring-boot)
      (The Apache Software License, Version 2.0) org.xmlunit:xmlunit-core (org.xmlunit:xmlunit-core:2.8.4 - https://www.xmlunit.org/)
      (Apache License, Version 2.0) SnakeYAML (org.yaml:snakeyaml:1.29 - http://www.snakeyaml.org)
-     (GNU Lesser General Public License, Version 3) JobKit Engine (tv.hd3g:jobkit-engine:11.1.0 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) JobKit Engine (tv.hd3g:jobkit-engine:11.2.0 - https://github.com/hdsdi3g/prodlib)
      (GNU Lesser General Public License, Version 3) CodePolicyValidation (tv.hd3g.commons:codepolicyvalidation:1.1.0 - https://github.com/hdsdi3g/codepolicyvalidation)
-     (GNU Lesser General Public License, Version 3) Commons Interfaces (tv.hd3g.commons:interfaces:11.1.0 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) Commons Interfaces (tv.hd3g.commons:interfaces:11.2.0 - https://github.com/hdsdi3g/prodlib)
