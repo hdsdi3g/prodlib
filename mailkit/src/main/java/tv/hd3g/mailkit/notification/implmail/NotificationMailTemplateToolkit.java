@@ -24,14 +24,12 @@ import static j2html.TagCreator.h1;
 import static j2html.TagCreator.h3;
 import static j2html.TagCreator.head;
 import static j2html.TagCreator.html;
-import static j2html.TagCreator.li;
 import static j2html.TagCreator.meta;
 import static j2html.TagCreator.pre;
 import static j2html.TagCreator.rawHtml;
 import static j2html.TagCreator.span;
 import static j2html.TagCreator.style;
 import static j2html.TagCreator.text;
-import static j2html.TagCreator.ul;
 import static j2html.attributes.Attr.HTTP_EQUIV;
 import static java.util.function.Predicate.not;
 
@@ -207,7 +205,7 @@ public class NotificationMailTemplateToolkit {
 			}
 		}
 
-		return li(timeSpan, messageSpan, verboseSpan);
+		return div(attrs(".stepline"), timeSpan, messageSpan, verboseSpan);
 	}
 
 	public void stepsList(final Locale lang,
@@ -218,23 +216,22 @@ public class NotificationMailTemplateToolkit {
 
 		final var stepLines = each(event.steps(),
 				step -> stepLineToString(lang, event, step, verbose));
-		listBodyContent.add(ul(attrs(".steps"), stepLines));
+		listBodyContent.add(div(attrs(".steps"), stepLines));
 		listCSSEntries.add("""
-				ul.steps {
+				div.steps {
 				    display: block;
-				    font-family: monospace;
+				    font-family: 'Consolas', 'Monaco', monospace;
 				    margin: 1em;
 				    padding: 0.9em;
 				    border-radius: 0.8rem;
 				    background-color: #F8F8F8;
 				    color: #000;
 				    border: 1px solid #cfcfcf;
-				    list-style-type: none;
 				}
-				ul.steps span.stepdate {
+				div.steps span.stepdate {
 				   color: #CCC;
 				}
-				ul.steps span.verbose {
+				div.steps span.verbose {
 				   color: #C8C;
 				}
 				""");
@@ -249,12 +246,12 @@ public class NotificationMailTemplateToolkit {
 				}
 
 				span.caller {
-				    font-family: monospace;
+				    font-family: 'Consolas', 'Monaco', monospace;
 				    color: #000;
 				}
 
 				span.date {
-				    font-family:  sans-serif;
+				    font-family: sans-serif;
 				    color: #fff;
 				    background-color: #85c0ad;
 				    display: inline-block;
@@ -418,7 +415,7 @@ public class NotificationMailTemplateToolkit {
 				    color: #BBB
 				}
 				span.envevent {
-				    font-family: monospace;
+				    font-family: 'Consolas', 'Monaco', monospace;
 				    color: #AAA;
 				}
 				""");
