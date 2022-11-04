@@ -36,6 +36,8 @@ import tv.hd3g.mailkit.notification.NotificationGroup;
 import tv.hd3g.mailkit.notification.NotificationRouter;
 
 public class NotificationRouterMail implements NotificationRouter {
+	private static final String ADMIN = "admin";
+
 	public static final String USER_AGENT = "JavaMail/MailKit/Notification";
 
 	private static Logger log = LogManager.getLogger();
@@ -88,10 +90,10 @@ public class NotificationRouterMail implements NotificationRouter {
 		final var endUserscontacts = setup.appNotificationService()
 				.getEndUserContactsToSendEvent(event, setup.supervisableManager().createContextExtractor(event));
 
-		endUserscontacts.forEach((lang, addr) -> send(lang, addr, engineSimpleTemplate, event));
+		endUserscontacts.forEach((lang, addr) -> send("endUser", lang, addr, engineSimpleTemplate, event));
 
 		if (oGroupAdmin.isPresent()) {
-			send(oGroupAdmin.get().addrList(), oGroupAdmin.get().lang(), engineFullTemplate, event);
+			send(ADMIN, oGroupAdmin.get().addrList(), oGroupAdmin.get().lang(), engineFullTemplate, event);
 		}
 	}
 
@@ -99,45 +101,47 @@ public class NotificationRouterMail implements NotificationRouter {
 		final var endUserscontacts = setup.appNotificationService()
 				.getEndUserContactsToSendEvent(event, setup.supervisableManager().createContextExtractor(event));
 
-		endUserscontacts.forEach((lang, addr) -> send(lang, addr, engineSimpleTemplate, event));
+		endUserscontacts.forEach((lang, addr) -> send("endUser", lang, addr, engineSimpleTemplate, event));
 
 		if (oGroupAdmin.isPresent()) {
-			send(oGroupAdmin.get().addrList(), oGroupAdmin.get().lang(), engineFullTemplate, event);
+			send(ADMIN, oGroupAdmin.get().addrList(), oGroupAdmin.get().lang(), engineFullTemplate, event);
 		}
 		if (oGroupDev.isPresent()) {
-			send(oGroupDev.get().addrList(), oGroupDev.get().lang(), engineDebugTemplate, event);
+			send("dev", oGroupDev.get().addrList(), oGroupDev.get().lang(), engineDebugTemplate, event);
 		}
 	}
 
 	void sendStateChangeEvent(final SupervisableEndEvent event) {
 		if (oGroupAdmin.isPresent()) {
-			send(oGroupAdmin.get().addrList(), oGroupAdmin.get().lang(), engineFullTemplate, event);
+			send(ADMIN, oGroupAdmin.get().addrList(), oGroupAdmin.get().lang(), engineFullTemplate, event);
 		}
 		if (oGroupDev.isPresent()) {
-			send(oGroupDev.get().addrList(), oGroupDev.get().lang(), engineDebugTemplate, event);
+			send("dev", oGroupDev.get().addrList(), oGroupDev.get().lang(), engineDebugTemplate, event);
 		}
 	}
 
 	void sendSecurityEvent(final SupervisableEndEvent event) {
 		if (oGroupAdmin.isPresent()) {
-			send(oGroupAdmin.get().addrList(), oGroupAdmin.get().lang(), engineFullTemplate, event, SECURITY);
+			send(ADMIN, oGroupAdmin.get().addrList(), oGroupAdmin.get().lang(), engineFullTemplate, event, SECURITY);
 		}
 		if (oGroupSecu.isPresent()) {
-			send(oGroupSecu.get().addrList(), oGroupSecu.get().lang(), engineFullTemplate, event, SECURITY);
+			send("sec", oGroupSecu.get().addrList(), oGroupSecu.get().lang(), engineFullTemplate, event, SECURITY);
 		}
 		if (oGroupDev.isPresent()) {
-			send(oGroupDev.get().addrList(), oGroupDev.get().lang(), engineDebugTemplate, event, SECURITY);
+			send("dev", oGroupDev.get().addrList(), oGroupDev.get().lang(), engineDebugTemplate, event, SECURITY);
 		}
 	}
 
-	private void send(final String recipientsAddr,
+	private void send(final String reason,
+					  final String recipientsAddr,
 					  final Locale lang,
 					  final NotificationMailMessageProducer template,
 					  final SupervisableEndEvent event) {
-		this.send(Set.of(recipientsAddr), lang, template, event);
+		this.send(reason, Set.of(recipientsAddr), lang, template, event);
 	}
 
-	private void send(final Set<String> recipientsAddr,
+	private void send(final String reason,
+					  final Set<String> recipientsAddr,
 					  final Locale lang,
 					  final NotificationMailMessageProducer template,
 					  final SupervisableEndEvent event) {
@@ -149,10 +153,11 @@ public class NotificationRouterMail implements NotificationRouter {
 		} else {
 			grade = MessageGrade.EVENT_NOTICE;
 		}
-		send(recipientsAddr, lang, template, event, grade);
+		send(reason, recipientsAddr, lang, template, event, grade);
 	}
 
-	private void send(final Set<String> recipientsAddr,
+	private void send(final String reason,
+					  final Set<String> recipientsAddr,
 					  final Locale lang,
 					  final NotificationMailMessageProducer template,
 					  final SupervisableEndEvent event,
@@ -182,7 +187,8 @@ public class NotificationRouterMail implements NotificationRouter {
 			message.setText(htmlMessage, true);
 			log.trace("Full message: {}", htmlMessage);
 
-			log.info("Send a mail to {}: \"{}\"", recipientsAddr, subject);
+			log.info("Send a mail to {}/{}, with {}: \"{}\"",
+					reason, recipientsAddr, template.getClass().getSimpleName(), subject);
 			setup.mailSender().send(mimeMessage);
 		} catch (final MessagingException e) {
 			log.error("Can't send mail to {} ({})", recipientsAddr, subject, e);
