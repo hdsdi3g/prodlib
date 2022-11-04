@@ -32,7 +32,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -75,21 +74,10 @@ class NotificationMailTemplateToolkitTest {
 		listBodyContent = new ArrayList<>();
 		listCSSEntries = new ArrayList<>();
 
-		// assertTrue(MockUtil.isMock());
-		// MockUtil.resetMock(toolRunner);
-		// @MockBean
-		// @Captor ArgumentCaptor<>
-		// Mockito.doThrow(new Exception()).when();
-
 		when(translate.i18n(eq(lang), eq(event), any(), any(), any()))
 				.thenReturn(faker.numerify("translate###"));
 		when(translate.i18n(eq(lang), eq(event.typeName()), any(), any(), any()))
 				.thenReturn(faker.numerify("translate###"));
-	}
-
-	@AfterEach
-	void end() {
-		// verifyNoMoreInteractions( env);
 	}
 
 	String checkStr(final String result) {
@@ -144,7 +132,7 @@ class NotificationMailTemplateToolkitTest {
 
 	@Test
 	void testExceptionFormatterToDom_noVerbose() {
-		final var e = new Exception(faker.coffee().region());
+		final var e = new Exception(faker.examplify("AAAAAAAAAAA00000000000000"));
 		final var result = t.exceptionFormatterToDom(e, false);
 		assertNotNull(result);
 		final var render = result.render();
