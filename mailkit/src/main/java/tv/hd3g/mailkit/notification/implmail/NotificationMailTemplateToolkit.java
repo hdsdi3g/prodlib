@@ -288,6 +288,7 @@ public class NotificationMailTemplateToolkit {
 				pre {
 				    margin: 0px;
 				    line-height: 1.3;
+				    font-family: 'Consolas', 'Monaco', monospace;
 				}
 				""");
 	}
@@ -374,6 +375,21 @@ public class NotificationMailTemplateToolkit {
 				    background-color: #484848;
 				    color: #dbdbdb;
 				}
+				div.contextblock div.context a {
+				   color: #dbdbdb;
+				}
+				div.contextblock div.context a:active {
+				   color: #dbdbdb;
+				}
+				div.contextblock div.context a:hover {
+				   color: #dbdbdb;
+				}
+				div.contextblock div.context a:visited {
+				   color: #dbdbdb;
+				}
+				div.contextblock div.context a:link {
+				   color: #dbdbdb;
+				}
 				""");
 		final var context = event.context();
 		if (context != null) {
@@ -396,6 +412,8 @@ public class NotificationMailTemplateToolkit {
 				}
 				span.result.caller {
 				    color: #C8C;
+				    font-family: 'Consolas', 'Monaco', monospace;
+				}
 				""");
 
 		final var resultCaller = translate.i18n(lang, event, "result.caller", "Result caller source: {0}.",
