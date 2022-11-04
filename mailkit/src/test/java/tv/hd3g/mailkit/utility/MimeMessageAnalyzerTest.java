@@ -125,7 +125,7 @@ class MimeMessageAnalyzerTest {
 		when(bodyPart0.getContent()).thenReturn(messageStr);
 		when(bodyPart0.getContentType()).thenReturn("");
 
-		assertEquals(messageStr, a.getMailContent());// TODO correct
+		assertEquals(messageStr, a.getMailContent());
 
 		verify(message, atLeastOnce()).getContent();
 		verify(mime, atLeastOnce()).getBodyPart(0);
