@@ -77,13 +77,13 @@ class TranslateTest {
 		assertTrue(isMock(messageSource));
 
 		lang = faker.options().option(Locale.getAvailableLocales());
-		code = "CODE" + faker.hobbit().character();
+		code = faker.numerify("code###");
 		defaultResult = "DRESULT" + faker.hobbit().location();
 		vars = faker.collection(() -> faker.book().title())
 				.len(1, 20)
 				.generate()
 				.toArray(new String[0]);
-		eventTypeName = "EVENTTYPENAME" + faker.app().name();
+		eventTypeName = faker.numerify("eventtypename###");
 		when(event.typeName()).thenReturn(eventTypeName);
 		resultMessage = "RESULTMESSAGE" + faker.animal().name();
 
@@ -100,7 +100,7 @@ class TranslateTest {
 	void testMakeKeyByEvent() {
 		final var keyByEvent = translate.makeKeyByEvent(eventTypeName, code);
 		assertNotNull(keyByEvent);
-		assertTrue(keyByEvent.contains(eventTypeName.toLowerCase()));
+		assertTrue(keyByEvent.contains(eventTypeName));
 		assertTrue(keyByEvent.contains(code));
 		assertTrue(keyByEvent.startsWith("mailkit.notification"));
 	}

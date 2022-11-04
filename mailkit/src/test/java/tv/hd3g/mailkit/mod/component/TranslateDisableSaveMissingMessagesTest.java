@@ -76,13 +76,13 @@ class TranslateDisableSaveMissingMessagesTest {
 		assertTrue(isMock(messageSource));
 
 		lang = faker.options().option(Locale.getAvailableLocales());
-		code = faker.numerify("CODE###");
+		code = faker.numerify("code###");
 		defaultResult = faker.numerify("defaultResult###");
 		vars = faker.collection(() -> faker.numerify("vars###"))
 				.len(1, 20)
 				.generate()
 				.toArray(new String[0]);
-		eventTypeName = faker.numerify("eventTypeName###");
+		eventTypeName = faker.numerify("eventtypename###");
 		when(event.typeName()).thenReturn(eventTypeName);
 		resultMessage = faker.numerify("resultMessage###");
 		keyByEvent = translate.makeKeyByEvent(eventTypeName, code);

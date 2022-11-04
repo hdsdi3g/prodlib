@@ -60,7 +60,7 @@ public class Translate {
 	}
 
 	String makeKeyByEvent(final String eventTypeName, final String code) {
-		return MAILKIT_NOTIFICATION + eventTypeName.toLowerCase() + "." + code;
+		return MAILKIT_NOTIFICATION + eventTypeName.toLowerCase() + "." + code.toLowerCase();
 	}
 
 	public String i18n(final Locale lang,
@@ -72,10 +72,12 @@ public class Translate {
 	}
 
 	public String i18n(final Locale lang,
-					   final String eventTypeName,
-					   final String code,
+					   final String rawEventTypeName,
+					   final String rawCode,
 					   final String defaultResult,
 					   final String... vars) {
+		final var eventTypeName = rawEventTypeName.toLowerCase();
+		final var code = rawCode.toLowerCase();
 		final var keyByEvent = makeKeyByEvent(eventTypeName, code);
 		try {
 			return messageSource.getMessage(keyByEvent, vars, lang);
