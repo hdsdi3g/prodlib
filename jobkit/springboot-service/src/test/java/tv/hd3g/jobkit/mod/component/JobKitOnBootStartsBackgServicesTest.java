@@ -16,6 +16,7 @@
  */
 package tv.hd3g.jobkit.mod.component;
 
+import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -34,6 +36,8 @@ class JobKitOnBootStartsBackgServicesTest {
 
 	@MockBean
 	JobKitEngine jobKitEngine;
+	@Autowired
+	JobKitOnBootStartsBackgServices onBoot;
 
 	@BeforeEach
 	void init() throws Exception {
@@ -46,8 +50,9 @@ class JobKitOnBootStartsBackgServicesTest {
 	}
 
 	@Test
-	void testStartsBackgroundServices() {
-		verify(jobKitEngine, times(1)).onApplicationReadyRunBackgroundServices();
+	void test() throws Exception {
+		verify(jobKitEngine, only()).onApplicationReadyRunBackgroundServices();
+		onBoot.destroy();
+		verify(jobKitEngine, times(1)).shutdown();
 	}
-
 }

@@ -23,6 +23,7 @@ public class BackgroundService {
 	private final ScheduledExecutorService scheduledExecutor;
 	private final BackgroundServiceEvent event;
 	private final RunnableWithException task;
+	private final RunnableWithException disableTask;
 
 	private boolean enabled;
 	private ScheduledFuture<?> nextRunReference;
@@ -37,13 +38,15 @@ public class BackgroundService {
 							 final Spooler spooler,
 							 final ScheduledExecutorService scheduledExecutor,
 							 final BackgroundServiceEvent event,
-							 final RunnableWithException task) {
+							 final RunnableWithException task,
+							 final RunnableWithException disableTask) {
 		this.name = name;
 		this.spoolName = spoolName;
 		this.spooler = spooler;
 		this.scheduledExecutor = scheduledExecutor;
 		this.event = event;
 		this.task = task;
+		this.disableTask = disableTask;
 		hasFirstStarted = false;
 		enabled = false;
 		priority = 0;
@@ -153,6 +156,10 @@ public class BackgroundService {
 				nextRunReference.cancel(false);
 				nextRunReference = null;
 			});
+			final var disableName = "On disable service " + name;
+			spooler.getExecutor(spoolName)
+					.addToQueue(disableTask, disableName, priority,
+							e -> log.warn("Can't run disableTask {}/{}", spoolName, disableName, e));
 		} else {
 			/**
 			 * Don't wan't to enable

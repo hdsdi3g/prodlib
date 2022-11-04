@@ -28,6 +28,7 @@ class BackgroundServiceEventTest {
 
 	ScheduledExecutorService scheduledExecutorService;
 	CountDownLatch latch;
+	CountDownLatch endLatch;
 	BackgroundService service;
 	String name;
 	String spoolName;
@@ -42,21 +43,20 @@ class BackgroundServiceEventTest {
 		interval = 10l;
 		scheduledExecutorService = Executors.newScheduledThreadPool(1);
 		latch = new CountDownLatch(1);
+		endLatch = new CountDownLatch(1);
 		name = String.valueOf(System.nanoTime());
 		spoolName = String.valueOf(System.nanoTime());
 		spooler = new Spooler(new ExecutionEvent() {}, new SupervisableEvents() {});
 		error = new AtomicReference<>();
 
 		service = new BackgroundService(name, spoolName, spooler, scheduledExecutorService, event, () -> {
-			try {
-				latch.await(500, MILLISECONDS);
-			} catch (final InterruptedException e1) {
-				throw new IllegalStateException(e1);
-			}
+			latch.await(500, MILLISECONDS);
 			final var e = error.get();
 			if (e != null) {
 				throw e;
 			}
+		}, () -> {
+			endLatch.await(100, MILLISECONDS);
 		});
 		service.setTimedInterval(interval, TimeUnit.MILLISECONDS);
 	}
@@ -198,42 +198,42 @@ class BackgroundServiceEventTest {
 
 	private void verifyScheduleNextBackgroundServiceTask(final VerificationMode mode) {
 		verify(event, mode).scheduleNextBackgroundServiceTask(
-		        any(String.class), any(String.class), any(int.class), any(long.class));
+				any(String.class), any(String.class), any(int.class), any(long.class));
 	}
 
 	private void verifyNextBackgroundServiceTask(final VerificationMode mode) {
 		verify(event, mode).nextBackgroundServiceTask(
-		        any(String.class), any(String.class), any(int.class));
+				any(String.class), any(String.class), any(int.class));
 	}
 
 	private void verifyPlanNextExec(final VerificationMode mode) {
 		verify(event, mode).planNextExec(
-		        any(String.class), any(String.class), any(long.class));
+				any(String.class), any(String.class), any(long.class));
 	}
 
 	private void verifyOnPreviousRunWithError(final VerificationMode mode) {
 		verify(event, mode).onPreviousRunWithError(
-		        any(String.class), any(String.class), any(Exception.class));
+				any(String.class), any(String.class), any(Exception.class));
 	}
 
 	private void verifyOnChangeTimedInterval(final VerificationMode mode) {
 		verify(event, mode).onChangeTimedInterval(
-		        any(String.class), any(String.class), any(long.class));
+				any(String.class), any(String.class), any(long.class));
 	}
 
 	private void verifyOnChangeEnabled(final VerificationMode mode, final boolean expected) {
 		verify(event, mode).onChangeEnabled(
-		        any(String.class), any(String.class), eq(expected));
+				any(String.class), any(String.class), eq(expected));
 	}
 
 	private void verifyOnChangeRetryAfterTimeFactor(final VerificationMode mode) {
 		verify(event, mode).onChangeRetryAfterTimeFactor(any(String.class), any(String.class),
-		        any(long.class));
+				any(long.class));
 	}
 
 	private void verifyOnChangeRetryAfterTimeFactor(final VerificationMode mode, final double retryAfterTimeFactor) {
 		verify(event, mode).onChangeRetryAfterTimeFactor(any(String.class), any(String.class),
-		        eq(retryAfterTimeFactor));
+				eq(retryAfterTimeFactor));
 	}
 
 }

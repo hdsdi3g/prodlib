@@ -36,11 +36,13 @@ public class FlatJobKitEngine extends JobKitEngine {
 	private final FlatScheduledExecutorService flatShExecutor;
 	private final List<SupervisableEndEvent> endEvents;
 	private final FlatSupervisableEvents supervisableEvents;
+	private final List<RunnableWithException> disableTaskList;
 
 	public FlatJobKitEngine() {
 		super();
 		flatShExecutor = new FlatScheduledExecutorService();
 		endEvents = Collections.synchronizedList(new ArrayList<>());
+		disableTaskList = Collections.synchronizedList(new ArrayList<>());
 		supervisableEvents = new FlatSupervisableEvents();
 	}
 
@@ -62,8 +64,10 @@ public class FlatJobKitEngine extends JobKitEngine {
 	@Override
 	public BackgroundService createService(final String name,
 										   final String spoolName,
-										   final RunnableWithException task) {
+										   final RunnableWithException task,
+										   final RunnableWithException disableTask) {
 		log.debug("Create service {}, spool {}", name, spoolName);
+		disableTaskList.add(disableTask);
 		return new FlatBackgroundService(flatShExecutor, task.toRunnable());
 	}
 
@@ -71,9 +75,11 @@ public class FlatJobKitEngine extends JobKitEngine {
 	public BackgroundService startService(final String name,
 										  final String spoolName,
 										  final Duration duration,
-										  final RunnableWithException task) {
+										  final RunnableWithException task,
+										  final RunnableWithException disableTask) {
 		log.debug("Start service {}, spool {}", name, spoolName);
-		return createService(name, spoolName, task).setTimedInterval(duration).enable();
+		return createService(name, spoolName, task, disableTask)
+				.setTimedInterval(duration).enable();
 	}
 
 	@Override
@@ -81,9 +87,11 @@ public class FlatJobKitEngine extends JobKitEngine {
 										  final String spoolName,
 										  final long timedInterval,
 										  final TimeUnit unit,
-										  final RunnableWithException task) {
+										  final RunnableWithException task,
+										  final RunnableWithException disableTask) {
 		log.debug("Start service {}, spool {}", name, spoolName);
-		return createService(name, spoolName, task).setTimedInterval(timedInterval, unit).enable();
+		return createService(name, spoolName, task, disableTask)
+				.setTimedInterval(timedInterval, unit).enable();
 	}
 
 	@Override
@@ -149,16 +157,7 @@ public class FlatJobKitEngine extends JobKitEngine {
 
 	@Override
 	public void shutdown() {
-		/**
-		 * Not needed, not implemented
-		 */
-	}
-
-	@Override
-	public void waitToClose() {
-		/**
-		 * Not needed, not implemented
-		 */
+		disableTaskList.forEach(d -> d.toRunnable().run());
 	}
 
 	@Override

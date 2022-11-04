@@ -52,35 +52,30 @@ public class Spooler {
 	}
 
 	/**
-	 * Non-blocking
+	 * Blocking
 	 */
 	public void shutdown() {
 		if (shutdown.get()) {
 			return;
 		}
 		shutdown.set(true);
-		log.info("Shutdown all ({}) spoolExecutors. {} are running jobs and {} in waiting.",
-				spoolExecutors.mappingCount(),
-				getRunningQueuesCount(),
-				getAllQueuesSize());
+
+		final var count = getRunningQueuesCount();
+		if (count > 0) {
+			log.info("Shutdown all ({}) spoolExecutors. {} are running jobs and {} in waiting...",
+					spoolExecutors.mappingCount(),
+					count,
+					getAllQueuesSize());
+		} else {
+			log.info("Shutdown all ({}) spoolExecutors. No running jobs or waiting jobs.",
+					spoolExecutors.mappingCount());
+		}
 		getSpoolExecutorStream().forEach(SpoolExecutor::shutdown);
 
 		final var s = new Supervisable(Thread.currentThread().toString(), "ShutdownSpooler", supervisableEvents);
 		s.start();
 		event.shutdownSpooler(s);
 		s.end();
-	}
-
-	/**
-	 * Blocking. It call shutdown() before.
-	 */
-	public void waitToClose() {
-		shutdown();
-		final var count = getRunningQueuesCount();
-		if (count > 0) {
-			log.info("Wait to ends all current ({}) running jobs...", count);
-		}
-		getSpoolExecutorStream().forEach(SpoolExecutor::waitToClose);
 	}
 
 }

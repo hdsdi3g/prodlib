@@ -156,7 +156,7 @@ public class Watchfolders {
 			log.trace("Ends full Watchfolders scans for {} ({} ms) - {} in error",
 					getWFName(), System.currentTimeMillis() - startTime, newInError.size());
 			retryInError(newInError);
-		});
+		}, () -> eventActivity.onStopScans(observedFolders));
 		service.setTimedInterval(timeBetweenScans);
 		service.setRetryAfterTimeFactor(10);
 		service.setPriority(0);
@@ -167,9 +167,6 @@ public class Watchfolders {
 				}, justLogAfterBadUserRun);
 	}
 
-	/**
-	 * Start/stop events from here don't tigger FolderActivity.onStartScans / onStopScans
-	 */
 	public synchronized BackgroundService getService() {
 		return service;
 	}
@@ -178,24 +175,14 @@ public class Watchfolders {
 		if (service == null || service.isEnabled() == false) {
 			return;
 		}
-		jobKitEngine.runOneShot("Stop watchfolder scans for " + getWFName(), spoolEvents, 0,
-				() -> {
-					service.disable();
-					eventActivity.onStopScans(observedFolders);
-				},
-				e -> {
-					if (e != null) {
-						log.error("Can't send onStopScans event", e);
-					}
-					service.disable();
-				});
+		service.disable();
 		service = null;
 	}
 
 	private BackgroundService retryInError(final ObservedFolder newInError) {
-		return jobKitEngine.createService("Retry for watchfolder in error "
-										  + getWFName() + " > " + newInError.getLabel(),
-				spoolScans,
+		return jobKitEngine.createService(
+				"Retry for watchfolder in error "
+										  + getWFName() + " > " + newInError.getLabel(), spoolScans,
 				() -> {
 					final var label = newInError.getLabel();
 					log.info("Retry to establish a connection to {}...", label);
@@ -205,7 +192,8 @@ public class Watchfolders {
 					log.info("Connection is ok. Back to normal for {}", label);
 					Optional.ofNullable(onErrorObservedFolders.remove(newInError))
 							.ifPresent(BackgroundService::disable);
-				});
+				},
+				() -> eventActivity.onStopScans(observedFolders));
 	}
 
 	private void retryInError(final List<? extends ObservedFolder> newInError) {

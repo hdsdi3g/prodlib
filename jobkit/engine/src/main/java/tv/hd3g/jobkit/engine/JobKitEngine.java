@@ -61,18 +61,17 @@ public class JobKitEngine implements JobTrait {
 		return spooler.getExecutor(spoolName).addToQueue(task, name, priority, afterRunCommand);
 	}
 
-	/**
-	 * @return a new service or the existing service for "name"
-	 */
-	public BackgroundService createService(final String name,
+	public BackgroundService createService(final String name, // NOSONAR S1133
 										   final String spoolName,
-										   final RunnableWithException task) {
+										   final RunnableWithException task,
+										   final RunnableWithException disableTask) {
 		final var service = new BackgroundService(name,
 				spoolName,
 				spooler,
 				scheduledExecutor,
 				backgroundServiceEvent,
-				task);
+				task,
+				disableTask);
 		backgroundServices.add(service);
 		return service;
 	}
@@ -80,12 +79,13 @@ public class JobKitEngine implements JobTrait {
 	/**
 	 * Create a service if not exists as "name".
 	 */
-	public BackgroundService startService(final String name,
+	public BackgroundService startService(final String name, // NOSONAR S1133
 										  final String spoolName,
 										  final long timedInterval,
 										  final TimeUnit unit,
-										  final RunnableWithException task) {
-		return createService(name, spoolName, task)
+										  final RunnableWithException task,
+										  final RunnableWithException disableTask) {
+		return createService(name, spoolName, task, disableTask)
 				.setTimedInterval(timedInterval, unit)
 				.enable();
 	}
@@ -96,8 +96,9 @@ public class JobKitEngine implements JobTrait {
 	public BackgroundService startService(final String name,
 										  final String spoolName,
 										  final Duration duration,
-										  final RunnableWithException task) {
-		return startService(name, spoolName, duration.toMillis(), MILLISECONDS, task);
+										  final RunnableWithException task,
+										  final RunnableWithException disableTask) {
+		return startService(name, spoolName, duration.toMillis(), MILLISECONDS, task, disableTask);
 	}
 
 	public Spooler getSpooler() {
@@ -106,21 +107,13 @@ public class JobKitEngine implements JobTrait {
 
 	/**
 	 * Stop all services and shutdown spooler.
-	 * Non-blocking.
+	 * Blocking.
 	 * Don't forget to shutdown the scheduled executor.
 	 */
 	public void shutdown() {
 		backgroundServices.forEach(BackgroundService::disable);
 		spooler.shutdown();
 		Optional.ofNullable(supervisableManager).ifPresent(SupervisableManager::close);
-	}
-
-	/**
-	 * Blocking. It call shutdown() before.
-	 */
-	public void waitToClose() {
-		shutdown();
-		spooler.waitToClose();
 	}
 
 	public void onApplicationReadyRunBackgroundServices() {

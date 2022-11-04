@@ -44,6 +44,8 @@ class BackgroundServiceTest {
 	@Mock
 	RunnableWithException task;
 	@Mock
+	RunnableWithException disableTask;
+	@Mock
 	ScheduledFuture<Object> nextRunReference;
 	@Mock
 	SpoolExecutor spoolExecutor;
@@ -66,7 +68,8 @@ class BackgroundServiceTest {
 		name = String.valueOf(System.nanoTime());
 		spoolName = String.valueOf(System.nanoTime());
 		timedInterval = Math.abs(random.nextLong());
-		backgroundService = new BackgroundService(name, spoolName, spooler, scheduledExecutor, event, task);
+		backgroundService = new BackgroundService(
+				name, spoolName, spooler, scheduledExecutor, event, task, disableTask);
 
 		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
 				.then(invocation -> nextRunReference);
@@ -327,7 +330,11 @@ class BackgroundServiceTest {
 				.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
 		verify(nextRunReference, never()).cancel(false);
 
-		verify(spoolExecutor, only())
+		verify(spoolExecutor, times(1))
+				.addToQueue(any(RunnableWithException.class), eq(name), eq(0), afterRunCommandCaptor.capture());
+		afterRunCommandCaptor.getValue().accept(null);
+
+		verify(spoolExecutor, times(1))
 				.addToQueue(any(RunnableWithException.class), eq(name), eq(0), afterRunCommandCaptor.capture());
 		afterRunCommandCaptor.getValue().accept(null);
 

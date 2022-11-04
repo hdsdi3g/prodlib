@@ -39,6 +39,8 @@ class JobKitEngineTest {
 	@Mock
 	RunnableWithException task;
 	@Mock
+	RunnableWithException disableTask;
+	@Mock
 	Consumer<Exception> afterRunCommand;
 
 	String name;
@@ -56,8 +58,8 @@ class JobKitEngineTest {
 	}
 
 	@AfterEach
-	void close() {
-		jobKitEngine.waitToClose();
+	void close() throws Exception {
+		jobKitEngine.shutdown();
 	}
 
 	@AfterAll
@@ -79,7 +81,7 @@ class JobKitEngineTest {
 
 	@Test
 	void testCreateService() {
-		final var s = jobKitEngine.createService(name, spoolName, task);
+		final var s = jobKitEngine.createService(name, spoolName, task, disableTask);
 		assertNotNull(s);
 		assertFalse(s.isEnabled());
 		assertEquals(0, s.getPriority());
@@ -91,7 +93,7 @@ class JobKitEngineTest {
 		final var i = new AtomicInteger();
 		task = () -> i.getAndIncrement();
 
-		final var s = jobKitEngine.startService(name, spoolName, 1, MILLISECONDS, task);
+		final var s = jobKitEngine.startService(name, spoolName, 1, MILLISECONDS, task, disableTask);
 		assertNotNull(s);
 		assertTrue(s.isEnabled());
 		assertEquals(0, s.getPriority());
@@ -109,7 +111,7 @@ class JobKitEngineTest {
 		final var i = new AtomicInteger();
 		task = () -> i.getAndIncrement();
 
-		final var s = jobKitEngine.startService(name, spoolName, Duration.ofMillis(1), task);
+		final var s = jobKitEngine.startService(name, spoolName, Duration.ofMillis(1), task, disableTask);
 		assertNotNull(s);
 		assertTrue(s.isEnabled());
 		assertEquals(0, s.getPriority());
@@ -129,14 +131,8 @@ class JobKitEngineTest {
 
 	@Test
 	void testShutdown() {
-		jobKitEngine.startService(name, spoolName, 1, TimeUnit.DAYS, task);
+		jobKitEngine.startService(name, spoolName, 1, TimeUnit.DAYS, task, disableTask);
 		assertDoesNotThrow(() -> jobKitEngine.shutdown());
-	}
-
-	@Test
-	void testWaitToClose() {
-		jobKitEngine.startService(name, spoolName, 1, TimeUnit.DAYS, task);
-		assertDoesNotThrow(() -> jobKitEngine.waitToClose());
 	}
 
 	@Test
@@ -144,7 +140,7 @@ class JobKitEngineTest {
 		final var i = new AtomicInteger();
 		task = () -> i.getAndIncrement();
 
-		final var s = jobKitEngine.startService(name, spoolName, Duration.ofDays(1), task);
+		final var s = jobKitEngine.startService(name, spoolName, Duration.ofDays(1), task, disableTask);
 		final var retry = s.getRetryAfterTimeFactor();
 
 		jobKitEngine.onApplicationReadyRunBackgroundServices();
@@ -167,7 +163,7 @@ class JobKitEngineTest {
 		final var i = new AtomicInteger();
 		task = () -> i.getAndIncrement();
 
-		final var s = jobKitEngine.createService(name, spoolName, task);
+		final var s = jobKitEngine.createService(name, spoolName, task, disableTask);
 
 		jobKitEngine.onApplicationReadyRunBackgroundServices();
 

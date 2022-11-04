@@ -19,7 +19,7 @@ public class SpoolExecutor {
 	private final ExecutionEvent event;
 	private final AtomicLong threadCount;
 
-	private Thread currentOperation;
+	private final AtomicComputeReference<Thread> currentOperation;
 	private final Comparator<SpoolJob> queueComparator;
 	private final PriorityBlockingQueue<SpoolJob> queue;
 	private final AtomicBoolean shutdown;
@@ -36,6 +36,7 @@ public class SpoolExecutor {
 		queue = new PriorityBlockingQueue<>(1, queueComparator);
 		shutdown = new AtomicBoolean(false);
 		this.supervisableEvents = supervisableEvents;
+		currentOperation = new AtomicComputeReference<>();
 	}
 
 	public boolean addToQueue(final RunnableWithException command,
@@ -57,7 +58,7 @@ public class SpoolExecutor {
 	}
 
 	public boolean isRunning() {
-		return currentOperation != null && currentOperation.isAlive();
+		return currentOperation.computePredicate(Thread::isAlive);
 	}
 
 	private void runNext() {
@@ -65,44 +66,39 @@ public class SpoolExecutor {
 			return;
 		}
 		synchronized (queue) {
-			if (currentOperation != null && currentOperation.isAlive()) {
+			if (isRunning()) {
 				return;
 			}
 			final var next = queue.poll();
 			if (next == null) {
-				currentOperation = null;
+				currentOperation.reset();
 				return;
 			}
-			currentOperation = next;
-			currentOperation.start();
+			currentOperation.setAnd(next, Thread::start);
 		}
-	}
-
-	/**
-	 * Non-blocking
-	 */
-	public void shutdown() {
-		log.debug("Set shutdown for {}", name);
-		shutdown.set(true);
-		queue.clear();
 	}
 
 	/**
 	 * Blocking
 	 */
-	public void waitToClose() {
-		if (shutdown.get() == false) {
-			shutdown();
-		} else if (currentOperation == null) {
+	public void shutdown() {
+		if (shutdown.get()) {
 			return;
 		}
-		log.debug("Wait to close {}...", name);
+		shutdown.set(true);
+		log.debug("Set shutdown for {}, wait to close...", name);
 
-		try {
-			while (currentOperation.isAlive()) {
+		while (isRunning()) {
+			Thread.onSpinWait();
+		}
+		Thread endOperation;
+		endOperation = queue.poll();
+		while (endOperation != null) {
+			endOperation.start();
+			while (endOperation.isAlive()) {
 				Thread.onSpinWait();
 			}
-		} catch (final NullPointerException e) {// NOSONAR
+			endOperation = queue.poll();
 		}
 		log.debug("{} is now closed", name);
 	}
@@ -201,7 +197,7 @@ public class SpoolExecutor {
 			supervisableReference.set(null);
 
 			synchronized (queue) {
-				currentOperation = null;
+				currentOperation.reset();
 			}
 			runNext();
 		}

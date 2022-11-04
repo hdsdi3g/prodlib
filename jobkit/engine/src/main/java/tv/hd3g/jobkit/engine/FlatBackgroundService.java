@@ -26,7 +26,7 @@ class FlatBackgroundService extends BackgroundService {
 
 	FlatBackgroundService(final FlatScheduledExecutorService scheduledExecutor,
 						  final Runnable task) {
-		super(null, null, null, scheduledExecutor, null, null);
+		super(null, null, null, scheduledExecutor, null, null, null);
 		runReference = new FlatScheduledFuture(task);
 		this.scheduledExecutor = scheduledExecutor;
 	}

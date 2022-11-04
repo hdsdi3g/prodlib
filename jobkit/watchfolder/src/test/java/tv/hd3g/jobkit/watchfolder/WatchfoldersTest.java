@@ -152,7 +152,7 @@ class WatchfoldersTest {
 		verify(folderActivity, times(1)).onBeforeScan(observedFolder);
 		verify(watchedFilesDb, times(1)).update(any(AbstractFileSystemURL.class));
 		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-		verify(folderActivity, times(1)).onStopScans(List.of(observedFolder));
+		verify(folderActivity, times(0)).onStopScans(List.of(observedFolder));
 
 		watchfolders.startScans();
 		watchfolders.startScans();
@@ -163,7 +163,7 @@ class WatchfoldersTest {
 		verify(folderActivity, times(2)).onBeforeScan(observedFolder);
 		verify(watchedFilesDb, times(2)).update(any(AbstractFileSystemURL.class));
 		verify(folderActivity, times(2)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-		verify(folderActivity, times(1)).onStopScans(List.of(observedFolder));
+		verify(folderActivity, times(0)).onStopScans(List.of(observedFolder));
 
 		watchfolders.stopScans();
 		watchfolders.stopScans();
@@ -174,11 +174,14 @@ class WatchfoldersTest {
 		verify(folderActivity, times(2)).onBeforeScan(observedFolder);
 		verify(watchedFilesDb, times(2)).update(any(AbstractFileSystemURL.class));
 		verify(folderActivity, times(2)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-		verify(folderActivity, times(2)).onStopScans(List.of(observedFolder));
+		verify(folderActivity, times(0)).onStopScans(List.of(observedFolder));
 
 		verify(folderActivity, times(0)).onScanErrorFolder(any(ObservedFolder.class), any(Exception.class));
 
 		verify(folderActivity, times(1)).getPickUpType(observedFolder);
+
+		jobKitEngine.shutdown();
+		verify(folderActivity, times(2)).onStopScans(List.of(observedFolder));
 	}
 
 	@Test
@@ -194,6 +197,9 @@ class WatchfoldersTest {
 
 		verify(folderActivity, times(1)).getPickUpType(observedFolder);
 		verify(folderActivity, times(1)).onStartScans(List.of(observedFolder));
+		verify(folderActivity, times(0)).onStopScans(List.of(observedFolder));
+
+		jobKitEngine.shutdown();
 		verify(folderActivity, times(1)).onStopScans(List.of(observedFolder));
 	}
 

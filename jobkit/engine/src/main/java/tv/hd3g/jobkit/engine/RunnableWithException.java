@@ -35,4 +35,7 @@ public interface RunnableWithException {
 	static RunnableWithException fromRunnable(final Runnable r) {
 		return r::run;
 	}
+
+	RunnableWithException nothing = () -> {
+	};
 }

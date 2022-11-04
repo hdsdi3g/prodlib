@@ -219,11 +219,7 @@ class SpoolExecutorTest {
 		final var reverseCmd = new CountDownLatch(1);
 		spoolExecutor.addToQueue(() -> {
 			smCmd0.countDown();
-			try {
-				reverseCmd.await(10, SECONDS);
-			} catch (final InterruptedException e1) {
-				throw new IllegalStateException(e1);
-			}
+			reverseCmd.await(10, SECONDS);
 		}, name, 0, e -> {
 			smCmd1.countDown();
 		});
@@ -253,11 +249,7 @@ class SpoolExecutorTest {
 		final var reverseCmd = new CountDownLatch(1);
 		spoolExecutor.addToQueue(() -> {
 			smCmd0.countDown();
-			try {
-				reverseCmd.await(10, SECONDS);
-			} catch (final InterruptedException e1) {
-				throw new IllegalStateException(e1);
-			}
+			reverseCmd.await(10, SECONDS);
 		}, name, 0, e -> {
 			smCmd1.countDown();
 		});
@@ -272,7 +264,7 @@ class SpoolExecutorTest {
 	}
 
 	@Test
-	void testShutdown() throws InterruptedException {
+	void testShutdown_simple() throws InterruptedException {
 		spoolExecutor.shutdown();
 
 		final var smCmd = new CountDownLatch(1);
@@ -286,26 +278,44 @@ class SpoolExecutorTest {
 	}
 
 	@Test
-	void testWaitToClose() {
+	void testShutdown() {
 		final var count = new AtomicInteger(0);
 
 		spoolExecutor.addToQueue(() -> {
-			try {
-				Thread.sleep(100);// NOSONAR
-			} catch (final InterruptedException e1) {
-				throw new IllegalStateException(e1);
-			}
+			Thread.sleep(100);// NOSONAR
 			count.incrementAndGet();
 		}, name, 0, e -> {
 			count.incrementAndGet();
 		});
 
 		assertEquals(0, count.get());
-		spoolExecutor.waitToClose();
+		spoolExecutor.shutdown();
 		assertEquals(2, count.get());
 
 		verify(event, times(0)).shutdownSpooler(any(Supervisable.class));
 		verify(sEvent, times(4)).onEnd(any(), eq(Optional.empty()));
+	}
+
+	@Test
+	void testShutdown_multiple() {
+		final var count = new AtomicInteger(0);
+		final var total = 10;
+
+		for (var i = 0; i < total; i++) {
+			assertTrue(spoolExecutor.addToQueue(() -> {
+				Thread.sleep(20);// NOSONAR
+				count.incrementAndGet();
+			}, name, 0, e -> {
+				count.incrementAndGet();
+			}));
+		}
+
+		assertEquals(0, count.get());
+		spoolExecutor.shutdown();
+		assertEquals(total * 2, count.get());
+
+		verify(event, times(0)).shutdownSpooler(any(Supervisable.class));
+		verify(sEvent, times(total * 4)).onEnd(any(), eq(Optional.empty()));
 	}
 
 	@Test

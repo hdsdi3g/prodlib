@@ -38,33 +38,35 @@ class FlatJobKitEngineTest {
 
 	FlatJobKitEngine jobKitEngine;
 	RunnableWithException task;
+	RunnableWithException disableTask;
 
 	@BeforeEach
 	void init() {
 		jobKitEngine = new FlatJobKitEngine();
 		task = () -> {
 		};
+		disableTask = () -> {
+		};
 
 		/**
 		 * Do nothing
 		 */
 		jobKitEngine.shutdown();
-		jobKitEngine.waitToClose();
 	}
 
 	@Test
 	void testCreateService() {
-		assertNotNull(jobKitEngine.createService(null, null, task));
+		assertNotNull(jobKitEngine.createService(null, null, task, disableTask));
 	}
 
 	@Test
 	void testStartServiceStringStringLongTimeUnitRunnable() {
-		assertNotNull(jobKitEngine.startService(null, null, 0, TimeUnit.DAYS, task));
+		assertNotNull(jobKitEngine.startService(null, null, 0, TimeUnit.DAYS, task, disableTask));
 	}
 
 	@Test
 	void testStartServiceStringStringDurationRunnable() {
-		assertNotNull(jobKitEngine.startService(null, null, Duration.ZERO, task));
+		assertNotNull(jobKitEngine.startService(null, null, Duration.ZERO, task, disableTask));
 	}
 
 	@Test
@@ -76,7 +78,7 @@ class FlatJobKitEngineTest {
 	void testRunAllServicesOnce() {
 		final var i = new AtomicInteger();
 		task = () -> i.getAndIncrement();
-		jobKitEngine.startService(null, null, 0, TimeUnit.DAYS, task);
+		jobKitEngine.startService(null, null, 0, TimeUnit.DAYS, task, disableTask);
 		jobKitEngine.runAllServicesOnce();
 		assertEquals(1, i.get());
 	}
@@ -85,13 +87,13 @@ class FlatJobKitEngineTest {
 	void testIsEmptyActiveServicesList() {
 		assertTrue(jobKitEngine.isEmptyActiveServicesList());
 
-		var s = jobKitEngine.createService(null, null, task);
+		var s = jobKitEngine.createService(null, null, task, disableTask);
 		assertTrue(jobKitEngine.isEmptyActiveServicesList());
 		s.enable();
 		assertFalse(jobKitEngine.isEmptyActiveServicesList());
 		s.disable();
 		assertTrue(jobKitEngine.isEmptyActiveServicesList());
-		s = jobKitEngine.startService(null, null, 0, TimeUnit.DAYS, task);
+		s = jobKitEngine.startService(null, null, 0, TimeUnit.DAYS, task, disableTask);
 		assertFalse(jobKitEngine.isEmptyActiveServicesList());
 		s.disable();
 		assertTrue(jobKitEngine.isEmptyActiveServicesList());
