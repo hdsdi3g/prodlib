@@ -8,6 +8,18 @@ All services (JobKit) must declare an "on close" (`disableTask`) ready-to-run la
 
 Always on JobKit, remove `waitToClose` and merge it with shutdown.
 
+### Bug fixes
+
+NotificationRouterMail end mail log message should display the reason to send a mail (group / enduser), and the used template #68
+
+Correct a flaky test and Mailkit code clean
+
+Correct Translate (MailKit) with uppercase keys #67
+
+Correct buggy templates on debug/dev Notification mails #65
+
+Add missing translate keys for Watchfolder on MailKit #66
+
 ## 11.2.0
 
 ### Bug fixes, no break changes
