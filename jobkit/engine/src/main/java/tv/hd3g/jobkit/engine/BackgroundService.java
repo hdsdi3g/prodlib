@@ -159,7 +159,13 @@ public class BackgroundService {
 			final var disableName = "On disable service " + name;
 			spooler.getExecutor(spoolName)
 					.addToQueue(disableTask, disableName, priority,
-							e -> log.warn("Can't run disableTask {}/{}", spoolName, disableName, e));
+							e -> {
+								if (e != null) {
+									log.warn("Can't run disableTask {}/{}", spoolName, disableName, e);
+								} else {
+									log.trace("Run disableTask {}/{} is ok", spoolName, disableName);
+								}
+							});
 		} else {
 			/**
 			 * Don't wan't to enable
