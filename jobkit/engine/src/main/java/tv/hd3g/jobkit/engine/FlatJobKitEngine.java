@@ -49,7 +49,12 @@ public class FlatJobKitEngine extends JobKitEngine {
 	private class FlatSupervisableEvents implements SupervisableEvents {
 		@Override
 		public void onEnd(final Supervisable supervisable, final Optional<Exception> oError) {
-			endEvents.add(supervisable.getEndEvent(oError, "flatManager"));
+			final var endEvent = supervisable.getEndEvent(oError, "flatManager");
+			if (endEvent.isEmpty()) {
+				log.trace("Supervisable is empty");
+			} else {
+				endEvents.add(endEvent.get());
+			}
 		}
 	}
 

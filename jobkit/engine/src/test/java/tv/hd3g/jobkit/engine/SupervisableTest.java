@@ -51,6 +51,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.NullNode;
 
 import net.datafaker.Faker;
 
@@ -90,7 +91,7 @@ class SupervisableTest {
 		defaultResult = faker.basketball().positions();
 		message = new SupervisableMessage(code, defaultResult, vars);
 
-		s = new Supervisable(spoolName, jobName, events);
+		s = new Supervisable(spoolName, jobName, events).setContext(typeName, NullNode.getInstance());
 	}
 
 	@AfterEach
@@ -117,6 +118,41 @@ class SupervisableTest {
 		final var latch = new CountDownLatch(1);
 
 		jk.runOneShot(jobName, spoolName, 0, () -> {
+			final var su = Supervisable.getSupervisable();
+			su.resultDone();
+			arSupervisable.set(su);
+			latch.countDown();
+		}, e -> {
+			arException.set(e);
+			latch.countDown();
+		});
+
+		latch.await(1, TimeUnit.SECONDS);
+		assertNotEquals(s, arSupervisable.get());
+		assertNull(arException.get());
+		s = arSupervisable.get();
+		assertNotNull(s);
+		final var eEvent = s.getEndEvent(Optional.empty(), managerName).get();
+		assertNotNull(eEvent);
+		assertEquals(jobName, eEvent.jobName());
+		assertEquals(spoolName, eEvent.spoolName());
+		assertEquals(WORKS_DONE, eEvent.result().state());
+		assertEquals(Set.of(), getEndEvent().marks());
+	}
+
+	@Test
+	void testGetSupervisable_ok_empty() throws InterruptedException {
+		final var jk = new JobKitEngine(Executors.newScheduledThreadPool(1),
+				new ExecutionEvent() {},
+				new BackgroundServiceEvent() {},
+				new SupervisableManager(managerName));
+
+		final var arSupervisable = new AtomicReference<Supervisable>();
+		final var arException = new AtomicReference<Exception>();
+
+		final var latch = new CountDownLatch(1);
+
+		jk.runOneShot(jobName, spoolName, 0, () -> {
 			arSupervisable.set(Supervisable.getSupervisable());
 			latch.countDown();
 		}, e -> {
@@ -129,11 +165,7 @@ class SupervisableTest {
 		assertNull(arException.get());
 		s = arSupervisable.get();
 		assertNotNull(s);
-		final var eEvent = s.getEndEvent(Optional.empty(), managerName);
-		assertNotNull(eEvent);
-		assertEquals(jobName, eEvent.jobName());
-		assertEquals(spoolName, eEvent.spoolName());
-		assertEquals(Set.of(TRIVIAL), getEndEvent().marks());
+		assertTrue(s.getEndEvent(Optional.empty(), managerName).isEmpty());
 	}
 
 	static void checkCaller(final StackTraceElement stepCaller) {
@@ -148,7 +180,7 @@ class SupervisableTest {
 	}
 
 	SupervisableEndEvent getEndEvent() {
-		final var event = s.getEndEvent(Optional.empty(), managerName);
+		final var event = s.getEndEvent(Optional.empty(), managerName).get();
 		assertEquals(managerName, event.managerName());
 		assertNotNull(event.creationDate());
 		return event;
@@ -204,7 +236,7 @@ class SupervisableTest {
 
 	@Test
 	void testEndEventException() {
-		final var event = s.getEndEvent(Optional.ofNullable(exception), managerName);
+		final var event = s.getEndEvent(Optional.ofNullable(exception), managerName).get();
 		assertEquals(managerName, event.managerName());
 		assertEquals(exception, event.error());
 		assertEquals(Set.of(TRIVIAL), getEndEvent().marks());
@@ -298,7 +330,7 @@ class SupervisableTest {
 
 		assertThrows(IllegalArgumentException.class, () -> s.setContext(typeName, k0, k0, k0));
 		final var endEvent = getEndEvent();
-		assertNull(endEvent.context());
+		assertEquals(NullNode.getInstance(), endEvent.context());
 		assertEquals(Set.of(TRIVIAL), getEndEvent().marks());
 	}
 
@@ -306,7 +338,7 @@ class SupervisableTest {
 	void testSetContextVarargs_empty() {
 		assertThrows(IllegalArgumentException.class, () -> s.setContext(typeName));
 		final var endEvent = getEndEvent();
-		assertNull(endEvent.context());
+		assertEquals(NullNode.getInstance(), endEvent.context());
 		assertEquals(Set.of(TRIVIAL), getEndEvent().marks());
 	}
 

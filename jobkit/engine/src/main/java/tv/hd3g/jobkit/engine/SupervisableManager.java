@@ -92,11 +92,17 @@ public class SupervisableManager {
 
 		@Override
 		public void onEnd(final Supervisable supervisable, final Optional<Exception> oError) {
+			final var oEndEvent = supervisable.getEndEvent(oError, name);
+			if (oEndEvent.isEmpty()) {
+				log.trace("Supervisable is empty");
+				return;
+			}
+			final var endEvent = oEndEvent.get();
+
 			if (shutdown.get()) {
 				log.error("Can't manage event [onEnd/{}] on a closed SupervisableManager", supervisable);
 				return;
 			}
-			final var endEvent = supervisable.getEndEvent(oError, name);
 			log.trace("Queue end event for {}", supervisable);
 
 			synchronized (lastEndEvents) {

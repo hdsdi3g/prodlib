@@ -96,9 +96,7 @@ class FolderActivityTest {
 	@Test
 	void testOnBeforeScan() {
 		run(() -> a.onBeforeScan(observedFolder));
-		event = jobKit.getEndEventsList().get(0);
-		assertFalse(event.isNotTrivialMarked());
-		assertFalse(FolderActivity.isFolderActivityEvent(event));
+		assertTrue(jobKit.getEndEventsList().isEmpty());
 	}
 
 	@Test

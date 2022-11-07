@@ -143,7 +143,8 @@ public class Supervisable {
 	}
 
 	public synchronized Supervisable setContext(final String typeName, final Object businessObject) {
-		setContext(typeName, events.extractContext(businessObject));
+		setContext(typeName, Objects.requireNonNull(events.extractContext(businessObject),
+				"Can't extract a non-null context"));
 		return this;
 	}
 
@@ -275,8 +276,18 @@ public class Supervisable {
 				.orElseThrow(() -> new IllegalArgumentException("Can't found caller"));
 	}
 
-	synchronized SupervisableEndEvent getEndEvent(final Optional<Exception> oError, final String managerName) {
-		return new SupervisableEndEvent(
+	synchronized Optional<SupervisableEndEvent> getEndEvent(final Optional<Exception> oError,
+															final String managerName) {
+		if (typeName == null
+			&& context == null
+			&& steps.isEmpty()
+			&& sResult == null
+			&& error == null
+			&& oError.isEmpty()) {
+			return Optional.empty();
+		}
+
+		return Optional.ofNullable(new SupervisableEndEvent(
 				spoolName,
 				jobName,
 				typeName,
@@ -288,7 +299,7 @@ public class Supervisable {
 				steps.stream().toList(),
 				sResult,
 				oError.orElse(null),
-				marks.stream().collect(toUnmodifiableSet()));
+				marks.stream().collect(toUnmodifiableSet())));
 	}
 
 }

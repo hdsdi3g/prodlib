@@ -16,7 +16,7 @@
  */
 package tv.hd3g.jobkit.engine;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static java.util.Optional.ofNullable;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
@@ -123,7 +123,7 @@ class SupervisableManagerTest {
 	void testGetLifeCycle_onEnd() {
 		final var lf = s.getLifeCycle();
 
-		when(supervisable.getEndEvent(oError, name)).thenReturn(supervisableEndEvent);
+		when(supervisable.getEndEvent(oError, name)).thenReturn(ofNullable(supervisableEndEvent));
 		s.registerOnEndEventConsumer(eventConsumer);
 
 		lf.onEnd(supervisable, oError);
@@ -136,7 +136,7 @@ class SupervisableManagerTest {
 	void testGetLifeCycle_onEnd_Exception() {
 		final var lf = s.getLifeCycle();
 
-		when(supervisable.getEndEvent(oError, name)).thenReturn(supervisableEndEvent);
+		when(supervisable.getEndEvent(oError, name)).thenReturn(ofNullable(supervisableEndEvent));
 		s.registerOnEndEventConsumer(eventConsumer);
 
 		Mockito.doThrow(new IllegalStateException()).when(eventConsumer).afterProcess(supervisableEndEvent);
@@ -149,7 +149,8 @@ class SupervisableManagerTest {
 	@Test
 	void testGetLifeCycle_onEnd_close() {
 		s.close();
-		assertDoesNotThrow(() -> s.getLifeCycle().onEnd(supervisable, oError));
+		s.getLifeCycle().onEnd(supervisable, oError);
+		verify(supervisable, times(1)).getEndEvent(oError, name);
 	}
 
 	@Test
@@ -171,7 +172,7 @@ class SupervisableManagerTest {
 	void testGetLifeCycle_onEnd_retention() {
 		final var lf = s.getLifeCycle();
 
-		when(supervisable.getEndEvent(oError, name)).thenReturn(supervisableEndEvent);
+		when(supervisable.getEndEvent(oError, name)).thenReturn(ofNullable(supervisableEndEvent));
 		lf.onEnd(supervisable, oError);
 		s.registerOnEndEventConsumer(eventConsumer);
 
@@ -183,7 +184,7 @@ class SupervisableManagerTest {
 	void testGetLifeCycle_onEnd_limited_retention() {
 		final var lf = s.getLifeCycle();
 
-		when(supervisable.getEndEvent(oError, name)).thenReturn(supervisableEndEvent);
+		when(supervisable.getEndEvent(oError, name)).thenReturn(ofNullable(supervisableEndEvent));
 		lf.onEnd(supervisable, oError);
 		lf.onEnd(supervisable, oError);
 		s.registerOnEndEventConsumer(eventConsumer);
@@ -199,7 +200,7 @@ class SupervisableManagerTest {
 		s = new SupervisableManager(name, objectMapper, iterations);
 		final var lf = s.getLifeCycle();
 
-		when(supervisable.getEndEvent(oError, name)).thenReturn(supervisableEndEvent);
+		when(supervisable.getEndEvent(oError, name)).thenReturn(ofNullable(supervisableEndEvent));
 		for (var pos = 0; pos < iterations; pos++) {
 			lf.onEnd(supervisable, oError);
 		}
