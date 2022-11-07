@@ -86,7 +86,7 @@ public class SpoolExecutor {
 			return;
 		}
 		shutdown.set(true);
-		log.debug("Set shutdown for {}, wait to close...", name);
+		log.debug("Set shutdown for spool {}, wait to close...", name);
 
 		while (isRunning()) {
 			Thread.onSpinWait();
@@ -100,7 +100,7 @@ public class SpoolExecutor {
 			}
 			endOperation = queue.poll();
 		}
-		log.debug("{} is now closed", name);
+		log.debug("Spool {} is now closed", name);
 	}
 
 	private class SpoolJob extends Thread implements SpoolJobStatus {

@@ -41,7 +41,8 @@ public class JobKitOnBootStartsBackgServices implements DisposableBean {
 
 	@Override
 	public void destroy() throws Exception {
-		log.debug("App want to close: shutdown jobKitEngine");
+		log.info("App want to close: shutdown jobKitEngine...");
 		jobKitEngine.shutdown();
+		log.debug("JobKitEngine is now closed");
 	}
 }

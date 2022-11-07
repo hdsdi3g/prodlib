@@ -72,8 +72,10 @@ public class SupervisableManager {
 	}
 
 	void close() {
-		log.info("Close SupervisableManager {}", name);
-		shutdown.set(true);
+		if (shutdown.get() == false) {
+			log.info("Close SupervisableManager {}", name);
+			shutdown.set(true);
+		}
 	}
 
 	public void registerOnEndEventConsumer(final SupervisableOnEndEventConsumer onEndEventConsumer) {
