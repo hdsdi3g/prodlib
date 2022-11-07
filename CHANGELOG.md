@@ -1,5 +1,17 @@
 # All ProdLib projects upgrades
 
+## 12.0.1
+
+### Bug fixes
+
+Correct messages for Watchfolder/MailKit
+
+Correct JobKit log messages during shutdown
+
+Fix a bad log message during BackgroundService closing
+
+Remove callbacks for empty supervisables
+
 ## 12.0.0
 
 Close Supervisable/Notifications mails are not sended during the App shutdown (#64), now JobKit Service will be `shutdown()` on Spring Boot shutdown, with blocking jobs: all running/waiting job will be waited before the app shutdown, even the Supervisable/Notification jobs.
