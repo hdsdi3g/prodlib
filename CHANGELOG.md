@@ -1,5 +1,13 @@
 # All ProdLib projects upgrades
 
+## 12.1.0
+
+Implements WithSuperviable annotation on Spring AOP #51
+
+Remove LifeCycle from SupervisableManager
+
+Explicit maven-compiler-plugin and maven-surefire-plugin versions, remove maven-deploy-plugin
+
 ## 12.0.1
 
 ### Bug fixes

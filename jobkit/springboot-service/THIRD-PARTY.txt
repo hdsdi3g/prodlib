@@ -1,5 +1,5 @@
 
-Lists of 78 third-party dependencies.
+Lists of 81 third-party dependencies.
      (The Apache Software License, Version 2.0) Jackson-annotations (com.fasterxml.jackson.core:jackson-annotations:2.13.3 - http://github.com/FasterXML/jackson)
      (The Apache Software License, Version 2.0) Jackson-core (com.fasterxml.jackson.core:jackson-core:2.13.3 - https://github.com/FasterXML/jackson-core)
      (The Apache Software License, Version 2.0) jackson-databind (com.fasterxml.jackson.core:jackson-databind:2.13.3 - http://github.com/FasterXML/jackson)
@@ -36,6 +36,8 @@ Lists of 78 third-party dependencies.
      (Apache License, Version 2.0) tomcat-embed-el (org.apache.tomcat.embed:tomcat-embed-el:9.0.65 - https://tomcat.apache.org/)
      (Apache License, Version 2.0) tomcat-embed-websocket (org.apache.tomcat.embed:tomcat-embed-websocket:9.0.65 - https://tomcat.apache.org/)
      (The Apache License, Version 2.0) org.apiguardian:apiguardian-api (org.apiguardian:apiguardian-api:1.1.2 - https://github.com/apiguardian-team/apiguardian)
+     (Eclipse Public License - v 2.0) AspectJ Runtime (org.aspectj:aspectjrt:1.9.7 - https://www.eclipse.org/aspectj/)
+     (Eclipse Public License - v 2.0) AspectJ Weaver (org.aspectj:aspectjweaver:1.9.7 - https://www.eclipse.org/aspectj/)
      (Apache License, Version 2.0) AssertJ fluent assertions (org.assertj:assertj-core:3.21.0 - https://assertj.github.io/doc/assertj-core/)
      (Apache License, Version 2.0) Plexus Common Utilities (org.codehaus.plexus:plexus-utils:3.2.1 - http://codehaus-plexus.github.io/plexus-utils/)
      (Eclipse Public License - v 2.0) Java Development Tools Core (org.eclipse.jdt:org.eclipse.jdt.core:3.25.0 - http://www.eclipse.org/jdt)
@@ -67,6 +69,7 @@ Lists of 78 third-party dependencies.
      (Apache License, Version 2.0) spring-boot-autoconfigure (org.springframework.boot:spring-boot-autoconfigure:2.6.11 - https://spring.io/projects/spring-boot)
      (Apache License, Version 2.0) spring-boot-configuration-processor (org.springframework.boot:spring-boot-configuration-processor:2.6.11 - https://spring.io/projects/spring-boot)
      (Apache License, Version 2.0) spring-boot-starter (org.springframework.boot:spring-boot-starter:2.6.11 - https://spring.io/projects/spring-boot)
+     (Apache License, Version 2.0) spring-boot-starter-aop (org.springframework.boot:spring-boot-starter-aop:2.6.11 - https://spring.io/projects/spring-boot)
      (Apache License, Version 2.0) spring-boot-starter-json (org.springframework.boot:spring-boot-starter-json:2.6.11 - https://spring.io/projects/spring-boot)
      (Apache License, Version 2.0) spring-boot-starter-test (org.springframework.boot:spring-boot-starter-test:2.6.11 - https://spring.io/projects/spring-boot)
      (Apache License, Version 2.0) spring-boot-starter-tomcat (org.springframework.boot:spring-boot-starter-tomcat:2.6.11 - https://spring.io/projects/spring-boot)
@@ -75,6 +78,6 @@ Lists of 78 third-party dependencies.
      (Apache License, Version 2.0) spring-boot-test-autoconfigure (org.springframework.boot:spring-boot-test-autoconfigure:2.6.11 - https://spring.io/projects/spring-boot)
      (The Apache Software License, Version 2.0) org.xmlunit:xmlunit-core (org.xmlunit:xmlunit-core:2.8.4 - https://www.xmlunit.org/)
      (Apache License, Version 2.0) SnakeYAML (org.yaml:snakeyaml:1.29 - http://www.snakeyaml.org)
-     (GNU Lesser General Public License, Version 3) JobKit Engine (tv.hd3g:jobkit-engine:12.0.1 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) JobKit Engine (tv.hd3g:jobkit-engine:12.1.0 - https://github.com/hdsdi3g/prodlib)
      (GNU Lesser General Public License, Version 3) CodePolicyValidation (tv.hd3g.commons:codepolicyvalidation:1.1.0 - https://github.com/hdsdi3g/codepolicyvalidation)
-     (GNU Lesser General Public License, Version 3) Commons Interfaces (tv.hd3g.commons:interfaces:12.0.1 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) Commons Interfaces (tv.hd3g.commons:interfaces:12.1.0 - https://github.com/hdsdi3g/prodlib)
