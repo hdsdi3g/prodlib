@@ -18,5 +18,20 @@
     "name": "mailkit",
     "type": "tv.hd3g.mailkit.mod.configuration.MailKitConfig",
     "description": "The full configuration of Notification user/groups"
+  },
+  {
+    "name": "mailkit.env.appName",
+    "type": "java.lang.String",
+    "description": "The app name on emails"
+  },
+  {
+    "name": "mailkit.env.instanceName",
+    "type": "java.lang.String",
+    "description": "The instance name on emails"
+  },
+  {
+    "name": "mailkit.env.vendorName",
+    "type": "java.lang.String",
+    "description": "The vendor name on emails"
   }
 ]}
