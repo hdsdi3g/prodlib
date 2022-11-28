@@ -59,8 +59,8 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 	private final String sftpAbsolutePath;
 
 	SFTPFile(final SFTPFileSystem fileSystem, final SFTPClient sftpClient,
-	         final String relativePath,
-	         final String absolutePath) {
+			 final String relativePath,
+			 final String absolutePath) {
 		super(fileSystem, relativePath);
 		if (fileSystem.isAbsoluteBasePath()) {
 			sftpAbsolutePath = absolutePath;
@@ -157,8 +157,8 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 		try {
 			final var type = sftpClient.stat(sftpAbsolutePath).getType();
 			return type != Type.REGULAR
-			       && type != Type.DIRECTORY
-			       && type != Type.SYMLINK;
+				   && type != Type.DIRECTORY
+				   && type != Type.SYMLINK;
 		} catch (final IOException e) {
 			if (isNoSuchFileInError(e)) {
 				return false;
@@ -181,11 +181,11 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 
 	private CachedFileAttributes makeCachedFileAttributesFromStat(final AbstractFile related, final FileAttributes f) {
 		return new CachedFileAttributes(related,
-		        f.getSize(), f.getMtime() * 1000L, true,
-		        f.getType() == Type.DIRECTORY,
-		        f.getType() == Type.REGULAR,
-		        f.getType() == Type.SYMLINK,
-		        f.getType() != Type.REGULAR && f.getType() != Type.DIRECTORY && f.getType() != Type.SYMLINK);
+				f.getSize(), f.getMtime() * 1000L, true,
+				f.getType() == Type.DIRECTORY,
+				f.getType() == Type.REGULAR,
+				f.getType() == Type.SYMLINK,
+				f.getType() != Type.REGULAR && f.getType() != Type.DIRECTORY && f.getType() != Type.SYMLINK);
 	}
 
 	@Override
@@ -212,9 +212,9 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 	public Stream<AbstractFile> list() {
 		try {
 			return sftpClient.ls(sftpAbsolutePath).stream()
-			        .map(RemoteResourceInfo::getPath)
-			        .map(toRelativePath)
-			        .map(fileSystem::getFromPath);
+					.map(RemoteResourceInfo::getPath)
+					.map(toRelativePath)
+					.map(fileSystem::getFromPath);
 		} catch (final IOException e) {
 			if (isNoSuchFileInError(e) || e.getMessage().equals("Accessed location is not a directory")) {
 				return Stream.empty();
@@ -227,8 +227,8 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 	public Stream<CachedFileAttributes> toCachedList() {
 		try {
 			return sftpClient.ls(sftpAbsolutePath).stream()
-			        .map(rri -> makeCachedFileAttributesFromStat(
-			                fileSystem.getFromPath(toRelativePath.apply(rri.getPath())), rri.getAttributes()));
+					.map(rri -> makeCachedFileAttributesFromStat(
+							fileSystem.getFromPath(toRelativePath.apply(rri.getPath())), rri.getAttributes()));
 		} catch (final IOException e) {
 			if (isNoSuchFileInError(e) || e.getMessage().equals("Accessed location is not a directory")) {
 				return Stream.empty();
@@ -244,6 +244,11 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 		} catch (final IOException e) {
 			throw new UncheckedIOException(e);
 		}
+	}
+
+	@Override
+	public void mkdirs() {
+		mkdir();
 	}
 
 	@Override
@@ -281,10 +286,10 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 	}
 
 	private void copy(final String source,
-	                  final String dest,
-	                  final File localFile,
-	                  final TransfertObserver observer,
-	                  final TransfertDirection transfertDirection) {
+					  final String dest,
+					  final File localFile,
+					  final TransfertObserver observer,
+					  final TransfertDirection transfertDirection) {
 		var sizeToTransfert = 0L;
 		try {
 			synchronized (sftpClient) {
@@ -297,7 +302,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 					public Listener file(final String name, final long size) {
 						return transferred -> {
 							if (observer.onTransfertProgress(
-							        localFile, thisRef, transfertDirection, now, transferred) == false) {
+									localFile, thisRef, transfertDirection, now, transferred) == false) {
 								throw new StoppedTransfertException(localFile.getPath(), transferred);
 							}
 						};
@@ -314,25 +319,25 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 				if (transfertDirection == DISTANTTOLOCAL) {
 					if (sftpClient.stat(sftpAbsolutePath).getType() == Type.DIRECTORY) {
 						throw new UncheckedIOException(
-						        new IOException("Source file is a directory, can't copy from it"));
+								new IOException("Source file is a directory, can't copy from it"));
 					}
 					sizeToTransfert = sftpClient.size(sftpAbsolutePath);
 					log.info("Download file from SSH host \"{}@{}:{}\" to \"{}\" ({} bytes)",
-					        fileSystem.getUsername(), fileSystem.getHost(), source, dest, sizeToTransfert);
+							fileSystem.getUsername(), fileSystem.getHost(), source, dest, sizeToTransfert);
 					ft.download(source, dest);
 				} else if (transfertDirection == LOCALTODISTANT) {
 					sizeToTransfert = localFile.length();
 					log.info("Upload file \"{}\" ({} bytes) to SSH host \"{}@{}:{}\"",
-					        localFile, sizeToTransfert, fileSystem.getUsername(), fileSystem.getHost(), dest);
+							localFile, sizeToTransfert, fileSystem.getUsername(), fileSystem.getHost(), dest);
 					ft.upload(source, dest);
 				}
 
 				observer.afterTransfert(localFile, this, transfertDirection,
-				        Duration.of(System.currentTimeMillis() - now, MILLIS));
+						Duration.of(System.currentTimeMillis() - now, MILLIS));
 			}
 		} catch (final StoppedTransfertException e) {
 			log.info("Stop copy SSH file from \"{}\" to \"{}\", ({}/{} bytes)",
-			        source, dest, e.transferred, sizeToTransfert);
+					source, dest, e.transferred, sizeToTransfert);
 		} catch (final IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -340,8 +345,8 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 
 	@Override
 	public long downloadAbstract(final OutputStream outputStream,
-	                             final int bufferSize,
-	                             final SizedStoppableCopyCallback copyCallback) {
+								 final int bufferSize,
+								 final SizedStoppableCopyCallback copyCallback) {
 		final var dest = new LocalDestFileImpl(outputStream, copyCallback);
 		synchronized (sftpClient) {
 			try {
@@ -367,8 +372,8 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 
 	@Override
 	public long uploadAbstract(final InputStream inputStream,
-	                           final int bufferSize,
-	                           final SizedStoppableCopyCallback copyCallback) {
+							   final int bufferSize,
+							   final SizedStoppableCopyCallback copyCallback) {
 		final var source = new LocalSourceFileImpl(getName(), inputStream, copyCallback);
 		synchronized (sftpClient) {
 			try {
@@ -426,8 +431,8 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 		private final InputStream inputStream;
 
 		LocalSourceFileImpl(final String name,
-		                    final InputStream inputStream,
-		                    final SizedStoppableCopyCallback copyCallback) {
+							final InputStream inputStream,
+							final SizedStoppableCopyCallback copyCallback) {
 			super(copyCallback);
 			this.name = name;
 			this.inputStream = inputStream;
@@ -490,7 +495,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 		private final OutputStream outputStream;
 
 		LocalDestFileImpl(final OutputStream outputStream,
-		                  final SizedStoppableCopyCallback copyCallback) {
+						  final SizedStoppableCopyCallback copyCallback) {
 			super(copyCallback);
 			this.outputStream = outputStream;
 		}

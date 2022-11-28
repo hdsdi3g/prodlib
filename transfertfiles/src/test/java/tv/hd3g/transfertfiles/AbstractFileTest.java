@@ -119,21 +119,25 @@ class AbstractFileTest {
 		}
 
 		@Override
+		public void mkdirs() {
+		}
+
+		@Override
 		public AbstractFile renameTo(final String path) {
 			return new DemoAF(path);
 		}
 
 		@Override
 		public long downloadAbstract(final OutputStream outputStream,
-		                             final int bufferSize,
-		                             final SizedStoppableCopyCallback copyCallback) {
+									 final int bufferSize,
+									 final SizedStoppableCopyCallback copyCallback) {
 			return 0;
 		}
 
 		@Override
 		public long uploadAbstract(final InputStream inputStream,
-		                           final int bufferSize,
-		                           final SizedStoppableCopyCallback copyCallback) {
+								   final int bufferSize,
+								   final SizedStoppableCopyCallback copyCallback) {
 			return 0;
 		}
 

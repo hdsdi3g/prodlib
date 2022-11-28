@@ -83,8 +83,8 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 			final var preferList = FTPListing.LIST.equals(fileSystem.getFtpListing());
 			if (preferList || ftpClient.hasFeature("MLST") == false) {
 				return Stream.of(ftpClient.listFiles(getFullPathNoEndSeparator(absolutePath)))
-				        .filter(f -> f.getName().equalsIgnoreCase(getName()))
-				        .findFirst();
+						.filter(f -> f.getName().equalsIgnoreCase(getName()))
+						.findFirst();
 			} else {
 				return Optional.ofNullable(ftpClient.mlistFile(absolutePath));
 			}
@@ -99,15 +99,15 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 	@Override
 	public CachedFileAttributes toCache() {
 		return getCurrentFile()
-		        .map(f -> makeCachedFileAttributesFromFTPFileRaw(this, f))
-		        .orElseGet(() -> CachedFileAttributes.notExists(this));
+				.map(f -> makeCachedFileAttributesFromFTPFileRaw(this, f))
+				.orElseGet(() -> CachedFileAttributes.notExists(this));
 	}
 
 	private CachedFileAttributes makeCachedFileAttributesFromFTPFileRaw(final AbstractFile related,
-	                                                                    final org.apache.commons.net.ftp.FTPFile f) {
+																		final org.apache.commons.net.ftp.FTPFile f) {
 		return new CachedFileAttributes(related,
-		        f.getSize(), f.getTimestamp().getTimeInMillis(), true,
-		        f.isDirectory(), f.isFile(), f.isSymbolicLink(), f.isUnknown());
+				f.getSize(), f.getTimestamp().getTimeInMillis(), true,
+				f.isDirectory(), f.isFile(), f.isSymbolicLink(), f.isUnknown());
 	}
 
 	@Override
@@ -115,12 +115,12 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 		try {
 			if (ftpClient.hasFeature("SIZE")) {
 				return Optional.ofNullable(ftpClient.getSize(absolutePath))
-				        .map(Long::valueOf)
-				        .orElse(0L);
+						.map(Long::valueOf)
+						.orElse(0L);
 			} else {
 				return getCurrentFile()
-				        .map(org.apache.commons.net.ftp.FTPFile::getSize)
-				        .orElse(0L);
+						.map(org.apache.commons.net.ftp.FTPFile::getSize)
+						.orElse(0L);
 			}
 		} catch (final IOException e) {
 			throw new UncheckedIOException(e);
@@ -135,46 +135,46 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 	@Override
 	public boolean isDirectory() {
 		return getCurrentFile()
-		        .map(org.apache.commons.net.ftp.FTPFile::isDirectory)
-		        .orElse(false);
+				.map(org.apache.commons.net.ftp.FTPFile::isDirectory)
+				.orElse(false);
 	}
 
 	@Override
 	public boolean isFile() {
 		return getCurrentFile()
-		        .map(org.apache.commons.net.ftp.FTPFile::isFile)
-		        .orElse(false);
+				.map(org.apache.commons.net.ftp.FTPFile::isFile)
+				.orElse(false);
 	}
 
 	@Override
 	public boolean isLink() {
 		return getCurrentFile()
-		        .map(org.apache.commons.net.ftp.FTPFile::isSymbolicLink)
-		        .orElse(false);
+				.map(org.apache.commons.net.ftp.FTPFile::isSymbolicLink)
+				.orElse(false);
 	}
 
 	@Override
 	public boolean isSpecial() {
 		return getCurrentFile()
-		        .map(org.apache.commons.net.ftp.FTPFile::isUnknown)
-		        .orElse(false);
+				.map(org.apache.commons.net.ftp.FTPFile::isUnknown)
+				.orElse(false);
 	}
 
 	@Override
 	public long lastModified() {
 		return getCurrentFile()
-		        .map(f -> f.getTimestamp().getTimeInMillis())
-		        .orElse(0L);
+				.map(f -> f.getTimestamp().getTimeInMillis())
+				.orElse(0L);
 	}
 
 	@Override
 	public Stream<AbstractFile> list() {
 		try {
 			return Optional.ofNullable(fileSystem.getFtpListing())
-			        .orElse(FTPListing.NLST)
-			        .listDirectory(ftpClient, absolutePath)
-			        .filter(name -> name.equalsIgnoreCase(getName()) == false)
-			        .map(name -> fileSystem.getFromPath(path, name));
+					.orElse(FTPListing.NLST)
+					.listDirectory(ftpClient, absolutePath)
+					.filter(name -> name.equalsIgnoreCase(getName()) == false)
+					.map(name -> fileSystem.getFromPath(path, name));
 		} catch (final IOException e) {
 			throw new UncheckedIOException(FTP_ERROR_DURING_LIST + absolutePath + "\"", e);
 		}
@@ -184,27 +184,27 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 	public Stream<CachedFileAttributes> toCachedList() {
 		try {
 			return Optional.ofNullable(fileSystem.getFtpListing())
-			        .map(ftpL -> {
-				        if (ftpL.equals(NLST)) {
-					        return MLSD;
-				        } else {
-					        return ftpL;
-				        }
-			        }).orElseGet(() -> {
-				        try {
-					        if (ftpClient.hasFeature("MLSD")) {
-						        return MLSD;
-					        }
-				        } catch (final IOException e) {
-					        throw new UncheckedIOException("Error during FTP  hasFeature", e);
-				        }
-				        return LIST;
-			        })
-			        .rawListDirectory(ftpClient, absolutePath)
-			        .peek(f -> log.trace("Raw toCachedList # {}", f))// NOSONAR S3864
-			        .filter(f -> f.getName().equalsIgnoreCase(getName()) == false)
-			        .map(f -> makeCachedFileAttributesFromFTPFileRaw(
-			                fileSystem.getFromPath(path, f.getName()), f));
+					.map(ftpL -> {
+						if (ftpL.equals(NLST)) {
+							return MLSD;
+						} else {
+							return ftpL;
+						}
+					}).orElseGet(() -> {
+						try {
+							if (ftpClient.hasFeature("MLSD")) {
+								return MLSD;
+							}
+						} catch (final IOException e) {
+							throw new UncheckedIOException("Error during FTP  hasFeature", e);
+						}
+						return LIST;
+					})
+					.rawListDirectory(ftpClient, absolutePath)
+					.peek(f -> log.trace("Raw toCachedList # {}", f))// NOSONAR S3864
+					.filter(f -> f.getName().equalsIgnoreCase(getName()) == false)
+					.map(f -> makeCachedFileAttributesFromFTPFileRaw(
+							fileSystem.getFromPath(path, f.getName()), f));
 		} catch (final IOException e) {
 			throw new UncheckedIOException(FTP_ERROR_DURING_LIST + absolutePath + "\"", e);
 		}
@@ -238,6 +238,24 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 		} catch (final IOException e) {
 			throw new UncheckedIOException(e);
 		}
+	}
+
+	@Override
+	public void mkdirs() {
+		if (getPath().equals("/")) {
+			return;
+		}
+		final var cache = toCache();
+		if (cache.exists()) {
+			if (cache.isDirectory()) {
+				return;
+			} else {
+				throw new UncheckedIOException(
+						new IOException("Can't mkdirs, this exists, and it's not a directory: " + fileSystem + path));
+			}
+		}
+		getParent().mkdirs();
+		mkdir();
 	}
 
 	@Override
@@ -277,7 +295,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 		final var done = ftpClient.changeWorkingDirectory(fileSystem.getPathFromRelative(newPath));
 		if (done == false) {
 			throw new IOException("Can't change working directory to " + actualCWD
-			                      + ": " + ftpClient.getReplyString());
+								  + ": " + ftpClient.getReplyString());
 		}
 	}
 
@@ -289,7 +307,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 		final var done = ftpClient.changeWorkingDirectory(actualCWD);
 		if (done == false) {
 			throw new IOException("Can't change working directory to " + actualCWD
-			                      + ": " + ftpClient.getReplyString());
+								  + ": " + ftpClient.getReplyString());
 		}
 		actualCWD = null;
 	}
@@ -313,12 +331,12 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 		final AtomicLong sizeToTransfert;
 
 		StoppableListener(final String source, final String dest, final File localFile,
-		                  final TransfertObserver observer,
-		                  final TransfertDirection transfertDirection,
-		                  final FTPFile thisRef,
-		                  final long now,
-		                  final AtomicReference<StoppableIOStream> stoppableIOStream,
-		                  final AtomicLong sizeToTransfert) {
+						  final TransfertObserver observer,
+						  final TransfertDirection transfertDirection,
+						  final FTPFile thisRef,
+						  final long now,
+						  final AtomicReference<StoppableIOStream> stoppableIOStream,
+						  final AtomicLong sizeToTransfert) {
 			this.source = source;
 			this.dest = dest;
 			this.localFile = localFile;
@@ -337,24 +355,24 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 
 		@Override
 		public void bytesTransferred(final long totalBytesTransferred,
-		                             final int bytesTransferred,
-		                             final long streamSize) {
+									 final int bytesTransferred,
+									 final long streamSize) {
 			if (observer.onTransfertProgress(
-			        localFile, thisRef, transfertDirection, now, totalBytesTransferred) == false) {
+					localFile, thisRef, transfertDirection, now, totalBytesTransferred) == false) {
 				final var stop = Objects.requireNonNull(stoppableIOStream.get(),
-				        "Not stoppableStream set before stop transfert");
+						"Not stoppableStream set before stop transfert");
 				log.info("Stop copy FTP file from \"{}\" to \"{}\", ({}/{} bytes)",
-				        source, dest, totalBytesTransferred, sizeToTransfert.get());
+						source, dest, totalBytesTransferred, sizeToTransfert.get());
 				stop.setStop();
 			}
 		}
 	}
 
 	private void copy(final String relativeSource,
-	                  final String relativeDest,
-	                  final File localFile,
-	                  final TransfertObserver observer,
-	                  final TransfertDirection transfertDirection) {
+					  final String relativeDest,
+					  final File localFile,
+					  final TransfertObserver observer,
+					  final TransfertDirection transfertDirection) {
 		final var localBufferSize = Math.max(8192, fileSystem.getIOBufferSize() * 2);
 		final var stoppableIOStream = new AtomicReference<StoppableIOStream>();
 		final var sizeToTransfert = new AtomicLong(0);
@@ -366,7 +384,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 
 			try {
 				ftpClient.setCopyStreamListener(new StoppableListener(relativeSource, relativeDest, localFile, observer,
-				        transfertDirection, thisRef, now, stoppableIOStream, sizeToTransfert));
+						transfertDirection, thisRef, now, stoppableIOStream, sizeToTransfert));
 
 				final var absSource = fileSystem.getPathFromRelative(relativeSource);
 				final var absDest = fileSystem.getPathFromRelative(relativeDest);
@@ -375,18 +393,18 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 
 				if (transfertDirection == DISTANTTOLOCAL) {
 					final var sourceFileRef = oTargetFileRef
-					        .orElseThrow(() -> new UncheckedIOException(
-					                new IOException("Can't access to source file in ftp server")));
+							.orElseThrow(() -> new UncheckedIOException(
+									new IOException("Can't access to source file in ftp server")));
 					if (sourceFileRef.isDirectory()) {
 						throw new UncheckedIOException(new IOException(
-						        "Source file is a directory, can't copy from it"));
+								"Source file is a directory, can't copy from it"));
 					}
 					sizeToTransfert.set(sourceFileRef.getSize());
 
 					try (var outputstream = new StoppableOutputStream(new BufferedOutputStream(
-					        new FileOutputStream(localFile), localBufferSize))) {
+							new FileOutputStream(localFile), localBufferSize))) {
 						log.info("Download file from FTP \"{}@{}:{}\" to \"{}\" ({} bytes)",
-						        fileSystem.getUsername(), fileSystem.getHost(), absSource, absDest, sizeToTransfert);
+								fileSystem.getUsername(), fileSystem.getHost(), absSource, absDest, sizeToTransfert);
 						stoppableIOStream.set(outputstream);
 						done = ftpClient.retrieveFile(getName(), outputstream);
 					}
@@ -402,9 +420,9 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 					}
 
 					try (var inputstream = new StoppableInputStream(new BufferedInputStream(
-					        new FileInputStream(localFile), localBufferSize))) {
+							new FileInputStream(localFile), localBufferSize))) {
 						log.info("Upload file \"{}\" ({} bytes) to FTP host \"{}@{}:{}\"",
-						        localFile, sizeToTransfert, fileSystem.getUsername(), fileSystem.getHost(), absDest);
+								localFile, sizeToTransfert, fileSystem.getUsername(), fileSystem.getHost(), absDest);
 						stoppableIOStream.set(inputstream);
 						done = ftpClient.storeFile(storeName, inputstream);
 					}
@@ -417,15 +435,15 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 					fileSystem.connect();
 				} else if (done == false) {
 					throw new IOException("FTP server refuse the file transfert after the operation: "
-					                      + ftpClient.getReplyString());
+										  + ftpClient.getReplyString());
 				} else {
 					observer.afterTransfert(localFile, this, transfertDirection,
-					        Duration.of(System.currentTimeMillis() - now, MILLIS));
+							Duration.of(System.currentTimeMillis() - now, MILLIS));
 					restoreCwd();
 				}
 			} catch (final CopyStreamException e) {
 				if (e.getCause() instanceof IOException
-				    && e.getCause().getMessage().equals(MANUALLY_STOP_WRITING)) {
+					&& e.getCause().getMessage().equals(MANUALLY_STOP_WRITING)) {
 					try {
 						actualCWD = null;
 						ftpClient.abort();
@@ -447,14 +465,14 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 
 	@Override
 	public long downloadAbstract(final OutputStream outputStream,
-	                             final int bufferSize,
-	                             final SizedStoppableCopyCallback copyCallback) {
+								 final int bufferSize,
+								 final SizedStoppableCopyCallback copyCallback) {
 		var copied = 0L;
 		try (var inputStream = ftpClient.retrieveFileStream(absolutePath)) {
 			if (inputStream == null) {
 				throw new UncheckedIOException(
-				        new IOException(
-				                "Can't start FTP download [" + absolutePath + "]: " + ftpClient.getReplyString()));
+						new IOException(
+								"Can't start FTP download [" + absolutePath + "]: " + ftpClient.getReplyString()));
 			}
 			final var continueStatus = new AtomicBoolean(false);
 			final SizedStoppableCopyCallback catchCallBack = size -> {
@@ -482,14 +500,14 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 
 	@Override
 	public long uploadAbstract(final InputStream inputStream,
-	                           final int bufferSize,
-	                           final SizedStoppableCopyCallback copyCallback) {
+							   final int bufferSize,
+							   final SizedStoppableCopyCallback copyCallback) {
 		var copied = 0L;
 		try (var outputStream = ftpClient.storeFileStream(getName())) {
 			if (outputStream == null) {
 				throw new UncheckedIOException(
-				        new IOException(
-				                "Can't start FTP upload [" + absolutePath + "]: " + ftpClient.getReplyString()));
+						new IOException(
+								"Can't start FTP upload [" + absolutePath + "]: " + ftpClient.getReplyString()));
 			}
 			copied = observableCopyStream(inputStream, outputStream, bufferSize, copyCallback);
 		} catch (final IOException e) {
@@ -509,7 +527,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 		try {
 			if (ftpClient.completePendingCommand() == false) {
 				throw new UncheckedIOException(
-				        new IOException(message + " [" + absolutePath + "]: " + ftpClient.getReplyString()));
+						new IOException(message + " [" + absolutePath + "]: " + ftpClient.getReplyString()));
 			}
 		} catch (final IOException e) {
 			throw new UncheckedIOException(e);

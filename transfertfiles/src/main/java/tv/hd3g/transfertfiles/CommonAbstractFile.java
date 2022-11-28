@@ -39,8 +39,8 @@ public abstract class CommonAbstractFile<T extends AbstractFileSystem<?>> implem
 	protected CommonAbstractFile(final T fileSystem, final String... path) {
 		this.fileSystem = fileSystem;
 		this.path = AbstractFile.normalizePath(Stream.of(path)
-		        .filter(not(Objects::isNull))
-		        .collect(joining("/")));
+				.filter(not(Objects::isNull))
+				.collect(joining("/")));
 	}
 
 	@Override
@@ -97,9 +97,9 @@ public abstract class CommonAbstractFile<T extends AbstractFileSystem<?>> implem
 	 * Dont forget to close inputStream / outputStream after use
 	 */
 	public static long observableCopyStream(final InputStream inputStream,
-	                                        final OutputStream outputStream,
-	                                        final int bufferSize,
-	                                        final SizedStoppableCopyCallback copyCallback) throws IOException {
+											final OutputStream outputStream,
+											final int bufferSize,
+											final SizedStoppableCopyCallback copyCallback) throws IOException {
 		Objects.requireNonNull(inputStream);
 		Objects.requireNonNull(outputStream);
 		final var buffer = new byte[bufferSize];

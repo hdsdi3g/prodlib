@@ -81,13 +81,13 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 	}
 
 	private void copy(final File source,
-	                  final File fileDirDest,
-	                  final File localFile,
-	                  final TransfertObserver observer,
-	                  final TransfertDirection transfertDirection) {
+					  final File fileDirDest,
+					  final File localFile,
+					  final TransfertObserver observer,
+					  final TransfertDirection transfertDirection) {
 		if (source.isDirectory()) {
 			throw new UncheckedIOException(
-			        new IOException("Can't copy directories directly"));
+					new IOException("Can't copy directories directly"));
 		}
 
 		File dest;
@@ -104,7 +104,7 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 		var stopped = false;
 		final var buffer = ByteBuffer.allocateDirect(fileSystem.getIOBufferSize());
 		try (var reader = Files.newByteChannel(source.toPath(), READ);
-		     var writer = Files.newByteChannel(dest.toPath(), WRITE, CREATE, TRUNCATE_EXISTING)) {
+			 var writer = Files.newByteChannel(dest.toPath(), WRITE, CREATE, TRUNCATE_EXISTING)) {
 
 			var dataTransferred = 0L;
 			while (reader.read(buffer) >= 0 || buffer.position() != 0) {
@@ -115,13 +115,13 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 
 				if (log.isTraceEnabled()) {
 					log.trace("Copy local progression from \"{}\" ({} bytes) to \"{}\": {} bytes",
-					        source, source.length(), dest, dataTransferred);
+							source, source.length(), dest, dataTransferred);
 				}
 				stopped = observer.onTransfertProgress(
-				        localFile, this, transfertDirection, now, dataTransferred) == false;
+						localFile, this, transfertDirection, now, dataTransferred) == false;
 				if (stopped) {
 					log.info("Stop copy local file from \"{}\" ({} bytes) to \"{}\": {} bytes",
-					        source, source.length(), dest, dataTransferred);
+							source, source.length(), dest, dataTransferred);
 					break;
 				}
 			}
@@ -133,13 +133,13 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 			return;
 		}
 		observer.afterTransfert(localFile, this, transfertDirection,
-		        Duration.of(System.currentTimeMillis() - now, MILLIS));
+				Duration.of(System.currentTimeMillis() - now, MILLIS));
 	}
 
 	@Override
 	public long downloadAbstract(final OutputStream outputStream,
-	                             final int bufferSize,
-	                             final SizedStoppableCopyCallback copyCallback) {
+								 final int bufferSize,
+								 final SizedStoppableCopyCallback copyCallback) {
 		try (var inputStream = new BufferedInputStream(new FileInputStream(internalFile), bufferSize)) {
 			return observableCopyStream(inputStream, outputStream, bufferSize, copyCallback);
 		} catch (final IOException e) {
@@ -155,8 +155,8 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 
 	@Override
 	public long uploadAbstract(final InputStream inputStream,
-	                           final int bufferSize,
-	                           final SizedStoppableCopyCallback copyCallback) {
+							   final int bufferSize,
+							   final SizedStoppableCopyCallback copyCallback) {
 		try (var outputStream = new BufferedOutputStream(new FileOutputStream(internalFile), bufferSize)) {
 			return observableCopyStream(inputStream, outputStream, bufferSize, copyCallback);
 		} catch (final IOException e) {
@@ -188,10 +188,10 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 		} catch (final IOException e) {
 			if (isDirectory()) {
 				throw new CannotDeleteException(this, true,
-				        new IOException("Can't delete directory: " + e.getMessage()));
+						new IOException("Can't delete directory: " + e.getMessage()));
 			} else {
 				throw new CannotDeleteException(this, false,
-				        new IOException("Can't delete file: " + e.getMessage()));
+						new IOException("Can't delete file: " + e.getMessage()));
 			}
 		}
 	}
@@ -218,8 +218,8 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 		}
 		try {
 			return Optional.ofNullable(Files.readAttributes(internalFile.toPath(), BasicFileAttributes.class))
-			        .map(BasicFileAttributes::isOther)
-			        .orElse(false);
+					.map(BasicFileAttributes::isOther)
+					.orElse(false);
 		} catch (final IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -239,8 +239,8 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 	public Stream<AbstractFile> list() {
 		final var rootLen = fileSystem.getRelativePath().getPath().length();
 		return Optional.ofNullable(internalFile.listFiles()).stream()
-		        .flatMap(Stream::of)
-		        .map(f -> fileSystem.getFromPath(f.getPath().substring(rootLen)));
+				.flatMap(Stream::of)
+				.map(f -> fileSystem.getFromPath(f.getPath().substring(rootLen)));
 	}
 
 	@Override
@@ -254,17 +254,22 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 	}
 
 	@Override
+	public void mkdirs() {
+		mkdir();
+	}
+
+	@Override
 	public AbstractFile renameTo(final String path) {
 		if (exists() == false) {
 			throw new UncheckedIOException(
-			        new IOException("Can't move non-existent file/dir \"" + internalFile + "\""));
+					new IOException("Can't move non-existent file/dir \"" + internalFile + "\""));
 		}
 		final var newRef = fileSystem.getFromPath(path);
 		final var dest = newRef.internalFile;
 		log.debug("Rename local file \"{}\" to \"{}\", as \"{}\"", internalFile, dest, path);
 		if (internalFile.renameTo(dest) == false) {
 			throw new UncheckedIOException(
-			        new IOException("Can't move \"" + internalFile + "\" to \"" + dest + "\""));
+					new IOException("Can't move \"" + internalFile + "\" to \"" + dest + "\""));
 		}
 		return newRef;
 	}

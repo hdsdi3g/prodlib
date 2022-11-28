@@ -42,7 +42,7 @@ public class RandomFile extends CommonAbstractFile<RandomFileSystem> {
 	private final int globalBufferSize;
 
 	public RandomFile(final int maxTransfert,
-	                  final int bufferSize) {
+					  final int bufferSize) {
 		super(new RandomFileSystem(), "/");
 		globalBufferSize = bufferSize;
 		transfered = new LinkedBlockingQueue<>(maxTransfert / bufferSize);
@@ -55,8 +55,8 @@ public class RandomFile extends CommonAbstractFile<RandomFileSystem> {
 
 	@Override
 	public long downloadAbstract(final OutputStream outputStream,
-	                             final int bufferSize,
-	                             final SizedStoppableCopyCallback copyCallback) {
+								 final int bufferSize,
+								 final SizedStoppableCopyCallback copyCallback) {
 		final var buffer = new byte[globalBufferSize];
 		var count = 0L;
 		try {
@@ -81,8 +81,8 @@ public class RandomFile extends CommonAbstractFile<RandomFileSystem> {
 
 	@Override
 	public long uploadAbstract(final InputStream inputStream,
-	                           final int bufferSize,
-	                           final SizedStoppableCopyCallback copyCallback) {
+							   final int bufferSize,
+							   final SizedStoppableCopyCallback copyCallback) {
 		final var buffer = new byte[globalBufferSize];
 		var count = 0L;
 		try {
@@ -160,6 +160,10 @@ public class RandomFile extends CommonAbstractFile<RandomFileSystem> {
 
 	@Override
 	public void mkdir() {
+	}
+
+	@Override
+	public void mkdirs() {
 	}
 
 	@Override

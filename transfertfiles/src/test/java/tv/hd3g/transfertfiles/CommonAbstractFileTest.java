@@ -82,9 +82,17 @@ class CommonAbstractFileTest {
 
 	@Test
 	void testGetParent() {
-		Mockito.when(fs.getFromPath(parentPath)).thenReturn(parent);
+		when(fs.getFromPath(parentPath)).thenReturn(parent);
 		assertEquals(parent, caf.getParent());
-		Mockito.verify(fs, only()).getFromPath(parentPath);
+		verify(fs, only()).getFromPath(parentPath);
+	}
+
+	@Test
+	void testGetParent_fromRoot() {
+		when(fs.getFromPath("/")).thenReturn(parent);
+		caf = new CAF(fs, "/");
+		assertEquals(parent, caf.getParent());
+		verify(fs, only()).getFromPath("/");
 	}
 
 	@Test
@@ -246,6 +254,10 @@ class CommonAbstractFileTest {
 		}
 
 		@Override
+		public void mkdirs() {
+		}
+
+		@Override
 		public AbstractFile renameTo(final String path) {
 			return null;
 		}
@@ -262,15 +274,15 @@ class CommonAbstractFileTest {
 
 		@Override
 		public long downloadAbstract(final OutputStream outputStream,
-		                             final int bufferSize,
-		                             final SizedStoppableCopyCallback copyCallback) {
+									 final int bufferSize,
+									 final SizedStoppableCopyCallback copyCallback) {
 			return 0;
 		}
 
 		@Override
 		public long uploadAbstract(final InputStream inputStream,
-		                           final int bufferSize,
-		                           final SizedStoppableCopyCallback copyCallback) {
+								   final int bufferSize,
+								   final SizedStoppableCopyCallback copyCallback) {
 			return 0;
 		}
 	}

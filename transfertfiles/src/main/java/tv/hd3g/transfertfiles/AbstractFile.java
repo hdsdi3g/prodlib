@@ -57,7 +57,7 @@ public interface AbstractFile {
 	String getName();
 
 	/**
-	 * @return null if not parent (this is root dir)
+	 * @return never null: if this is root dir, return this.
 	 */
 	AbstractFile getParent();
 
@@ -88,6 +88,11 @@ public interface AbstractFile {
 	Stream<AbstractFile> list();
 
 	void mkdir();
+
+	/**
+	 * Don't throws error if dirs exists. But throw an error if a dir was already a file.
+	 */
+	void mkdirs();
 
 	/**
 	 * @return moved file

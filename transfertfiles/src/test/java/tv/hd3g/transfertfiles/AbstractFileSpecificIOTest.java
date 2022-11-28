@@ -87,7 +87,7 @@ class AbstractFileSpecificIOTest {
 	void testCopyDefault() {
 		source.copyAbstractToAbstract(destination, observer);
 		verify(destination, times(1)).uploadAbstract(any(InputStream.class), eq(8192),
-		        any(SizedStoppableCopyCallback.class));
+				any(SizedStoppableCopyCallback.class));
 		assertEquals(1, source.outputStreams.size());
 		assertEquals(1, source.copyCallbacks.size());
 
@@ -96,7 +96,7 @@ class AbstractFileSpecificIOTest {
 		verify(fsDest, times(1)).getIOBufferSize();
 		verify(observer, times(1)).beforeTransfert(source, destination);
 		verify(observer, times(1)).afterTransfert(eq(source), eq(destination),
-		        eq(source.copiedFrom), eq(0L), any(Duration.class));
+				eq(source.copiedFrom), eq(0L), any(Duration.class));
 	}
 
 	@Test
@@ -107,7 +107,7 @@ class AbstractFileSpecificIOTest {
 
 		source.copyAbstractToAbstract(destination, 8192, observer, exchange);
 		verify(destination, times(1)).uploadAbstract(eq(inputStream), eq(8192),
-		        any(SizedStoppableCopyCallback.class));
+				any(SizedStoppableCopyCallback.class));
 		assertEquals(1, source.outputStreams.size());
 		assertEquals(outputStream, source.outputStreams.get(0));
 		assertEquals(1, source.copyCallbacks.size());
@@ -115,7 +115,7 @@ class AbstractFileSpecificIOTest {
 		verify(destination, times(1)).getFileSystem();
 		verify(observer, times(1)).beforeTransfert(source, destination);
 		verify(observer, times(1)).afterTransfert(eq(source), eq(destination),
-		        eq(source.copiedFrom), eq(0L), any(Duration.class));
+				eq(source.copiedFrom), eq(0L), any(Duration.class));
 	}
 
 	@Test
@@ -172,8 +172,8 @@ class AbstractFileSpecificIOTest {
 
 		@Override
 		public long uploadAbstract(final InputStream inputStream,
-		                           final int bufferSize,
-		                           final SizedStoppableCopyCallback copyCallback) {
+								   final int bufferSize,
+								   final SizedStoppableCopyCallback copyCallback) {
 			inputStreams.add(Objects.requireNonNull(inputStream));
 			copyCallbacks.add(Objects.requireNonNull(copyCallback));
 			return -1;
@@ -181,8 +181,8 @@ class AbstractFileSpecificIOTest {
 
 		@Override
 		public long downloadAbstract(final OutputStream outputStream,
-		                             final int bufferSize,
-		                             final SizedStoppableCopyCallback copyCallback) {
+									 final int bufferSize,
+									 final SizedStoppableCopyCallback copyCallback) {
 			outputStreams.add(Objects.requireNonNull(outputStream));
 			copyCallbacks.add(Objects.requireNonNull(copyCallback));
 			return copiedFrom;
@@ -270,6 +270,11 @@ class AbstractFileSpecificIOTest {
 
 		@Override
 		public AbstractFile renameTo(final String path) {
+			throw new IllegalAccessError();
+		}
+
+		@Override
+		public void mkdirs() {
 			throw new IllegalAccessError();
 		}
 	}
@@ -366,16 +371,21 @@ class AbstractFileSpecificIOTest {
 		}
 
 		@Override
+		public void mkdirs() {
+			throw new IllegalAccessError();
+		}
+
+		@Override
 		public long downloadAbstract(final OutputStream outputStream,
-		                             final int bufferSize,
-		                             final SizedStoppableCopyCallback copyCallback) {
+									 final int bufferSize,
+									 final SizedStoppableCopyCallback copyCallback) {
 			throw new IllegalAccessError();
 		}
 
 		@Override
 		public long uploadAbstract(final InputStream inputStream,
-		                           final int bufferSize,
-		                           final SizedStoppableCopyCallback copyCallback) {
+								   final int bufferSize,
+								   final SizedStoppableCopyCallback copyCallback) {
 			throw new IllegalAccessError();
 		}
 	}

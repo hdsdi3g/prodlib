@@ -60,6 +60,8 @@ import org.apache.mina.core.RuntimeIoException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -80,7 +82,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 		root = new File("target/testfs");
 		FileUtils.forceMkdir(root);
 		Stream.of(root.listFiles())
-		        .forEach(f -> f.setWritable(true));
+				.forEach(f -> f.setWritable(true));
 
 		FileUtils.cleanDirectory(root);
 		random = new Random();
@@ -98,7 +100,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 		createdFS.clear();
 
 		Stream.of(root.listFiles())
-		        .forEach(f -> f.setWritable(true));
+				.forEach(f -> f.setWritable(true));
 		FileUtils.cleanDirectory(root);
 	}
 
@@ -122,44 +124,44 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 	}
 
 	private void addRegularTests(final Map<String, Executable1<AbstractFile>> tests,
-	                             final AbstractFileSystem<T> fs,
-	                             final boolean isADir,
-	                             final boolean isAFile,
-	                             final long length) {
+								 final AbstractFileSystem<T> fs,
+								 final boolean isADir,
+								 final boolean isAFile,
+								 final long length) {
 		if (isAFile) {
 			tests.put("testLength", f -> assertEquals(length, f.length()));
 		}
 		tests.put("testExists",
-		        f -> assertEquals(isADir || isAFile, f.exists()));
+				f -> assertEquals(isADir || isAFile, f.exists()));
 		tests.put("testIsDirectory",
-		        f -> assertEquals(isADir, f.isDirectory()));
+				f -> assertEquals(isADir, f.isDirectory()));
 		tests.put("testIsFile",
-		        f -> assertEquals(isAFile, f.isFile()));
+				f -> assertEquals(isAFile, f.isFile()));
 		tests.put("testIsLink",
-		        f -> assertFalse(f.isLink()));
+				f -> assertFalse(f.isLink()));
 		tests.put("testIsSpecial",
-		        f -> assertFalse(f.isSpecial()));
+				f -> assertFalse(f.isSpecial()));
 		if (isADir == false && isAFile == false) {
 			tests.put("testLastModified",
-			        f -> assertEquals(0, f.lastModified()));
+					f -> assertEquals(0, f.lastModified()));
 			tests.put("testToCache",
-			        f -> {
-				        final var c = f.toCache();
-				        assertFalse(c.exists());
-				        assertFalse(c.isDirectory());
-				        assertFalse(c.isFile());
-				        assertFalse(c.isLink());
-				        assertFalse(c.isSpecial());
-				        assertEquals(0, c.lastModified());
-				        assertEquals(0, c.length());
-				        assertEquals(f.getName(), c.getName());
-				        assertEquals(f.getPath(), c.getPath());
-			        });
+					f -> {
+						final var c = f.toCache();
+						assertFalse(c.exists());
+						assertFalse(c.isDirectory());
+						assertFalse(c.isFile());
+						assertFalse(c.isLink());
+						assertFalse(c.isSpecial());
+						assertEquals(0, c.lastModified());
+						assertEquals(0, c.length());
+						assertEquals(f.getName(), c.getName());
+						assertEquals(f.getPath(), c.getPath());
+					});
 		} else {
 			tests.put("testLastModified-notTooYoung",
-			        f -> assertTrue(f.lastModified() < System.currentTimeMillis() + 1_000L));
+					f -> assertTrue(f.lastModified() < System.currentTimeMillis() + 1_000L));
 			tests.put("testLastModified-notTooOld",
-			        f -> assertTrue(f.lastModified() > System.currentTimeMillis() - 300_000L));
+					f -> assertTrue(f.lastModified() > System.currentTimeMillis() - 300_000L));
 			tests.put("testToCache", f -> compareCache(f, f.toCache()));
 		}
 	}
@@ -202,84 +204,142 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 		addRegularTests(tests, fs, true, false, dir.length());
 		final var to = new TransfertObserver() {};
 		tests.put("testList",
-		        f -> {
-			        final var sf = fs.getFromPath(baseDirName + "/" + baseSubFileName);
-			        final var list = f.list().collect(toUnmodifiableList());
-			        assertEquals(1, list.size());
-			        assertEquals(sf, list.get(0));
-			        assertEquals(subFile.getName(), list.get(0).getName());
-		        });
+				f -> {
+					final var sf = fs.getFromPath(baseDirName + "/" + baseSubFileName);
+					final var list = f.list().collect(toUnmodifiableList());
+					assertEquals(1, list.size());
+					assertEquals(sf, list.get(0));
+					assertEquals(subFile.getName(), list.get(0).getName());
+				});
 		tests.put("testToCachedList",
-		        f -> {
-			        final var list = f.list().collect(toUnmodifiableList());
-			        final var clist = f.toCachedList().collect(toUnmodifiableList());
-			        assertEquals(1, list.size());
-			        assertEquals(1, clist.size());
-			        compareCache(list.get(0), clist.get(0));
-		        });
+				f -> {
+					final var list = f.list().collect(toUnmodifiableList());
+					final var clist = f.toCachedList().collect(toUnmodifiableList());
+					assertEquals(1, list.size());
+					assertEquals(1, clist.size());
+					compareCache(list.get(0), clist.get(0));
+				});
 		tests.put("testDelete",
-		        f -> {
-			        assertTrue(dir.exists());
-			        assertTrue(subFile.exists());
-			        assertThrows(CannotDeleteException.class, () -> f.delete());
-			        assertTrue(dir.exists());
-			        assertTrue(subFile.exists());
-			        FileUtils.cleanDirectory(dir);
-			        f.delete();
-			        assertFalse(dir.exists());
-		        });
+				f -> {
+					assertTrue(dir.exists());
+					assertTrue(subFile.exists());
+					assertThrows(CannotDeleteException.class, () -> f.delete());
+					assertTrue(dir.exists());
+					assertTrue(subFile.exists());
+					FileUtils.cleanDirectory(dir);
+					f.delete();
+					assertFalse(dir.exists());
+				});
 		tests.put("testMkdir",
-		        f -> {
-			        FileUtils.cleanDirectory(root);
-			        assertFalse(dir.exists());
-			        assertFalse(subFile.exists());
-			        f.mkdir();
-			        assertTrue(dir.exists());
-			        assertTrue(dir.isDirectory());
-		        });
+				f -> {
+					FileUtils.cleanDirectory(root);
+					assertFalse(dir.exists());
+					assertFalse(subFile.exists());
+					f.mkdir();
+					assertTrue(dir.exists());
+					assertTrue(dir.isDirectory());
+				});
 		tests.put("testRenameTo",
-		        f -> {
-			        assertTrue(f.exists());
-			        final var newF = f.renameTo("/thisDir");
-			        assertFalse(f.exists());
-			        assertFalse(dir.exists());
+				f -> {
+					assertTrue(f.exists());
+					final var newF = f.renameTo("/thisDir");
+					assertFalse(f.exists());
+					assertFalse(dir.exists());
 
-			        assertTrue(newF.exists());
-			        assertFalse(newF.isFile());
-			        assertTrue(newF.isDirectory());
-		        });
+					assertTrue(newF.exists());
+					assertFalse(newF.isFile());
+					assertTrue(newF.isDirectory());
+				});
 		tests.put("testCopyAbstractToLocal",
-		        d -> {
-			        final var dest = new File(root, "destfileCopy");
-			        assertThrows(UncheckedIOException.class, () -> d.copyAbstractToLocal(dest, to));
-		        });
+				d -> {
+					final var dest = new File(root, "destfileCopy");
+					assertThrows(UncheckedIOException.class, () -> d.copyAbstractToLocal(dest, to));
+				});
 		tests.put("testSendLocalToAbstract",
-		        d -> {
-			        final var localFileCopy = new File(root, "localfileCopy");
-			        assertFalse(localFileCopy.exists());
-			        FileUtils.write(localFileCopy, "BB", defaultCharset());
-			        assertTrue(localFileCopy.exists());
-			        d.sendLocalToAbstract(localFileCopy, to);
-			        assertTrue(d.exists());
+				d -> {
+					final var localFileCopy = new File(root, "localfileCopy");
+					assertFalse(localFileCopy.exists());
+					FileUtils.write(localFileCopy, "BB", defaultCharset());
+					assertTrue(localFileCopy.exists());
+					d.sendLocalToAbstract(localFileCopy, to);
+					assertTrue(d.exists());
 
-			        final var expectedFile = new File(dir, "localfileCopy");
-			        assertTrue(expectedFile.exists());
-			        assertEquals(2, expectedFile.length());
-			        assertEquals("BB", FileUtils.readFileToString(expectedFile, defaultCharset()));
-		        });
+					final var expectedFile = new File(dir, "localfileCopy");
+					assertTrue(expectedFile.exists());
+					assertEquals(2, expectedFile.length());
+					assertEquals("BB", FileUtils.readFileToString(expectedFile, defaultCharset()));
+				});
 
 		return tests.entrySet().stream().map(entry -> {
 			final var testName = entry.getKey();
 			final var testAction = entry.getValue();
 			return dynamicTest(testName,
-			        () -> {
-				        FileUtils.cleanDirectory(root);
-				        FileUtils.forceMkdir(dir);
-				        write(subFile);
-				        final var f = fs.getFromPath(baseDirName);
-				        testAction.execute(f);
-			        });
+					() -> {
+						FileUtils.cleanDirectory(root);
+						FileUtils.forceMkdir(dir);
+						write(subFile);
+						final var f = fs.getFromPath(baseDirName);
+						testAction.execute(f);
+					});
 		});
+	}
+
+	@Nested
+	class Mkdirs {
+
+		@Test
+		void testExistingDir() throws IOException {
+			final var baseDirName = "existing-dir/mk/dirs";
+			final var dir = new File(root, baseDirName).getAbsoluteFile();
+			final var fs = createFileSystem();
+			createdFS.add(fs);
+
+			FileUtils.cleanDirectory(root);
+			FileUtils.forceMkdir(dir);
+			final var f = fs.getFromPath(baseDirName);
+
+			assertTrue(dir.exists());
+			f.mkdirs();
+			assertTrue(dir.exists());
+			assertTrue(dir.isDirectory());
+		}
+
+		@Test
+		void testExistingFile() throws IOException {
+			final var baseDirName = "existing-dir/mk/dirs";
+			final var dir = new File(root, baseDirName).getAbsoluteFile();
+			final var baseSubFileName = "existing-file";
+			final var file = new File(dir, baseSubFileName).getAbsoluteFile();
+			final var fs = createFileSystem();
+			createdFS.add(fs);
+
+			FileUtils.cleanDirectory(root);
+			write(file);
+			final var f = fs.getFromPath(baseDirName + "/" + baseSubFileName);
+			assertTrue(file.exists());
+			assertFalse(file.isDirectory());
+			assertThrows(UncheckedIOException.class, () -> f.mkdirs());
+			assertTrue(file.exists());
+			assertFalse(file.isDirectory());
+		}
+
+		@Test
+		void testNonExisting() throws IOException {
+			final var baseName = "existing-dir/mk/dirs";
+			final var file = new File(root, baseName).getAbsoluteFile();
+			final var fs = createFileSystem();
+			createdFS.add(fs);
+
+			FileUtils.cleanDirectory(root);
+			final var f = fs.getFromPath(baseName);
+
+			assertFalse(file.exists());
+			assertFalse(file.isDirectory());
+			f.mkdirs();
+			assertTrue(file.exists());
+			assertTrue(file.isDirectory());
+		}
+
 	}
 
 	@TestFactory
@@ -292,9 +352,9 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 		final Map<String, Executable1<AbstractFile>> tests = new LinkedHashMap<>();
 		addRegularTests(tests, fs, false, true, 1);
 		tests.put("testList",
-		        f -> assertEquals(0, f.list().count()));
+				f -> assertEquals(0, f.list().count()));
 		tests.put("testToCachedList",
-		        f -> assertEquals(0, f.toCachedList().count()));
+				f -> assertEquals(0, f.toCachedList().count()));
 		tests.put("testDelete", f -> {
 			assertTrue(file.exists());
 			f.delete();
@@ -321,9 +381,9 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 
 			final var to = Mockito.mock(TransfertObserver.class);
 			when(to.onTransfertProgress(
-			        any(File.class), any(AbstractFile.class), any(TransfertDirection.class), anyLong(),
-			        anyLong()))
-			                .thenReturn(true);
+					any(File.class), any(AbstractFile.class), any(TransfertDirection.class), anyLong(),
+					anyLong()))
+							.thenReturn(true);
 
 			f.copyAbstractToLocal(localFileCopy, to);
 			assertTrue(localFileCopy.exists());
@@ -331,16 +391,16 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 			assertEquals("A", FileUtils.readFileToString(localFileCopy, defaultCharset()));
 
 			verify(to, Mockito.times(1)).onTransfertProgress(
-			        eq(localFileCopy),
-			        eq(f),
-			        eq(DISTANTTOLOCAL),
-			        anyLong(),
-			        eq(localFileCopy.length()));
+					eq(localFileCopy),
+					eq(f),
+					eq(DISTANTTOLOCAL),
+					anyLong(),
+					eq(localFileCopy.length()));
 			verify(to, Mockito.times(1))
-			        .beforeTransfert(localFileCopy, f, DISTANTTOLOCAL);
+					.beforeTransfert(localFileCopy, f, DISTANTTOLOCAL);
 			verify(to, Mockito.times(1))
-			        .afterTransfert(eq(localFileCopy), eq(f), eq(DISTANTTOLOCAL), any(
-			                Duration.class));
+					.afterTransfert(eq(localFileCopy), eq(f), eq(DISTANTTOLOCAL), any(
+							Duration.class));
 		});
 		tests.put("testSendLocalToAbstract", f -> {
 			final var localFileCopy = new File(root, "destfileCopy");
@@ -350,9 +410,9 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 
 			final var to = Mockito.mock(TransfertObserver.class);
 			when(to.onTransfertProgress(
-			        any(File.class), any(AbstractFile.class), any(TransfertDirection.class), anyLong(),
-			        anyLong()))
-			                .thenReturn(true);
+					any(File.class), any(AbstractFile.class), any(TransfertDirection.class), anyLong(),
+					anyLong()))
+							.thenReturn(true);
 
 			f.sendLocalToAbstract(localFileCopy, to);
 			assertTrue(f.exists());
@@ -360,27 +420,27 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 			assertEquals("BB", FileUtils.readFileToString(file, defaultCharset()));
 
 			verify(to, Mockito.times(1)).onTransfertProgress(
-			        eq(localFileCopy),
-			        eq(f),
-			        eq(LOCALTODISTANT),
-			        anyLong(),
-			        eq(localFileCopy.length()));
+					eq(localFileCopy),
+					eq(f),
+					eq(LOCALTODISTANT),
+					anyLong(),
+					eq(localFileCopy.length()));
 			verify(to, Mockito.times(1))
-			        .beforeTransfert(localFileCopy, f, LOCALTODISTANT);
+					.beforeTransfert(localFileCopy, f, LOCALTODISTANT);
 			verify(to, Mockito.times(1))
-			        .afterTransfert(eq(localFileCopy), eq(f), eq(LOCALTODISTANT), any(Duration.class));
+					.afterTransfert(eq(localFileCopy), eq(f), eq(LOCALTODISTANT), any(Duration.class));
 		});
 
 		return tests.entrySet().stream().map(entry -> {
 			final var testName = entry.getKey();
 			final var testAction = entry.getValue();
 			return dynamicTest(testName,
-			        () -> {
-				        FileUtils.cleanDirectory(root);
-				        write(file);
-				        final var f = fs.getFromPath(baseName);
-				        testAction.execute(f);
-			        });
+					() -> {
+						FileUtils.cleanDirectory(root);
+						write(file);
+						final var f = fs.getFromPath(baseName);
+						testAction.execute(f);
+					});
 		});
 	}
 
@@ -395,11 +455,11 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 		final Map<String, Executable1<AbstractFile>> tests = new LinkedHashMap<>();
 		addRegularTests(tests, fs, false, false, 0);
 		tests.put("testIsHidden-reallyhidded",
-		        f -> assertTrue(fs.getFromPath(".dontseeme").isHidden()));
+				f -> assertTrue(fs.getFromPath(".dontseeme").isHidden()));
 		tests.put("testList",
-		        f -> assertEquals(0, f.list().count()));
+				f -> assertEquals(0, f.list().count()));
 		tests.put("testToCachedList",
-		        f -> assertEquals(0, f.toCachedList().count()));
+				f -> assertEquals(0, f.toCachedList().count()));
 		tests.put("testDelete", f -> {
 			assertThrows(UncheckedIOException.class, () -> f.delete());
 		});
@@ -417,23 +477,23 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 		tests.put("testCopyAbstractToLocal", f -> {
 			final var localFileCopy = new File("target/destfile");
 			assertThrows(UncheckedIOException.class,
-			        () -> f.copyAbstractToLocal(localFileCopy, to));
+					() -> f.copyAbstractToLocal(localFileCopy, to));
 		});
 		tests.put("testSendLocalToAbstract", f -> {
 			final var localFileCopy = new File("target/destfile");
 			assertThrows(UncheckedIOException.class,
-			        () -> f.sendLocalToAbstract(localFileCopy, to));
+					() -> f.sendLocalToAbstract(localFileCopy, to));
 		});
 
 		return tests.entrySet().stream().map(entry -> {
 			final var testName = entry.getKey();
 			final var testAction = entry.getValue();
 			return dynamicTest(testName,
-			        () -> {
-				        FileUtils.cleanDirectory(root);
-				        final var f = fs.getFromPath(baseName);
-				        testAction.execute(f);
-			        });
+					() -> {
+						FileUtils.cleanDirectory(root);
+						final var f = fs.getFromPath(baseName);
+						testAction.execute(f);
+					});
 		});
 	}
 
@@ -447,119 +507,119 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 		final var baseBufferSize = fs.getIOBufferSize();
 
 		final var stringContent = IntStream.range(0, baseBufferSize * LOOP_COPIES_BUFFER)
-		        .mapToObj(i -> (char) (i % 93 + 33))
-		        .map(String::valueOf)
-		        .collect(joining());
+				.mapToObj(i -> (char) (i % 93 + 33))
+				.map(String::valueOf)
+				.collect(joining());
 		final var localFileCopy = new File(root, "transfertDest");
 
 		final Map<String, Executable1<AbstractFile>> tests = new LinkedHashMap<>();
 		tests.put("testObserverStop_DISTANTTOLOCAL",
-		        f -> {
-			        final var direction = DISTANTTOLOCAL;
-			        when(to.onTransfertProgress(
-			                any(File.class), any(AbstractFile.class), eq(direction), anyLong(), anyLong()))
-			                        .thenReturn(false);
-			        f.copyAbstractToLocal(localFileCopy, to);
-			        final long expectedSize = baseBufferSize;
+				f -> {
+					final var direction = DISTANTTOLOCAL;
+					when(to.onTransfertProgress(
+							any(File.class), any(AbstractFile.class), eq(direction), anyLong(), anyLong()))
+									.thenReturn(false);
+					f.copyAbstractToLocal(localFileCopy, to);
+					final long expectedSize = baseBufferSize;
 
-			        verify(to, Mockito.times(1)).onTransfertProgress(eq(localFileCopy),
-			                eq(f), eq(direction), anyLong(), longThat(l -> l > 0 && l <= baseBufferSize));
-			        verify(to, Mockito.never())
-			                .afterTransfert(any(File.class), any(AbstractFile.class), eq(direction), any(
-			                        Duration.class));
+					verify(to, Mockito.times(1)).onTransfertProgress(eq(localFileCopy),
+							eq(f), eq(direction), anyLong(), longThat(l -> l > 0 && l <= baseBufferSize));
+					verify(to, Mockito.never())
+							.afterTransfert(any(File.class), any(AbstractFile.class), eq(direction), any(
+									Duration.class));
 
-			        assertTrue(localFileCopy.exists());
-			        assertTrue(localFileCopy.length() > 0);
-			        assertTrue(localFileCopy.length() <= expectedSize);
-			        assertEquals(stringContent.substring(0, (int) localFileCopy.length()),
-			                FileUtils.readFileToString(localFileCopy, defaultCharset()));
-			        verify(to, Mockito.times(1))
-			                .beforeTransfert(localFileCopy, f, direction);
-		        });
+					assertTrue(localFileCopy.exists());
+					assertTrue(localFileCopy.length() > 0);
+					assertTrue(localFileCopy.length() <= expectedSize);
+					assertEquals(stringContent.substring(0, (int) localFileCopy.length()),
+							FileUtils.readFileToString(localFileCopy, defaultCharset()));
+					verify(to, Mockito.times(1))
+							.beforeTransfert(localFileCopy, f, direction);
+				});
 		tests.put("testObserverStop_LOCALTODISTANT",
-		        f -> {
-			        final var direction = LOCALTODISTANT;
-			        internalFile.renameTo(localFileCopy);
+				f -> {
+					final var direction = LOCALTODISTANT;
+					internalFile.renameTo(localFileCopy);
 
-			        when(to.onTransfertProgress(
-			                any(File.class), any(AbstractFile.class), eq(direction), anyLong(), anyLong()))
-			                        .thenReturn(false);
-			        f.sendLocalToAbstract(localFileCopy, to);
-			        final long expectedSize = baseBufferSize;
+					when(to.onTransfertProgress(
+							any(File.class), any(AbstractFile.class), eq(direction), anyLong(), anyLong()))
+									.thenReturn(false);
+					f.sendLocalToAbstract(localFileCopy, to);
+					final long expectedSize = baseBufferSize;
 
-			        verify(to, Mockito.times(1)).onTransfertProgress(
-			                eq(localFileCopy), eq(f), eq(direction), anyLong(),
-			                longThat(l -> l > 0 && l <= baseBufferSize));
-			        verify(to, Mockito.never())
-			                .afterTransfert(any(File.class), any(AbstractFile.class), eq(direction),
-			                        any(Duration.class));
+					verify(to, Mockito.times(1)).onTransfertProgress(
+							eq(localFileCopy), eq(f), eq(direction), anyLong(),
+							longThat(l -> l > 0 && l <= baseBufferSize));
+					verify(to, Mockito.never())
+							.afterTransfert(any(File.class), any(AbstractFile.class), eq(direction),
+									any(Duration.class));
 
-			        assertTrue(internalFile.exists());
-			        assertTrue(internalFile.length() <= expectedSize);
-			        assertEquals(stringContent.substring(0, (int) internalFile.length()),
-			                FileUtils.readFileToString(internalFile, defaultCharset()));
-			        verify(to, Mockito.times(1))
-			                .beforeTransfert(localFileCopy, f, direction);
-		        });
+					assertTrue(internalFile.exists());
+					assertTrue(internalFile.length() <= expectedSize);
+					assertEquals(stringContent.substring(0, (int) internalFile.length()),
+							FileUtils.readFileToString(internalFile, defaultCharset()));
+					verify(to, Mockito.times(1))
+							.beforeTransfert(localFileCopy, f, direction);
+				});
 		tests.put("testObserverFull_DISTANTTOLOCAL",
-		        f -> {
-			        final var direction = DISTANTTOLOCAL;
-			        final var expectedSize = stringContent.length();
-			        when(to.onTransfertProgress(
-			                any(File.class), any(AbstractFile.class), eq(direction), anyLong(), anyLong()))
-			                        .thenReturn(true);
-			        f.copyAbstractToLocal(localFileCopy, to);
+				f -> {
+					final var direction = DISTANTTOLOCAL;
+					final var expectedSize = stringContent.length();
+					when(to.onTransfertProgress(
+							any(File.class), any(AbstractFile.class), eq(direction), anyLong(), anyLong()))
+									.thenReturn(true);
+					f.copyAbstractToLocal(localFileCopy, to);
 
-			        verify(to, atLeastOnce()).onTransfertProgress(
-			                eq(localFileCopy), eq(f), eq(direction), anyLong(),
-			                longThat(l -> l > 0 && l <= expectedSize));
-			        verify(to, Mockito.times(1))
-			                .afterTransfert(eq(localFileCopy), eq(f), eq(direction), any(Duration.class));
+					verify(to, atLeastOnce()).onTransfertProgress(
+							eq(localFileCopy), eq(f), eq(direction), anyLong(),
+							longThat(l -> l > 0 && l <= expectedSize));
+					verify(to, Mockito.times(1))
+							.afterTransfert(eq(localFileCopy), eq(f), eq(direction), any(Duration.class));
 
-			        assertTrue(localFileCopy.exists());
-			        assertEquals(expectedSize, localFileCopy.length());
-			        assertEquals(stringContent.substring(0, expectedSize),
-			                FileUtils.readFileToString(localFileCopy, defaultCharset()));
-			        verify(to, Mockito.times(1))
-			                .beforeTransfert(localFileCopy, f, direction);
-		        });
+					assertTrue(localFileCopy.exists());
+					assertEquals(expectedSize, localFileCopy.length());
+					assertEquals(stringContent.substring(0, expectedSize),
+							FileUtils.readFileToString(localFileCopy, defaultCharset()));
+					verify(to, Mockito.times(1))
+							.beforeTransfert(localFileCopy, f, direction);
+				});
 		tests.put("testObserverFull_LOCALTODISTANT",
-		        f -> {
-			        final var direction = LOCALTODISTANT;
-			        final var expectedSize = stringContent.length();
-			        internalFile.renameTo(localFileCopy);
+				f -> {
+					final var direction = LOCALTODISTANT;
+					final var expectedSize = stringContent.length();
+					internalFile.renameTo(localFileCopy);
 
-			        when(to.onTransfertProgress(
-			                any(File.class), any(AbstractFile.class), eq(direction), anyLong(), anyLong()))
-			                        .thenReturn(true);
-			        f.sendLocalToAbstract(localFileCopy, to);
+					when(to.onTransfertProgress(
+							any(File.class), any(AbstractFile.class), eq(direction), anyLong(), anyLong()))
+									.thenReturn(true);
+					f.sendLocalToAbstract(localFileCopy, to);
 
-			        verify(to, atLeastOnce()).onTransfertProgress(
-			                eq(localFileCopy), eq(f), eq(direction), anyLong(),
-			                longThat(l -> l > 0 && l <= expectedSize));
-			        verify(to, Mockito.times(1))
-			                .afterTransfert(eq(localFileCopy), eq(f), eq(direction), any(Duration.class));
+					verify(to, atLeastOnce()).onTransfertProgress(
+							eq(localFileCopy), eq(f), eq(direction), anyLong(),
+							longThat(l -> l > 0 && l <= expectedSize));
+					verify(to, Mockito.times(1))
+							.afterTransfert(eq(localFileCopy), eq(f), eq(direction), any(Duration.class));
 
-			        assertTrue(internalFile.exists());
-			        assertEquals(expectedSize, internalFile.length());
-			        assertEquals(stringContent.substring(0, expectedSize),
-			                FileUtils.readFileToString(internalFile, defaultCharset()));
-			        verify(to, Mockito.times(1))
-			                .beforeTransfert(localFileCopy, f, direction);
-		        });
+					assertTrue(internalFile.exists());
+					assertEquals(expectedSize, internalFile.length());
+					assertEquals(stringContent.substring(0, expectedSize),
+							FileUtils.readFileToString(internalFile, defaultCharset()));
+					verify(to, Mockito.times(1))
+							.beforeTransfert(localFileCopy, f, direction);
+				});
 
 		return tests.entrySet().stream().map(entry -> {
 			final var testName = entry.getKey();
 			final var testAction = entry.getValue();
 			return dynamicTest(testName,
-			        () -> {
-				        FileUtils.cleanDirectory(root);
-				        Mockito.reset(to);
-				        FileUtils.write(internalFile, stringContent, defaultCharset());
+					() -> {
+						FileUtils.cleanDirectory(root);
+						Mockito.reset(to);
+						FileUtils.write(internalFile, stringContent, defaultCharset());
 
-				        final var f = fs.getFromPath("transfertSource");
-				        testAction.execute(f);
-			        });
+						final var f = fs.getFromPath("transfertSource");
+						testAction.execute(f);
+					});
 		});
 	}
 
@@ -584,7 +644,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 			assertEquals(sourceDatas.length, copied);
 
 			verify(copyCallback, atLeastOnce())
-			        .apply(longThat(l -> l > 0 && l <= copied));
+					.apply(longThat(l -> l > 0 && l <= copied));
 			verify(copyCallback, times(1)).apply(copied);
 
 			assertTrue(file.exists());
@@ -606,7 +666,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 			assertTrue(file.exists());
 			assertTrue(f.exists());
 			assertTrue(Arrays.equals(sourceDatas, 0, (int) copied,
-			        FileUtils.readFileToByteArray(file), 0, (int) copied));
+					FileUtils.readFileToByteArray(file), 0, (int) copied));
 		});
 		tests.put("testDownloadAbstract", f -> {
 			assertFalse(file.exists());
@@ -619,7 +679,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 			assertEquals(sourceDatas.length, copied);
 
 			verify(copyCallback, atLeastOnce())
-			        .apply(ArgumentMatchers.longThat(l -> l > 0 && l <= copied));
+					.apply(ArgumentMatchers.longThat(l -> l > 0 && l <= copied));
 			verify(copyCallback, times(1)).apply(copied);
 
 			assertTrue(Arrays.equals(sourceDatas, outputStream.toByteArray()));
@@ -639,26 +699,26 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 			verify(copyCallback, times(1)).apply(copied);
 
 			assertTrue(Arrays.equals(sourceDatas, 0, (int) copied,
-			        outputStream.toByteArray(), 0, (int) copied));
+					outputStream.toByteArray(), 0, (int) copied));
 		});
 
 		return tests.entrySet().stream().map(entry -> {
 			final var testName = entry.getKey();
 			final var testAction = entry.getValue();
 			return dynamicTest(testName,
-			        () -> {
-				        reset(copyCallback);
-				        when(copyCallback.apply(anyLong())).thenReturn(true);
-				        random.nextBytes(sourceDatas);
-				        if (file.exists()) {
-					        file.setWritable(true);
-				        }
+					() -> {
+						reset(copyCallback);
+						when(copyCallback.apply(anyLong())).thenReturn(true);
+						random.nextBytes(sourceDatas);
+						if (file.exists()) {
+							file.setWritable(true);
+						}
 
-				        FileUtils.cleanDirectory(root);
-				        final var f = fs.getFromPath(baseName);
-				        testAction.execute(f);
-				        verifyNoMoreInteractions(copyCallback);
-			        });
+						FileUtils.cleanDirectory(root);
+						final var f = fs.getFromPath(baseName);
+						testAction.execute(f);
+						verifyNoMoreInteractions(copyCallback);
+					});
 		});
 	}
 
