@@ -1,5 +1,15 @@
 # All ProdLib projects upgrades
 
+## 12.2.0
+
+Add explicit hamcrest dependency in starter pom #74
+
+Add commons-collections4 dependency and property version #75
+
+Create a mkdirs function on AbstractFile/Transfertfiles project #76
+
+Add explicit configuration metadatas for MailKit
+
 ## 12.1.0
 
 Implements WithSuperviable annotation on Spring AOP #51
