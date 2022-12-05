@@ -1,5 +1,7 @@
 # All ProdLib projects upgrades
 
+Bug fix: correct a problem with serialization and Supervisable.
+
 ## 12.2.0
 
 Add explicit hamcrest dependency in starter pom #74
