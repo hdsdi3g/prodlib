@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 
 import tv.hd3g.transfertfiles.CachedFileAttributes;
 
-class WatchedFileInMemoryDb {
+class FileInMemoryDb {
 	private static final Logger log = LogManager.getLogger();
 
 	private final boolean isDirectory;
@@ -38,9 +38,9 @@ class WatchedFileInMemoryDb {
 	private boolean lastIsSame;
 	private boolean doneButChanged;
 
-	WatchedFileInMemoryDb(final CachedFileAttributes firstDetectionFile,
-	                      final WatchFolderPickupType pickUp,
-	                      final Duration minFixedStateTime) {
+	FileInMemoryDb(final CachedFileAttributes firstDetectionFile,
+				   final WatchFolderPickupType pickUp,
+				   final Duration minFixedStateTime) {
 		lastFile = firstDetectionFile;
 		isDirectory = firstDetectionFile.isDirectory();
 		lastWatched = System.currentTimeMillis();
@@ -49,8 +49,8 @@ class WatchedFileInMemoryDb {
 		pickUpFiles = pickUp.isPickUpFiles();
 		pickUpDirs = pickUp.isPickUpDirs();
 		this.minFixedStateTime = minFixedStateTime;
-		log.trace("Create WatchedFileInMemoryDb for {}, {} ({})",
-		        firstDetectionFile, pickUp, minFixedStateTime);
+		log.trace("Create FileInMemoryDb for {}, {} ({})",
+				firstDetectionFile, pickUp, minFixedStateTime);
 	}
 
 	@Override
@@ -72,14 +72,14 @@ class WatchedFileInMemoryDb {
 		return sb.toString().trim() + "}";
 	}
 
-	WatchedFileInMemoryDb update(final CachedFileAttributes seeAgainFile) {
+	FileInMemoryDb update(final CachedFileAttributes seeAgainFile) {
 		if (isDirectory) {
 			if (markedAsDone == false) {
 				lastFile = seeAgainFile;
 			}
 		} else {
 			lastIsSame = lastFile.lastModified() == seeAgainFile.lastModified()
-			             && lastFile.length() == seeAgainFile.length();
+						 && lastFile.length() == seeAgainFile.length();
 			if (lastIsSame == false) {
 				lastWatched = System.currentTimeMillis();
 				if (markedAsDone) {
@@ -94,7 +94,7 @@ class WatchedFileInMemoryDb {
 	boolean isTimeQualified() {
 		final var notTooRecent = lastWatched < System.currentTimeMillis() - minFixedStateTime.toMillis();
 		return isDirectory
-		       || lastIsSame && notTooRecent;
+			   || lastIsSame && notTooRecent;
 	}
 
 	boolean canBeCallbacked() {
@@ -105,7 +105,7 @@ class WatchedFileInMemoryDb {
 		return isDirectory && pickUpDirs == true || isDirectory == false && pickUpFiles == true;
 	}
 
-	WatchedFileInMemoryDb setMarkedAsDone() {
+	FileInMemoryDb setMarkedAsDone() {
 		markedAsDone = true;
 		return this;
 	}
@@ -118,7 +118,7 @@ class WatchedFileInMemoryDb {
 		return doneButChanged;
 	}
 
-	WatchedFileInMemoryDb resetDoneButChanged() {
+	FileInMemoryDb resetDoneButChanged() {
 		doneButChanged = false;
 		return this;
 	}

@@ -42,21 +42,21 @@ import org.mockito.MockitoAnnotations;
 
 import tv.hd3g.transfertfiles.CachedFileAttributes;
 
-class WatchedFileInMemoryDbTest {
+class FileInMemoryDbTest {
 
 	@Mock
 	CachedFileAttributes firstDetectionFile;
 	@Mock
 	CachedFileAttributes seeAgainFile;
 
-	WatchedFileInMemoryDb f;
+	FileInMemoryDb f;
 
 	@BeforeEach
 	void init() throws Exception {
 		MockitoAnnotations.openMocks(this).close();
 
 		when(firstDetectionFile.isDirectory()).thenReturn(false);
-		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_DIRS, ofDays(1));
+		f = new FileInMemoryDb(firstDetectionFile, FILES_DIRS, ofDays(1));
 		verify(firstDetectionFile, times(1)).isDirectory();
 	}
 
@@ -105,7 +105,7 @@ class WatchedFileInMemoryDbTest {
 
 	@Test
 	void testUpdate_updated_OutTime() {
-		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_DIRS, ZERO);
+		f = new FileInMemoryDb(firstDetectionFile, FILES_DIRS, ZERO);
 		when(firstDetectionFile.lastModified()).thenReturn(1L);
 		when(seeAgainFile.lastModified()).thenReturn(2L);
 
@@ -125,7 +125,7 @@ class WatchedFileInMemoryDbTest {
 
 	@Test
 	void testUpdate_notUpdated_OutTime() throws InterruptedException {
-		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_DIRS, ZERO);
+		f = new FileInMemoryDb(firstDetectionFile, FILES_DIRS, ZERO);
 
 		when(firstDetectionFile.lastModified()).thenReturn(1L);
 		when(seeAgainFile.lastModified()).thenReturn(1L);
@@ -170,7 +170,7 @@ class WatchedFileInMemoryDbTest {
 
 	@Test
 	void testChangeFile_afterDone() throws InterruptedException {
-		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_DIRS, ZERO);
+		f = new FileInMemoryDb(firstDetectionFile, FILES_DIRS, ZERO);
 		f.setMarkedAsDone();
 
 		when(firstDetectionFile.length()).thenReturn(1L);
@@ -206,7 +206,7 @@ class WatchedFileInMemoryDbTest {
 	@Test
 	void testUpdate_directory() {
 		when(firstDetectionFile.isDirectory()).thenReturn(true);
-		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_DIRS, Duration.ofDays(1));
+		f = new FileInMemoryDb(firstDetectionFile, FILES_DIRS, Duration.ofDays(1));
 		verify(firstDetectionFile, Mockito.times(2)).isDirectory();
 
 		assertEquals(f, f.update(seeAgainFile));
@@ -216,7 +216,7 @@ class WatchedFileInMemoryDbTest {
 		assertFalse(f.isDoneButChanged());
 		assertEquals(seeAgainFile, f.getLastFile());
 
-		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_ONLY, ofDays(1));
+		f = new FileInMemoryDb(firstDetectionFile, FILES_ONLY, ofDays(1));
 		assertFalse(f.canBeCallbacked());
 
 		verify(firstDetectionFile, atLeastOnce()).isDirectory();
@@ -225,7 +225,7 @@ class WatchedFileInMemoryDbTest {
 	@Test
 	void testUpdate_directory_afterDone() {
 		when(firstDetectionFile.isDirectory()).thenReturn(true);
-		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_DIRS, Duration.ofDays(1));
+		f = new FileInMemoryDb(firstDetectionFile, FILES_DIRS, Duration.ofDays(1));
 		verify(firstDetectionFile, Mockito.times(2)).isDirectory();
 
 		f.setMarkedAsDone();
@@ -239,7 +239,7 @@ class WatchedFileInMemoryDbTest {
 
 	@Test
 	void testUpdate_updatedOnlySizes_OutTime() {
-		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_DIRS, ZERO);
+		f = new FileInMemoryDb(firstDetectionFile, FILES_DIRS, ZERO);
 
 		when(firstDetectionFile.lastModified()).thenReturn(1L);
 		when(seeAgainFile.lastModified()).thenReturn(1L);
@@ -273,10 +273,10 @@ class WatchedFileInMemoryDbTest {
 		assertTrue(f.canBePickupFromType());
 
 		/** file */
-		f = new WatchedFileInMemoryDb(firstDetectionFile, DIRS_ONLY, ZERO);
+		f = new FileInMemoryDb(firstDetectionFile, DIRS_ONLY, ZERO);
 		assertFalse(f.canBePickupFromType());
 
-		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_ONLY, ZERO);
+		f = new FileInMemoryDb(firstDetectionFile, FILES_ONLY, ZERO);
 		assertTrue(f.canBePickupFromType());
 
 		/**
@@ -284,10 +284,10 @@ class WatchedFileInMemoryDbTest {
 		 */
 		when(firstDetectionFile.isDirectory()).thenReturn(true);
 
-		f = new WatchedFileInMemoryDb(firstDetectionFile, DIRS_ONLY, ZERO);
+		f = new FileInMemoryDb(firstDetectionFile, DIRS_ONLY, ZERO);
 		assertTrue(f.canBePickupFromType());
 
-		f = new WatchedFileInMemoryDb(firstDetectionFile, FILES_ONLY, ZERO);
+		f = new FileInMemoryDb(firstDetectionFile, FILES_ONLY, ZERO);
 		assertFalse(f.canBePickupFromType());
 
 		verify(firstDetectionFile, atLeastOnce()).isDirectory();

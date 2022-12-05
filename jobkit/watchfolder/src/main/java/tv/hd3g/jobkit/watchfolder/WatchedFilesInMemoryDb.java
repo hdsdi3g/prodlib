@@ -43,7 +43,7 @@ import tv.hd3g.transfertfiles.CachedFileAttributes;
 public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 	private static final Logger log = LogManager.getLogger();
 
-	private final Map<CachedFileAttributes, WatchedFileInMemoryDb> allWatchedFiles;
+	private final Map<CachedFileAttributes, FileInMemoryDb> allWatchedFiles;
 
 	private int maxDeep;
 	private ObservedFolder observedFolder;
@@ -104,11 +104,11 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 		 * get updated
 		 */
 		final var updatedChangedFounded = updateFounded.stream()
-				.filter(not(WatchedFileInMemoryDb::isNotYetMarkedAsDone))// == MarkedAsDone
-				.filter(WatchedFileInMemoryDb::canBeCallbacked)
-				.filter(WatchedFileInMemoryDb::isDoneButChanged)
-				.map(WatchedFileInMemoryDb::resetDoneButChanged)
-				.map(WatchedFileInMemoryDb::getLastFile)
+				.filter(not(FileInMemoryDb::isNotYetMarkedAsDone))// == MarkedAsDone
+				.filter(FileInMemoryDb::canBeCallbacked)
+				.filter(FileInMemoryDb::isDoneButChanged)
+				.map(FileInMemoryDb::resetDoneButChanged)
+				.map(FileInMemoryDb::getLastFile)
 				.collect(toUnmodifiableSet());
 		log.trace("List updatedChangedFounded={}", updatedChangedFounded);
 
@@ -116,9 +116,9 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 		 * get qualified, set them marked
 		 */
 		final var qualifyFounded = updateFounded.stream()
-				.filter(WatchedFileInMemoryDb::isNotYetMarkedAsDone)
-				.filter(WatchedFileInMemoryDb::isTimeQualified)
-				.map(WatchedFileInMemoryDb::setMarkedAsDone)
+				.filter(FileInMemoryDb::isNotYetMarkedAsDone)
+				.filter(FileInMemoryDb::isTimeQualified)
+				.map(FileInMemoryDb::setMarkedAsDone)
 				.toList();
 		log.trace("List qualifyFounded={}", qualifyFounded);
 
@@ -126,19 +126,19 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 		 * get only them can be callbacked
 		 */
 		final var qualifiedAndCallbacked = qualifyFounded.stream()
-				.filter(WatchedFileInMemoryDb::canBeCallbacked)
-				.map(WatchedFileInMemoryDb::getLastFile)
+				.filter(FileInMemoryDb::canBeCallbacked)
+				.map(FileInMemoryDb::getLastFile)
 				.collect(toUnmodifiableSet());
 		log.trace("List qualifiedAndCallbacked={}", qualifiedAndCallbacked);
 
 		final var losted = allWatchedFiles.values().stream()
-				.filter(WatchedFileInMemoryDb::isNotYetMarkedAsDone)
+				.filter(FileInMemoryDb::isNotYetMarkedAsDone)
 				.filter(w -> w.absentInSet(detected))
 				.toList();
 
 		final var lostedAndCallbacked = losted.stream()
-				.filter(WatchedFileInMemoryDb::canBePickupFromType)
-				.map(WatchedFileInMemoryDb::getLastFile)
+				.filter(FileInMemoryDb::canBePickupFromType)
+				.map(FileInMemoryDb::getLastFile)
 				.collect(toUnmodifiableSet());
 
 		/**
@@ -146,7 +146,7 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 		 */
 		detected.stream()
 				.filter(Predicate.not(allWatchedFiles::containsKey))
-				.forEach(f -> allWatchedFiles.put(f, new WatchedFileInMemoryDb(f, pickUp, minFixedStateTime)));
+				.forEach(f -> allWatchedFiles.put(f, new FileInMemoryDb(f, pickUp, minFixedStateTime)));
 
 		/**
 		 * Clean deleted files
@@ -161,7 +161,7 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 			size = allWatchedFiles.size();
 		} else {
 			size = (int) allWatchedFiles.values().stream()
-					.filter(WatchedFileInMemoryDb::canBePickupFromType)
+					.filter(FileInMemoryDb::canBePickupFromType)
 					.count();
 		}
 
