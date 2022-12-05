@@ -41,6 +41,7 @@ import tv.hd3g.transfertfiles.CachedFileAttributes;
 
 public class TransfertFilesSerializer {
 	private static Logger log = LogManager.getLogger();
+	public static final int DEFAULT_HASHCODE = 0;
 
 	private TransfertFilesSerializer() {
 	}
@@ -104,9 +105,13 @@ public class TransfertFilesSerializer {
 					TransfertFilesSerializer.class.getClassLoader(),
 					new Class[] { AbstractFile.class },
 					(proxy, method, args) -> {
+						log.trace("Access to AbstractFile via a Proxy, {}", path);
 						if (method.getName().equals("getPath")) {
 							return path;
+						} else if (method.getName().equals("hashCode")) {
+							return DEFAULT_HASHCODE;
 						}
+
 						log.warn("This instance is a Proxy extracted from a Json, you can't access directly to it. {}",
 								node);
 						return null;

@@ -16,6 +16,8 @@
  */
 package tv.hd3g.transfertfiles;
 
+import static tv.hd3g.transfertfiles.json.TransfertFilesSerializer.DEFAULT_HASHCODE;
+
 import java.util.Objects;
 
 import org.apache.commons.io.FilenameUtils;
@@ -39,6 +41,7 @@ public class CachedFileAttributes {
 	private final boolean file;
 	private final boolean link;
 	private final boolean special;
+	private final int hashCode;
 
 	/**
 	 * Attributes and AbstractFile attributes shoud be the same values (at the least on the creation).
@@ -60,6 +63,7 @@ public class CachedFileAttributes {
 		this.file = file;
 		this.link = link;
 		this.special = special;
+		hashCode = abstractFile.hashCode();
 	}
 
 	/**
@@ -75,6 +79,7 @@ public class CachedFileAttributes {
 		file = abstractFile.isFile();
 		link = abstractFile.isLink();
 		special = abstractFile.isSpecial();
+		hashCode = abstractFile.hashCode();
 	}
 
 	public static CachedFileAttributes notExists(final AbstractFile abstractFile) {
@@ -139,7 +144,10 @@ public class CachedFileAttributes {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(abstractFile);
+		if (hashCode == DEFAULT_HASHCODE) {
+			throw new IllegalStateException("You can't use hashCode with a disconnected item.");
+		}
+		return hashCode;
 	}
 
 	@Override
@@ -154,7 +162,10 @@ public class CachedFileAttributes {
 			return false;
 		}
 		final var other = (CachedFileAttributes) obj;
-		return Objects.equals(abstractFile, other.abstractFile);
+		if (hashCode == DEFAULT_HASHCODE || other.hashCode == DEFAULT_HASHCODE) {
+			throw new IllegalStateException("You can't use equals with a disconnected item.");
+		}
+		return Objects.equals(hashCode, other.hashCode);
 	}
 
 }
