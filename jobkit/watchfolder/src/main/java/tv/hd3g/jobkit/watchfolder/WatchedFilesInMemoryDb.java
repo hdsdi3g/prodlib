@@ -98,7 +98,6 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 				.filter(allWatchedFiles::containsKey)
 				.map(f -> allWatchedFiles.get(f).update(f))
 				.toList();
-		log.trace("List updateFounded={}", updateFounded);
 
 		/**
 		 * get updated
@@ -110,7 +109,6 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 				.map(FileInMemoryDb::resetDoneButChanged)
 				.map(FileInMemoryDb::getLastFile)
 				.collect(toUnmodifiableSet());
-		log.trace("List updatedChangedFounded={}", updatedChangedFounded);
 
 		/**
 		 * get qualified, set them marked
@@ -120,7 +118,6 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 				.filter(FileInMemoryDb::isTimeQualified)
 				.map(FileInMemoryDb::setMarkedAsDone)
 				.toList();
-		log.trace("List qualifyFounded={}", qualifyFounded);
 
 		/**
 		 * get only them can be callbacked
@@ -129,7 +126,6 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 				.filter(FileInMemoryDb::canBeCallbacked)
 				.map(FileInMemoryDb::getLastFile)
 				.collect(toUnmodifiableSet());
-		log.trace("List qualifiedAndCallbacked={}", qualifiedAndCallbacked);
 
 		final var losted = allWatchedFiles.values().stream()
 				.filter(FileInMemoryDb::isNotYetMarkedAsDone)
@@ -146,15 +142,27 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 		 */
 		detected.stream()
 				.filter(Predicate.not(allWatchedFiles::containsKey))
+				.peek(f -> log.trace("Add to Db: {} ({})", f, f.hashCode()))// NOSONAR S3864
 				.forEach(f -> allWatchedFiles.put(f, new FileInMemoryDb(f, pickUp, minFixedStateTime)));
 
 		/**
 		 * Clean deleted files
 		 */
-		allWatchedFiles.keySet().stream()
+		final var toClean = allWatchedFiles.keySet().stream()
 				.filter(Predicate.not(detected::contains))
-				.toList()
-				.forEach(allWatchedFiles::remove);
+				.toList();
+		toClean.forEach(allWatchedFiles::remove);
+
+		log.trace(
+				"Lists detected={}, updateFounded={}, updatedChangedFounded={}, qualifyFounded={}, qualifiedAndCallbacked={}, losted={}, lostedAndCallbacked={}, toClean={}",
+				detected,
+				updateFounded,
+				updatedChangedFounded,
+				qualifyFounded,
+				qualifiedAndCallbacked,
+				losted,
+				lostedAndCallbacked,
+				toClean);
 
 		int size;
 		if (pickUp == FILES_DIRS) {
@@ -166,7 +174,10 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 		}
 
 		log.debug("Scan result for {}: {} founded, {} lost, {} total",
-				observedFolder.getLabel(), qualifiedAndCallbacked.size(), lostedAndCallbacked.size(), size);
+				observedFolder.getLabel(),
+				qualifiedAndCallbacked.size(),
+				lostedAndCallbacked.size(),
+				size);
 		return new WatchedFiles(qualifiedAndCallbacked, lostedAndCallbacked, updatedChangedFounded, size);
 	}
 
