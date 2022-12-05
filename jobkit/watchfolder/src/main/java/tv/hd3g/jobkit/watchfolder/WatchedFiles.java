@@ -22,6 +22,8 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import tv.hd3g.transfertfiles.AbstractFile;
 import tv.hd3g.transfertfiles.AbstractFileSystem;
 import tv.hd3g.transfertfiles.CachedFileAttributes;
@@ -52,19 +54,20 @@ public record WatchedFiles(Set<CachedFileAttributes> founded,
 		return builder.toString();
 	}
 
+	@JsonIgnore
 	public Set<CachedFileAttributes> foundedAndUpdated() {
 		return Stream.concat(founded.stream(), updated.stream())
 				.distinct()
 				.collect(toUnmodifiableSet());
 	}
 
+	@JsonIgnore
 	public Set<AbstractFileSystem<?>> getFoundedAndUpdatedFS() { // NOSONAR S1452
 		return foundedAndUpdated().stream()
 				.map(CachedFileAttributes::getAbstractFile)
 				.map(AbstractFile::getFileSystem)
 				.distinct()
 				.collect(toUnmodifiableSet());
-
 	}
 
 }

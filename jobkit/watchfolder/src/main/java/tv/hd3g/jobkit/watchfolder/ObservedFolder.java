@@ -30,11 +30,13 @@ import java.util.function.UnaryOperator;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import tv.hd3g.transfertfiles.AbstractFile;
 import tv.hd3g.transfertfiles.AbstractFileSystemURL;
 
-@Data
+@Getter
+@Setter
 public class ObservedFolder {
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
