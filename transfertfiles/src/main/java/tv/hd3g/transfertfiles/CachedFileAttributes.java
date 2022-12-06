@@ -165,7 +165,7 @@ public class CachedFileAttributes {
 		if (hashCode == DEFAULT_HASHCODE || other.hashCode == DEFAULT_HASHCODE) {
 			throw new IllegalStateException("You can't use equals with a disconnected item.");
 		}
-		return Objects.equals(hashCode, other.hashCode);
+		return hashCode == other.hashCode;
 	}
 
 }

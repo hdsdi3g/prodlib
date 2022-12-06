@@ -85,7 +85,7 @@ class CommonAbstractFileSystemTest {
 	static class TestCAFS extends CommonAbstractFileSystem<AbstractFile> {
 
 		protected TestCAFS(final String basePath) {
-			super(basePath);
+			super(basePath, "TestCAFS");
 		}
 
 		@Override

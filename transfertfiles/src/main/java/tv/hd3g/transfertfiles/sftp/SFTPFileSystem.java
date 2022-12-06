@@ -61,7 +61,7 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 						  final String username,
 						  final String basePath,
 						  final boolean absoluteBasePath) {
-		super(basePath);
+		super(basePath, username + "@" + host.getHostName() + ":" + port);
 		client = new SSHClient();
 		wasConnected = false;
 		this.host = Objects.requireNonNull(host);
@@ -289,24 +289,6 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 	@Override
 	public String getUsername() {
 		return username;
-	}
-
-	@Override
-	public int hashCode() {
-		return 31 * super.hashCode() + Objects.hash(host, port, username);
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		} else if (super.equals(obj) == false || getClass() != obj.getClass()) {
-			return false;
-		}
-		final var other = (SFTPFileSystem) obj;
-		return Objects.equals(host, other.host)
-			   && port == other.port
-			   && Objects.equals(username, other.username);
 	}
 
 	@Override

@@ -25,7 +25,7 @@ import tv.hd3g.transfertfiles.CommonAbstractFileSystem;
 public class RandomFileSystem extends CommonAbstractFileSystem<RandomFile> {
 
 	protected RandomFileSystem() {
-		super("/");
+		super("/", "RandomFileSystem");
 	}
 
 	@Override

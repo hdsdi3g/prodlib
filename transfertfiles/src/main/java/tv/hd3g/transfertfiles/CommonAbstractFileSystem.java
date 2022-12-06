@@ -16,18 +16,34 @@
  */
 package tv.hd3g.transfertfiles;
 
+import static java.util.Objects.requireNonNull;
 import static tv.hd3g.transfertfiles.AbstractFile.normalizePath;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public abstract class CommonAbstractFileSystem<T extends AbstractFile> implements AbstractFileSystem<T> {
+	private static final Logger log = LogManager.getLogger();
 
 	private final String basePath;
+	private final String standardHostName;
 	protected long timeoutDuration;
 
-	protected CommonAbstractFileSystem(final String basePath) {
-		this.basePath = normalizePath(Objects.requireNonNull(basePath, "basePath"));
+	/**
+	 * @param standardHostname will be use with equals/hashCode to identificate if same servers or not.
+	 *        You should add user/port/server NAME (not IP - it can be non-stable), but not basePath ot protocol.
+	 */
+	protected CommonAbstractFileSystem(final String basePath, final String standardHostname) {
+		this.basePath = normalizePath(requireNonNull(basePath, "basePath"));
+		this.standardHostName = getClass().getSimpleName()
+								+ "#"
+								+ requireNonNull(standardHostname, "\"standardHostname\" can't to be null")
+								+ basePath;
+		log.trace("Init FileSystem, basePath={} standardHostname={} hashCode=#{}",
+				basePath, standardHostName, hashCode());
 		timeoutDuration = 0;
 	}
 
@@ -43,13 +59,19 @@ public abstract class CommonAbstractFileSystem<T extends AbstractFile> implement
 		return basePath;
 	}
 
+	/**
+	 * Use standardHostName to alter hashCode/equals behavior.
+	 */
 	@Override
-	public int hashCode() {
-		return Objects.hash(basePath);
+	public final int hashCode() {
+		return Objects.hash(standardHostName, basePath);
 	}
 
+	/**
+	 * Use standardHostName to alter hashCode/equals behavior.
+	 */
 	@Override
-	public boolean equals(final Object obj) {
+	public final boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -60,7 +82,7 @@ public abstract class CommonAbstractFileSystem<T extends AbstractFile> implement
 			return false;
 		}
 		final var other = (CommonAbstractFileSystem<?>) obj;
-		return Objects.equals(basePath, other.basePath);
+		return hashCode() == other.hashCode();
 	}
 
 	@Override
@@ -72,7 +94,7 @@ public abstract class CommonAbstractFileSystem<T extends AbstractFile> implement
 		}
 		if (timeoutDuration > Integer.MAX_VALUE) {
 			throw new IllegalArgumentException("Can't set a timeoutDuration > Integer.MAX_VALUE: "
-			                                   + timeoutDuration);
+											   + timeoutDuration);
 		}
 	}
 

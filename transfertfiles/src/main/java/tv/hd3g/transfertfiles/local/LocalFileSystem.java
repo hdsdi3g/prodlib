@@ -35,16 +35,16 @@ public class LocalFileSystem extends CommonAbstractFileSystem<LocalFile> {
 	private final File relativePath;
 
 	public LocalFileSystem(final File relativePath) {
-		super("");
+		super("", relativePath.getAbsolutePath());
 		try {
 			this.relativePath = Objects.requireNonNull(relativePath).getCanonicalFile()
-			        .toPath().toRealPath().normalize().toFile();
+					.toPath().toRealPath().normalize().toFile();
 		} catch (final IOException e) {
 			throw new UncheckedIOException(e);
 		}
 		if (relativePath.exists() == false || relativePath.isDirectory() == false || relativePath.canRead() == false) {
 			throw new UncheckedIOException(
-			        new IOException("Can't access to \"" + relativePath + "\" directory"));
+					new IOException("Can't access to \"" + relativePath + "\" directory"));
 		}
 		log.debug("Init LocalFileSystem with {}", relativePath);
 	}
@@ -63,7 +63,7 @@ public class LocalFileSystem extends CommonAbstractFileSystem<LocalFile> {
 	public LocalFile getFromPath(final String path) {
 		final var rpath = getPathFromRelative(path.replace('\\', '/'));
 		final var file = new File(relativePath, rpath)
-		        .getAbsoluteFile().toPath().normalize().toFile();
+				.getAbsoluteFile().toPath().normalize().toFile();
 		log.trace("Get LocalFile from path {}: {}", rpath, file);
 
 		/**
@@ -82,7 +82,7 @@ public class LocalFileSystem extends CommonAbstractFileSystem<LocalFile> {
 		final var rootPath = relativePath.getPath();
 		if (realPath.startsWith(rootPath) == false) {
 			throw new UncheckedIOException(
-			        new IOException("Invalid root path for \"" + file.getPath() + "\""));
+					new IOException("Invalid root path for \"" + file.getPath() + "\""));
 		}
 		return new LocalFile(file, this);
 	}
@@ -103,29 +103,6 @@ public class LocalFileSystem extends CommonAbstractFileSystem<LocalFile> {
 		/**
 		 * Local FS don't need a connection.
 		 */
-	}
-
-	@Override
-	public int hashCode() {
-		final var prime = 31;
-		var result = super.hashCode();
-		result = prime * result + Objects.hash(relativePath);
-		return result;
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final var other = (LocalFileSystem) obj;
-		return Objects.equals(relativePath, other.relativePath);
 	}
 
 	@Override

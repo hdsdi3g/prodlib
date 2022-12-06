@@ -47,12 +47,12 @@ public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
 	private final FTPClient client;
 
 	public FTPFileSystem(final InetAddress host,
-	                     final int port,
-	                     final String username,
-	                     final char[] password,
-	                     final boolean passiveMode,
-	                     final String basePath) {
-		super(basePath);
+						 final int port,
+						 final String username,
+						 final char[] password,
+						 final boolean passiveMode,
+						 final String basePath) {
+		super(basePath, username + "@" + host.getHostName() + ":" + port);
 		this.host = Objects.requireNonNull(host);
 		this.port = port;
 		this.username = Objects.requireNonNull(username, "FTP username");
@@ -166,10 +166,10 @@ public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
 	public int getIOBufferSize() {
 		final var ftpClient = getClient();
 		return IntStream.of(0x1000,
-		        ftpClient.getBufferSize(),
-		        ftpClient.getSendDataSocketBufferSize(),
-		        ftpClient.getReceiveDataSocketBufferSize())
-		        .max().getAsInt();
+				ftpClient.getBufferSize(),
+				ftpClient.getSendDataSocketBufferSize(),
+				ftpClient.getReceiveDataSocketBufferSize())
+				.max().getAsInt();
 	}
 
 	@Override
@@ -188,29 +188,6 @@ public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
 
 	public FTPListing getFtpListing() {
 		return ftpListing;
-	}
-
-	@Override
-	public int hashCode() {
-		final var prime = 31;
-		var result = super.hashCode();
-		result = prime * result + Objects.hash(host, port, username);
-		return result;
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final var other = (FTPFileSystem) obj;
-		return Objects.equals(host, other.host) && port == other.port && Objects.equals(username, other.username);
 	}
 
 	@Override
