@@ -12,7 +12,7 @@
     <parent>
         <groupId>tv.hd3g</groupId>
         <artifactId>jobkit-starter</artifactId>
-        <version>12.2.2-SNAPSHOT</version>
+        <version>12.3.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -20,12 +20,12 @@
         <dependency>
             <groupId>tv.hd3g</groupId>
             <artifactId>jobkit-engine</artifactId>
-            <version>12.2.2-SNAPSHOT</version>
+            <version>12.3.0</version>
         </dependency>
         <dependency>
             <groupId>tv.hd3g.commons</groupId>
             <artifactId>interfaces</artifactId>
-            <version>12.2.2-SNAPSHOT</version>
+            <version>12.3.0</version>
         </dependency>
         <dependency>
             <groupId>javax.validation</groupId>

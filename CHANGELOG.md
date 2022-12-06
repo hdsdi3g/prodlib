@@ -1,6 +1,10 @@
 # All ProdLib projects upgrades
 
+## 12.3.0
+
 Bug fix: correct a problem with serialization and Supervisable.
+
+Also bug fix: Protect against hashCode requests to CachedFileAttribute in a disconnected state, and re-implements hashCode computing for FileSystems (transfertfiles), to avoid host ip change relative bugs with watchfolders #81
 
 ## 12.2.0
 
