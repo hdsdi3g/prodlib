@@ -47,7 +47,7 @@
         <commons.text.version>1.10.0</commons.text.version>
         <commons.net.version>3.8.0</commons.net.version>
         <commons.io.version>2.11.0</commons.io.version>
-        <commons.compress.version>1.21</commons.compress.version>
+        <commons.compress.version>1.22</commons.compress.version>
         <commons.collections4.version>4.4</commons.collections4.version>
         <sshj.version>0.33.0</sshj.version>
         <bouncycastle.version>1.70</bouncycastle.version>
@@ -108,7 +108,7 @@
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
-	    <artifactId>hamcrest</artifactId>
+            <artifactId>hamcrest</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -142,6 +142,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons.collections4.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${commons.compress.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
