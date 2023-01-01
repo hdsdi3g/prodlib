@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 12.3.1
+
+Maintenance version: explicit add of common-compress dep v1.22 #85
+
 ## 12.3.0
 
 Bug fix: correct a problem with serialization and Supervisable.
