@@ -65,6 +65,9 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 
 	@Override
 	public void setup(final ObservedFolder observedFolder, final WatchFolderPickupType pickUp) {
+		if (observedFolder.isDisabled()) {
+			throw new IllegalArgumentException("Can't setup a disabled observedFolder: " + observedFolder);
+		}
 		this.observedFolder = observedFolder;
 		observedFolder.postConfiguration();
 		this.pickUp = pickUp;

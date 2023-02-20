@@ -16,6 +16,7 @@
  */
 package tv.hd3g.jobkit.watchfolder;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -77,6 +78,13 @@ class ObservedFolderTest {
 		assertEquals(Set.of("no", "never", "na.nb", "nc.nd", "ne.nf.ng"), observedFolder.getBlockedExtentions());
 		assertEquals(Set.of("/never/here", "/nope/dir"), observedFolder.getIgnoreRelativePaths());
 		assertEquals(Set.of("desktop.ini", ".ds_store"), observedFolder.getIgnoreFiles());
+	}
+
+	@Test
+	void testPostConfiguration_disabled() {
+		observedFolder.setTargetFolder(new File("/" + String.valueOf(System.nanoTime())).getPath());
+		observedFolder.setDisabled(true);
+		assertDoesNotThrow(() -> observedFolder.postConfiguration());
 	}
 
 	@Test

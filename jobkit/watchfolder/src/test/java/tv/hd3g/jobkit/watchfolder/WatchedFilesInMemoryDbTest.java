@@ -23,6 +23,7 @@ import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.DIRS_ONLY;
 import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.FILES_DIRS;
 import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.FILES_ONLY;
@@ -76,6 +77,14 @@ class WatchedFilesInMemoryDbTest {
 
 		watchedFilesDb = new WatchedFilesInMemoryDb();
 		fs = observedFolder.createFileSystem();
+	}
+
+	@Test
+	void testUpdate_disabled() {
+		observedFolder.setDisabled(true);
+		assertThrows(IllegalArgumentException.class, () -> watchedFilesDb.setup(observedFolder, FILES_ONLY));
+		assertThrows(IllegalArgumentException.class, () -> watchedFilesDb.setup(observedFolder, FILES_DIRS));
+		assertThrows(IllegalArgumentException.class, () -> watchedFilesDb.setup(observedFolder, DIRS_ONLY));
 	}
 
 	@Test

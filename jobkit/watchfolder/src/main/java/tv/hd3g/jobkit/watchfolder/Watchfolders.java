@@ -17,6 +17,7 @@
 package tv.hd3g.jobkit.watchfolder;
 
 import static java.time.temporal.ChronoUnit.MILLIS;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableMap;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
 
@@ -53,14 +54,16 @@ public class Watchfolders {
 
 	private BackgroundService service;
 
-	public Watchfolders(final List<? extends ObservedFolder> observedFolders,
+	public Watchfolders(final List<? extends ObservedFolder> allObservedFolders,
 						final FolderActivity eventActivity,
 						final Duration timeBetweenScans,
 						final JobKitEngine jobKitEngine,
 						final String spoolScans,
 						final String spoolEvents,
 						final Supplier<WatchedFilesDb> watchedFilesDbBuilder) {
-		this.observedFolders = Objects.requireNonNull(observedFolders);
+		observedFolders = Objects.requireNonNull(allObservedFolders).stream()
+				.filter(not(ObservedFolder::isDisabled))
+				.toList();
 		this.eventActivity = Objects.requireNonNull(eventActivity);
 		this.timeBetweenScans = Objects.requireNonNull(timeBetweenScans);
 		this.jobKitEngine = Objects.requireNonNull(jobKitEngine);
@@ -131,7 +134,7 @@ public class Watchfolders {
 	}
 
 	public synchronized void startScans() {
-		if (service != null && service.isEnabled()) {
+		if (service != null && service.isEnabled() || observedFolders.isEmpty()) {
 			return;
 		}
 		service = jobKitEngine.createService("Watchfolder for " + getWFName(), spoolScans, () -> {

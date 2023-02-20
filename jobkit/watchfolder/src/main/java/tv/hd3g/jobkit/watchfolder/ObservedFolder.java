@@ -50,6 +50,7 @@ public class ObservedFolder {
 	private boolean allowedLinks;
 	private boolean recursive;
 	private Duration minFixedStateTime;
+	private boolean disabled;
 
 	private static final UnaryOperator<String> removeFirstDot = ext -> {
 		if (ext.startsWith(".")) {
@@ -59,6 +60,9 @@ public class ObservedFolder {
 	};
 
 	void postConfiguration() {
+		if (disabled) {
+			return;
+		}
 		Objects.requireNonNull(targetFolder, "Null targetFolder");
 		try {
 			final var targetFolderF = new File(targetFolder);

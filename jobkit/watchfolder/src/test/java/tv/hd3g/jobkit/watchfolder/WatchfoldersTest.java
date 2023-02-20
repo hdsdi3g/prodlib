@@ -86,8 +86,18 @@ class WatchfoldersTest {
 
 	@AfterEach
 	void close() throws InterruptedException {
-		verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068
 		verifyNoMoreInteractions(folderActivity, watchedFilesDb, pickUp, watchedFiles);
+	}
+
+	@Test
+	void testDisabledFolder() throws IOException {
+		observedFolder.setDisabled(true);
+		watchfolders = new Watchfolders(List.of(observedFolder), folderActivity,
+				Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
+
+		observedFolder.setTargetFolder("file://localhost/" + new File("").getAbsolutePath());
+		watchfolders.startScans();
+		assertTrue(jobKitEngine.isEmptyActiveServicesList());
 	}
 
 	@Test
@@ -126,6 +136,7 @@ class WatchfoldersTest {
 		verify(folderActivity, atMostOnce()).onBeforeScan(observedFolder);
 		verify(folderActivity, atMostOnce()).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
 		verify(watchedFilesDb, atMostOnce()).update(any(AbstractFileSystemURL.class));
+		verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068
 	}
 
 	@Test
@@ -182,6 +193,7 @@ class WatchfoldersTest {
 
 		jobKitEngine.shutdown();
 		verify(folderActivity, times(2)).onStopScans(List.of(observedFolder));
+		verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068
 	}
 
 	@Test
@@ -201,6 +213,7 @@ class WatchfoldersTest {
 
 		jobKitEngine.shutdown();
 		verify(folderActivity, times(1)).onStopScans(List.of(observedFolder));
+		verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068
 	}
 
 	@Test
@@ -250,6 +263,7 @@ class WatchfoldersTest {
 		verify(folderActivity, times(1)).onBeforeScan(observedFolder);
 		verify(watchedFilesDb, times(4)).update(any(AbstractFileSystemURL.class));
 		verify(watchedFilesDb, times(1)).reset(Set.of(cfa));
+		verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068
 		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
 		verify(watchedFiles, times(3)).founded();
 
