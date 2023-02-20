@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 12.4.0
+
+Add a "disable" entry in Watchfolder configuration (ObservedFolder) #84
+
 ## 12.3.1
 
 Maintenance version: explicit add of common-compress dep v1.22 #85
