@@ -181,8 +181,4 @@ public class SupervisableUtility {
 		return faker.options().option(Locale.getAvailableLocales());
 	}
 
-	/*public SupervisableUtility(final StackTraceElement caller,
-							   final Exception error,
-							   final JsonNode context) {
-	}*/
 }

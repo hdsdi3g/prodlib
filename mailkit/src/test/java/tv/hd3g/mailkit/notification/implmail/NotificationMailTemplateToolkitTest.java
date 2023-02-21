@@ -38,10 +38,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 
+import com.fasterxml.jackson.databind.node.JsonNodeType;
+
 import j2html.tags.DomContent;
 import net.datafaker.Faker;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 import tv.hd3g.mailkit.mod.component.Translate;
+import tv.hd3g.mailkit.mod.service.SendAsSimpleNotificationContextPredicate;
 import tv.hd3g.mailkit.notification.NotificationEnvironment;
 import tv.hd3g.mailkit.notification.SupervisableUtility;
 
@@ -53,6 +56,7 @@ class NotificationMailTemplateToolkitTest {
 	SupervisableEndEvent event;
 	SupervisableUtility utility;
 	NotificationEnvironment env;
+	SendAsSimpleNotificationContextPredicate contextPredicate;
 	List<DomContent> listBodyContent;
 	List<String> listCSSEntries;
 
@@ -70,6 +74,13 @@ class NotificationMailTemplateToolkitTest {
 				faker.numerify("instanceName"),
 				faker.numerify("vendorName"),
 				List.of());
+		contextPredicate = new SendAsSimpleNotificationContextPredicate() {
+			@Override
+			public boolean isSendAsSimpleNotificationThisContextEntry(final String contextKey,
+																	  final SupervisableEndEvent event) {
+				return true;
+			}
+		};
 		t = new NotificationMailTemplateToolkit(translate, env);
 		listBodyContent = new ArrayList<>();
 		listCSSEntries = new ArrayList<>();
@@ -221,6 +232,22 @@ class NotificationMailTemplateToolkitTest {
 	@Test
 	void testMakeDocumentContext() {
 		t.makeDocumentContext(lang, event, listBodyContent, listCSSEntries);
+		assertEquals(1, listBodyContent.size());
+		assertEquals(1, listCSSEntries.size());
+	}
+
+	@Test
+	void testMakeDocumentSimpleContext_empty() {
+		when(event.context().isNull()).thenReturn(true);
+		t.makeDocumentSimpleContext(lang, event, listBodyContent, listCSSEntries, contextPredicate);
+		assertTrue(listBodyContent.isEmpty());
+		assertTrue(listCSSEntries.isEmpty());
+	}
+
+	@Test
+	void testMakeDocumentSimpleContext() {
+		when(event.context().getNodeType()).thenReturn(JsonNodeType.BOOLEAN);
+		t.makeDocumentSimpleContext(lang, event, listBodyContent, listCSSEntries, contextPredicate);
 		assertEquals(1, listBodyContent.size());
 		assertEquals(1, listCSSEntries.size());
 	}

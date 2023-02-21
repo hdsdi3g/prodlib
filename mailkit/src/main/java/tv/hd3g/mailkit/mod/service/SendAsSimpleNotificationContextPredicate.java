@@ -11,35 +11,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
- * Copyright (C) hdsdi3g for hd3g.tv 2022
+ * Copyright (C) hdsdi3g for hd3g.tv 2023
  *
  */
 package tv.hd3g.mailkit.mod.service;
 
-import java.util.Locale;
-import java.util.Map;
-
-import org.springframework.stereotype.Service;
-
-import tv.hd3g.jobkit.engine.SupervisableContextExtractor;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 
-@Service
-public class AppNotificationServiceImpl implements AppNotificationService {
+public interface SendAsSimpleNotificationContextPredicate {
 
-	@Override
-	public boolean isStateChangeEvent(final SupervisableEndEvent event) {
+	default boolean isSendAsSimpleNotificationThisContextEntry(final String contextKey,
+															   final SupervisableEndEvent event) {
 		return false;
 	}
 
-	@Override
-	public boolean isSecurityEvent(final SupervisableEndEvent event) {
-		return false;
-	}
-
-	@Override
-	public Map<String, Locale> getEndUserContactsToSendEvent(final SupervisableEndEvent event,
-															 final SupervisableContextExtractor contextExtractor) {
-		return null;
-	}
 }

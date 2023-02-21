@@ -22,7 +22,7 @@ import java.util.Map;
 import tv.hd3g.jobkit.engine.SupervisableContextExtractor;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 
-public interface AppNotificationService {
+public interface AppNotificationService extends SendAsSimpleNotificationContextPredicate {
 
 	boolean isStateChangeEvent(SupervisableEndEvent event);
 

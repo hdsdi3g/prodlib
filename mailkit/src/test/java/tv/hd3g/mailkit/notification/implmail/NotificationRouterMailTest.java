@@ -17,6 +17,8 @@
 package tv.hd3g.mailkit.notification.implmail;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -145,12 +147,12 @@ class NotificationRouterMailTest {
 
 		when(supervisableManager.createContextExtractor(event)).thenReturn(contextExtractor);
 		when(appNotificationService.getEndUserContactsToSendEvent(event, contextExtractor)).thenReturn(users);
-		when(engineSimpleTemplate.makeMessage(lang, event)).thenReturn(message);
-		when(engineFullTemplate.makeMessage(lang, event)).thenReturn(message);
-		when(engineDebugTemplate.makeMessage(lang, event)).thenReturn(message);
-		when(engineSimpleTemplate.makeMessage(langGroup, event)).thenReturn(message);
-		when(engineFullTemplate.makeMessage(langGroup, event)).thenReturn(message);
-		when(engineDebugTemplate.makeMessage(langGroup, event)).thenReturn(message);
+		when(engineSimpleTemplate.makeMessage(any(), eq(event))).thenReturn(message);
+		when(engineFullTemplate.makeMessage(any(), eq(event))).thenReturn(message);
+		when(engineDebugTemplate.makeMessage(any(), eq(event))).thenReturn(message);
+		when(engineSimpleTemplate.makeMessage(any(), eq(event))).thenReturn(message);
+		when(engineFullTemplate.makeMessage(any(), eq(event))).thenReturn(message);
+		when(engineDebugTemplate.makeMessage(any(), eq(event))).thenReturn(message);
 	}
 
 	@Nested
@@ -172,7 +174,7 @@ class NotificationRouterMailTest {
 				verify(appNotificationService, times(1)).isSecurityEvent(event);
 				verify(appNotificationService, times(1)).isStateChangeEvent(event);
 				verify(appNotificationService, times(1)).getEndUserContactsToSendEvent(event, contextExtractor);
-				verify(engineSimpleTemplate, times(1)).makeMessage(lang, event);
+				verify(engineSimpleTemplate, times(1)).makeMessage(any(), eq(event));
 			}
 
 			@Test
@@ -283,8 +285,8 @@ class NotificationRouterMailTest {
 			verify(appNotificationService, times(1)).isSecurityEvent(event);
 			verify(appNotificationService, times(1)).isStateChangeEvent(event);
 			verify(appNotificationService, times(1)).getEndUserContactsToSendEvent(event, contextExtractor);
-			verify(engineSimpleTemplate, times(1)).makeMessage(lang, event);
-			verify(engineFullTemplate, times(1)).makeMessage(langGroup, event);
+			verify(engineSimpleTemplate, times(1)).makeMessage(any(), eq(event));
+			verify(engineFullTemplate, times(1)).makeMessage(any(), eq(event));
 		}
 
 		@Test
@@ -308,9 +310,9 @@ class NotificationRouterMailTest {
 			verify(appNotificationService, times(1)).isSecurityEvent(event);
 			verify(appNotificationService, times(1)).isStateChangeEvent(event);
 			verify(appNotificationService, times(1)).getEndUserContactsToSendEvent(event, contextExtractor);
-			verify(engineSimpleTemplate, times(1)).makeMessage(lang, event);
-			verify(engineFullTemplate, times(1)).makeMessage(langGroup, event);
-			verify(engineDebugTemplate, times(1)).makeMessage(langGroup, event);
+			verify(engineSimpleTemplate, times(1)).makeMessage(any(), eq(event));
+			verify(engineFullTemplate, times(1)).makeMessage(any(), eq(event));
+			verify(engineDebugTemplate, times(1)).makeMessage(any(), eq(event));
 		}
 
 		@Test
@@ -340,8 +342,8 @@ class NotificationRouterMailTest {
 
 			verify(appNotificationService, times(1)).isSecurityEvent(event);
 			verify(appNotificationService, times(1)).isStateChangeEvent(event);
-			verify(engineFullTemplate, times(1)).makeMessage(langGroup, event);
-			verify(engineDebugTemplate, times(1)).makeMessage(langGroup, event);
+			verify(engineFullTemplate, times(1)).makeMessage(any(), eq(event));
+			verify(engineDebugTemplate, times(1)).makeMessage(any(), eq(event));
 		}
 
 		@ParameterizedTest
@@ -366,8 +368,8 @@ class NotificationRouterMailTest {
 					MessageGrade.SECURITY);
 
 			verify(appNotificationService, times(1)).isSecurityEvent(event);
-			verify(engineFullTemplate, times(2)).makeMessage(langGroup, event);
-			verify(engineDebugTemplate, times(1)).makeMessage(langGroup, event);
+			verify(engineFullTemplate, times(2)).makeMessage(any(), eq(event));
+			verify(engineDebugTemplate, times(1)).makeMessage(any(), eq(event));
 		}
 
 	}
@@ -390,7 +392,7 @@ class NotificationRouterMailTest {
 		verify(appNotificationService, times(1)).isSecurityEvent(event);
 		verify(appNotificationService, times(1)).isStateChangeEvent(event);
 		verify(appNotificationService, times(1)).getEndUserContactsToSendEvent(event, contextExtractor);
-		verify(engineSimpleTemplate, times(1)).makeMessage(lang, event);
+		verify(engineSimpleTemplate, times(1)).makeMessage(any(), eq(event));
 	}
 
 }

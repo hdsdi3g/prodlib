@@ -24,13 +24,17 @@ import static j2html.TagCreator.h1;
 import static j2html.TagCreator.h3;
 import static j2html.TagCreator.head;
 import static j2html.TagCreator.html;
+import static j2html.TagCreator.li;
 import static j2html.TagCreator.meta;
+import static j2html.TagCreator.ol;
 import static j2html.TagCreator.pre;
 import static j2html.TagCreator.rawHtml;
 import static j2html.TagCreator.span;
 import static j2html.TagCreator.style;
 import static j2html.TagCreator.text;
+import static j2html.TagCreator.ul;
 import static j2html.attributes.Attr.HTTP_EQUIV;
+import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.function.Predicate.not;
 
 import java.text.DateFormat;
@@ -39,10 +43,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Spliterator;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import j2html.TagCreator;
 import j2html.tags.DomContent;
@@ -53,10 +64,15 @@ import tv.hd3g.jobkit.engine.SupervisableResult;
 import tv.hd3g.jobkit.engine.SupervisableResultState;
 import tv.hd3g.jobkit.engine.SupervisableStep;
 import tv.hd3g.mailkit.mod.component.Translate;
+import tv.hd3g.mailkit.mod.service.SendAsSimpleNotificationContextPredicate;
 import tv.hd3g.mailkit.notification.ExceptionToString;
 import tv.hd3g.mailkit.notification.NotificationEnvironment;
 
 public class NotificationMailTemplateToolkit {
+	private static final String ATTR_JSON = ".json";
+	private static final String ATTR_JSON_VALUE = ".json.value";
+	private static final String CONTEXT_STR = "Context:";
+
 	private static Logger log = LogManager.getLogger();
 
 	static final String APPNAME = ".appname";
@@ -359,6 +375,80 @@ public class NotificationMailTemplateToolkit {
 		listBodyContent.add(div(attrs(".dates"), rawHtml(dates)));
 	}
 
+	private DomContent jsonToDom(final JsonNode json,
+								 final UnaryOperator<String> i18nKey, // NOSONAR 4276
+								 final Predicate<String> filterKey) {
+		return switch (json.getNodeType()) {
+		case ARRAY -> ol(attrs(ATTR_JSON),
+				each(IntStream.range(0, json.size())
+						.mapToObj(json::get)
+						.map(entry -> jsonToDom(entry, i18nKey, filterKey))
+						.map(TagCreator::li)
+						.map(entry -> (DomContent) entry)));// NOSONAR S1612
+		case OBJECT -> ul(attrs(ATTR_JSON),
+				each(StreamSupport.stream(
+						spliteratorUnknownSize(json.fieldNames(), Spliterator.DISTINCT), false)
+						.filter(filterKey)
+						.sorted()
+						.map(key -> {
+							final var value = json.get(key);
+							var keyName = i18nKey.apply(key);
+							if (value.isContainerNode() == false) {
+								keyName = keyName + ":";
+							}
+							return li(span(attrs(".json.key"),
+									keyName),
+									jsonToDom(value, i18nKey, filterKey));
+						})
+						.map(entry -> (DomContent) entry)));// NOSONAR S1612
+
+		case NUMBER -> span(attrs(ATTR_JSON_VALUE), json.toString());
+		case STRING -> span(attrs(ATTR_JSON_VALUE), json.asText());
+		case BOOLEAN -> span(attrs(ATTR_JSON_VALUE), i18nKey.apply(String.valueOf(json.asBoolean())));
+		default -> div(ATTR_JSON);
+		};
+	}
+
+	public void makeDocumentSimpleContext(final Locale lang,
+										  final SupervisableEndEvent event,
+										  final List<DomContent> listBodyContent,
+										  final List<String> listCSSEntries,
+										  final SendAsSimpleNotificationContextPredicate contextPredicate) {
+		final var context = event.context();
+		if (context == null || context.isNull() || context.isEmpty() && context.isContainerNode()) {
+			return;
+		}
+
+		final var tree = jsonToDom(context,
+				k -> translate.i18n(lang, event, "simplecontext.entry." + k, k),
+				k -> contextPredicate.isSendAsSimpleNotificationThisContextEntry(k, event));
+
+		listCSSEntries.add("""
+				div.simplecontext {
+				    margin-top: 1em;
+				    margin-bottom: 1em;
+				}
+				div.simplecontext span.json.value {
+				    font-family: 'Consolas', 'Monaco', monospace;
+				    color: #555;
+				}
+				div.simplecontext ul {
+				    margin-block-start: 0em;
+				    margin-block-end: 0em;
+				    list-style-type: none;
+				}
+				div.simplecontext ol {
+				    margin-block-start: 0em;
+				    margin-block-end: 0em;
+				}
+				""");
+
+		listBodyContent.add(
+				div(attrs(".simplecontext"),
+						text(translate.i18n(lang, event, "context", CONTEXT_STR)),
+						tree));
+	}
+
 	public void makeDocumentContext(final Locale lang,
 									final SupervisableEndEvent event,
 									final List<DomContent> listBodyContent,
@@ -394,7 +484,7 @@ public class NotificationMailTemplateToolkit {
 		final var context = event.context();
 		if (context != null) {
 			listBodyContent.add(div(attrs(".contextblock"),
-					text(translate.i18n(lang, event, "context", "Context:")),
+					text(translate.i18n(lang, event, "context", CONTEXT_STR)),
 					div(attrs(".context"), pre(event.context().toPrettyString()))));
 		}
 	}

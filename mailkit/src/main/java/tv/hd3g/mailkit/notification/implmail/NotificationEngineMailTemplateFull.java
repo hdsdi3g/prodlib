@@ -35,10 +35,11 @@ public class NotificationEngineMailTemplateFull implements NotificationMailMessa
 	}
 
 	@Override
-	public NotificationMailMessage makeMessage(final Locale lang, final SupervisableEndEvent event) {
+	public NotificationMailMessage makeMessage(final NotificationMailMessageProducerEnvironment env,
+											   final SupervisableEndEvent event) {
 		return new NotificationMailMessage(
-				toolkit.processSubject(lang, event),
-				toolkit.processHTMLMessage(assembleHTMLMessageBodyContent(lang, event)));
+				toolkit.processSubject(env.lang(), event),
+				toolkit.processHTMLMessage(assembleHTMLMessageBodyContent(env.lang(), event)));
 	}
 
 	private HtmlCssDocumentPayload assembleHTMLMessageBodyContent(final Locale lang,

@@ -26,7 +26,6 @@ import static org.mockito.MockitoAnnotations.openMocks;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.util.List;
-import java.util.Locale;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,15 +37,16 @@ import org.mockito.Mock;
 import j2html.tags.DomContent;
 import net.datafaker.Faker;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
+import tv.hd3g.mailkit.mod.service.SendAsSimpleNotificationContextPredicate;
 import tv.hd3g.mailkit.notification.SupervisableUtility;
 
 class NotificationEngineMailTemplateFullTest {
 	static Faker faker = Faker.instance();
 
 	NotificationMailMessageProducer p;
+	NotificationMailMessageProducerEnvironment env;
 	String subject;
 	String htmlMessage;
-	Locale lang;
 	SupervisableEndEvent event;
 	SupervisableUtility utility;
 
@@ -66,7 +66,17 @@ class NotificationEngineMailTemplateFullTest {
 
 		subject = faker.numerify("subject###");
 		htmlMessage = faker.numerify("htmlMessage###");
-		lang = SupervisableUtility.getLang();
+		env = new NotificationMailMessageProducerEnvironment(
+				SupervisableUtility.getLang(),
+				new SendAsSimpleNotificationContextPredicate() {
+
+					@Override
+					public boolean isSendAsSimpleNotificationThisContextEntry(final String contextKey,
+																			  final SupervisableEndEvent event) {
+						return true;
+					}
+
+				});
 
 		when(toolkit.processHTMLMessage(any(HtmlCssDocumentPayload.class))).thenReturn(htmlMessage);
 	}
@@ -74,9 +84,9 @@ class NotificationEngineMailTemplateFullTest {
 	@AfterEach
 	void end() {
 		verify(toolkit, times(1)).makeDocumentBaseStyles(listCSSEntries);
-		verify(toolkit, times(1)).makeDocumentDates(lang, event, listBodyContent);
-		verify(toolkit, times(1)).makeDocumentContext(lang, event, listBodyContent, listCSSEntries);
-		verify(toolkit, times(1)).makeDocumentEventEnv(lang, event, listBodyContent, listCSSEntries);
+		verify(toolkit, times(1)).makeDocumentDates(env.lang(), event, listBodyContent);
+		verify(toolkit, times(1)).makeDocumentContext(env.lang(), event, listBodyContent, listCSSEntries);
+		verify(toolkit, times(1)).makeDocumentEventEnv(env.lang(), event, listBodyContent, listCSSEntries);
 		verify(toolkit, times(1)).makeDocumentFooter(listBodyContent, listCSSEntries);
 
 		utility.verifyNoMoreInteractions();
@@ -87,7 +97,7 @@ class NotificationEngineMailTemplateFullTest {
 	}
 
 	void checkSubjectMessage() {
-		verify(toolkit, times(1)).processSubject(lang, event);
+		verify(toolkit, times(1)).processSubject(env.lang(), event);
 		verify(toolkit, times(1)).processHTMLMessage(payloadCaptor.capture());
 		assertNotNull(payloadCaptor.getValue());
 		listBodyContent = payloadCaptor.getValue().listBodyContent();
@@ -97,7 +107,7 @@ class NotificationEngineMailTemplateFullTest {
 	}
 
 	void checkMakeMessage() {
-		final var mailMessage = p.makeMessage(lang, event);
+		final var mailMessage = p.makeMessage(env, event);
 		assertNotNull(mailMessage);
 		assertEquals(htmlMessage, mailMessage.htmlMessage());
 		assertEquals(subject, mailMessage.subject());
@@ -106,7 +116,7 @@ class NotificationEngineMailTemplateFullTest {
 	void setUtility(final SupervisableUtility u) {
 		utility = u;
 		event = utility.event;
-		when(toolkit.processSubject(lang, event)).thenReturn(subject);
+		when(toolkit.processSubject(env.lang(), event)).thenReturn(subject);
 	}
 
 	@Test
@@ -116,7 +126,7 @@ class NotificationEngineMailTemplateFullTest {
 		checkMakeMessage();
 		checkSubjectMessage();
 
-		verify(toolkit, times(1)).makeDocumentTitleWithoutResult(lang, event, listBodyContent);
+		verify(toolkit, times(1)).makeDocumentTitleWithoutResult(env.lang(), event, listBodyContent);
 	}
 
 	@Test
@@ -126,7 +136,7 @@ class NotificationEngineMailTemplateFullTest {
 		checkMakeMessage();
 		checkSubjectMessage();
 
-		verify(toolkit, times(1)).makeDocumentTitleError(lang, event, listBodyContent, true, false);
+		verify(toolkit, times(1)).makeDocumentTitleError(env.lang(), event, listBodyContent, true, false);
 	}
 
 	@Test
@@ -136,7 +146,7 @@ class NotificationEngineMailTemplateFullTest {
 		checkMakeMessage();
 		checkSubjectMessage();
 
-		verify(toolkit, times(1)).makeDocumentTitleWithResult(lang, event, listBodyContent);
+		verify(toolkit, times(1)).makeDocumentTitleWithResult(env.lang(), event, listBodyContent);
 	}
 
 	@Test
@@ -146,8 +156,8 @@ class NotificationEngineMailTemplateFullTest {
 		checkMakeMessage();
 		checkSubjectMessage();
 
-		verify(toolkit, times(1)).makeDocumentTitleWithoutResult(lang, event, listBodyContent);
-		verify(toolkit, times(1)).stepsList(lang, event, false, listBodyContent, listCSSEntries);
+		verify(toolkit, times(1)).makeDocumentTitleWithoutResult(env.lang(), event, listBodyContent);
+		verify(toolkit, times(1)).stepsList(env.lang(), event, false, listBodyContent, listCSSEntries);
 	}
 
 }

@@ -19,7 +19,6 @@ package tv.hd3g.mailkit.notification.implmail;
 import static j2html.TagCreator.hr;
 
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -35,13 +34,14 @@ public class NotificationEngineMailTemplateSimple implements NotificationMailMes
 	}
 
 	@Override
-	public NotificationMailMessage makeMessage(final Locale lang, final SupervisableEndEvent event) {
+	public NotificationMailMessage makeMessage(final NotificationMailMessageProducerEnvironment env,
+											   final SupervisableEndEvent event) {
 		return new NotificationMailMessage(
-				toolkit.processSubject(lang, event),
-				toolkit.processHTMLMessage(assembleHTMLMessageBodyContent(lang, event)));
+				toolkit.processSubject(env.lang(), event),
+				toolkit.processHTMLMessage(assembleHTMLMessageBodyContent(env, event)));
 	}
 
-	private HtmlCssDocumentPayload assembleHTMLMessageBodyContent(final Locale lang,
+	private HtmlCssDocumentPayload assembleHTMLMessageBodyContent(final NotificationMailMessageProducerEnvironment env,
 																  final SupervisableEndEvent event) {
 		final var listBodyContent = new ArrayList<DomContent>();
 		final var listCSSEntries = new ArrayList<String>();
@@ -49,18 +49,21 @@ public class NotificationEngineMailTemplateSimple implements NotificationMailMes
 		toolkit.makeDocumentBaseStyles(listCSSEntries);
 
 		if (event.error() != null) {
-			toolkit.makeDocumentTitleError(lang, event, listBodyContent, false, false);
+			toolkit.makeDocumentTitleError(env.lang(), event, listBodyContent, false, false);
 		}
 
 		final var result = event.result();
 		if (result != null) {
-			toolkit.makeDocumentTitleWithResult(lang, event, listBodyContent);
+			toolkit.makeDocumentTitleWithResult(env.lang(), event, listBodyContent);
 		} else if (event.error() == null) {
-			toolkit.makeDocumentTitleWithoutResult(lang, event, listBodyContent);
+			toolkit.makeDocumentTitleWithoutResult(env.lang(), event, listBodyContent);
 		}
 
+		toolkit.makeDocumentSimpleContext(
+				env.lang(), event, listBodyContent, listCSSEntries, env.sendAsSimpleNotificationContextPredicate());
+
 		Optional.ofNullable(event.steps())
-				.ifPresent(steps -> toolkit.stepsList(lang, event, false, listBodyContent, listCSSEntries));
+				.ifPresent(steps -> toolkit.stepsList(env.lang(), event, false, listBodyContent, listCSSEntries));
 
 		listBodyContent.add(hr());
 		toolkit.makeDocumentFooter(listBodyContent, listCSSEntries);

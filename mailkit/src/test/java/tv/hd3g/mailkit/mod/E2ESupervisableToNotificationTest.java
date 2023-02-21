@@ -29,6 +29,7 @@ import static tv.hd3g.commons.mailkit.SendMailDto.MessageGrade.SECURITY;
 import static tv.hd3g.mailkit.notification.implmail.NotificationRouterMail.USER_AGENT;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -105,7 +106,8 @@ class E2ESupervisableToNotificationTest {
 
 		when(appNotificationService.getEndUserContactsToSendEvent(any(), any()))
 				.thenReturn(Map.of(userInternalAddr, lang));
-
+		when(appNotificationService.isSendAsSimpleNotificationThisContextEntry(any(), any()))
+				.thenReturn(true);
 		mailSender.clear();
 	}
 
@@ -128,7 +130,7 @@ class E2ESupervisableToNotificationTest {
 			Supervisable.getSupervisable()
 					.onMessage("test", "Test ok")
 					.onMessage("test2", "Test ok2")
-					.setContext(typeName, new JustForFunContext(context))
+					.setContext(typeName, getJustForFunContext())
 					.resultDone();
 		});
 		assertNull(e);
@@ -144,7 +146,7 @@ class E2ESupervisableToNotificationTest {
 		final var e = startRun(() -> {
 			Supervisable.getSupervisable()
 					.onMessage("test", "error")
-					.setContext(typeName, new JustForFunContext(context));
+					.setContext(typeName, getJustForFunContext());
 			throw new IllegalStateException("Just for test: " + faker.disease().internalDisease());
 		});
 		assertNotNull(e);
@@ -161,7 +163,7 @@ class E2ESupervisableToNotificationTest {
 		final var e = startRun(() -> {
 			Supervisable.getSupervisable()
 					.onMessage("test", "error")
-					.setContext(typeName, new JustForFunContext(context))
+					.setContext(typeName, getJustForFunContext())
 					.resultDone();
 			throw new IllegalStateException("Just for test: " + faker.disease().internalDisease());
 		});
@@ -179,7 +181,7 @@ class E2ESupervisableToNotificationTest {
 		final var e = startRun(() -> {
 			Supervisable.getSupervisable()
 					.onMessage("test", "InternalSecurity")
-					.setContext(typeName, new JustForFunContext(context))
+					.setContext(typeName, getJustForFunContext())
 					.markAsSecurity()
 					.resultDone();
 		});
@@ -197,7 +199,7 @@ class E2ESupervisableToNotificationTest {
 		final var e = startRun(() -> {
 			Supervisable.getSupervisable()
 					.onMessage("test", "InternalStateChange")
-					.setContext(typeName, new JustForFunContext(context))
+					.setContext(typeName, getJustForFunContext())
 					.markAsInternalStateChange()
 					.resultDone();
 		});
@@ -217,7 +219,7 @@ class E2ESupervisableToNotificationTest {
 		final var e = startRun(() -> {
 			Supervisable.getSupervisable()
 					.onMessage("test", "Security")
-					.setContext(typeName, new JustForFunContext(context))
+					.setContext(typeName, getJustForFunContext())
 					.resultDone();
 		});
 		assertNull(e);
@@ -237,7 +239,7 @@ class E2ESupervisableToNotificationTest {
 		final var e = startRun(() -> {
 			Supervisable.getSupervisable()
 					.onMessage("test", "StateChange")
-					.setContext(typeName, new JustForFunContext(context))
+					.setContext(typeName, getJustForFunContext())
 					.markAsInternalStateChange()
 					.resultDone();
 		});
@@ -249,7 +251,15 @@ class E2ESupervisableToNotificationTest {
 		checkMail(m.get(1), userDevAddr, groupLang, EVENT_NOTICE);
 	}
 
-	record JustForFunContext(String aValue) {
+	private JustForFunContext getJustForFunContext() {
+		return new JustForFunContext(
+				context,
+				faker.random().nextInt(),
+				List.of(faker.numerify("list##"), faker.numerify("list##")),
+				Map.of("k0", faker.numerify("map##"), "k1", faker.numerify("map##")));
+	}
+
+	record JustForFunContext(String aValue, int aNumber, List<String> list, Map<String, String> map) {
 	}
 
 	private Exception startRun(final RunnableWithException run) throws InterruptedException {
