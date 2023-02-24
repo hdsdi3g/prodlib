@@ -1,8 +1,8 @@
 
 Lists of 42 third-party dependencies.
-     (The Apache Software License, Version 2.0) Jackson-annotations (com.fasterxml.jackson.core:jackson-annotations:2.13.3 - http://github.com/FasterXML/jackson)
-     (The Apache Software License, Version 2.0) Jackson-core (com.fasterxml.jackson.core:jackson-core:2.13.3 - https://github.com/FasterXML/jackson-core)
-     (The Apache Software License, Version 2.0) jackson-databind (com.fasterxml.jackson.core:jackson-databind:2.13.3 - http://github.com/FasterXML/jackson)
+     (The Apache Software License, Version 2.0) Jackson-annotations (com.fasterxml.jackson.core:jackson-annotations:2.13.5 - http://github.com/FasterXML/jackson)
+     (The Apache Software License, Version 2.0) Jackson-core (com.fasterxml.jackson.core:jackson-core:2.13.5 - https://github.com/FasterXML/jackson-core)
+     (The Apache Software License, Version 2.0) jackson-databind (com.fasterxml.jackson.core:jackson-databind:2.13.5 - http://github.com/FasterXML/jackson)
      (The Apache Software License, Version 2.0) Generex (com.github.mifmif:generex:1.0.2 - https://github.com/mifmif/Generex/tree/master)
      (LGPL) JSAP (com.martiansoftware:jsap:2.1 - http://www.martiansoftware.com/jsap/)
      (Apache 2) opencsv (com.opencsv:opencsv:5.6 - http://opencsv.sf.net)
@@ -14,8 +14,8 @@ Lists of 42 third-party dependencies.
      (CeCILL-C) Spoon Core (fr.inria.gforge.spoon:spoon-core:8.4.0 - http://spoon.gforge.inria.fr/)
      (The Apache Software License, Version 2.0) javax.inject (javax.inject:javax.inject:1 - http://code.google.com/p/atinject/)
      (Eclipse Distribution License v. 1.0) (Eclipse Public License v1.0) javax.persistence-api (javax.persistence:javax.persistence-api:2.2 - https://github.com/javaee/jpa-spec)
-     (Apache License, Version 2.0) Byte Buddy (without dependencies) (net.bytebuddy:byte-buddy:1.11.22 - https://bytebuddy.net/byte-buddy)
-     (Apache License, Version 2.0) Byte Buddy agent (net.bytebuddy:byte-buddy-agent:1.11.22 - https://bytebuddy.net/byte-buddy-agent)
+     (Apache License, Version 2.0) Byte Buddy (without dependencies) (net.bytebuddy:byte-buddy:1.12.23 - https://bytebuddy.net/byte-buddy)
+     (Apache License, Version 2.0) Byte Buddy agent (net.bytebuddy:byte-buddy-agent:1.12.23 - https://bytebuddy.net/byte-buddy-agent)
      (The Apache Software License, Version 2.0) Data Faker (net.datafaker:datafaker:1.6.0 - https://www.datafaker.net)
      (Apache License, Version 2.0) Apache Commons Collections (org.apache.commons:commons-collections4:4.4 - https://commons.apache.org/proper/commons-collections/)
      (Apache License, Version 2.0) Apache Commons Compress (org.apache.commons:commons-compress:1.22 - https://commons.apache.org/proper/commons-compress/)

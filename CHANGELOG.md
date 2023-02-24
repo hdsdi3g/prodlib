@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 13.0.0
+
+Update Spring Boot parent version from 2.6.11 to 2.7.9, correct h2 test setup for AuthKit, change AuthKit MySQL dep in pom, remove unnecessary annotations in Authkit, remove explicit commons compress version in pom transfertfiles #89
+
 ## 12.4.0
 
 Add a "disable" entry in Watchfolder configuration (ObservedFolder) #84
