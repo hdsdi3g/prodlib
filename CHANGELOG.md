@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 13.1.0
+
+Add SendToEndUserThisContext utility in MailKit Notification #88. It must be enabled explicitly (by default, it set to false, and it don't break actual code/behaviors)
+
 ## 13.0.0
 
 Update Spring Boot parent version from 2.6.11 to 2.7.9, correct h2 test setup for AuthKit, change AuthKit MySQL dep in pom, remove unnecessary annotations in Authkit, remove explicit commons compress version in pom transfertfiles #89
