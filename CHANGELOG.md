@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 13.2.0
+
+Implements #95 add allowed/blocked Files/Dirs based on simple willcards.
+
 ## 13.1.0
 
 Add SendToEndUserThisContext utility in MailKit Notification #88. It must be enabled explicitly (by default, it set to false, and it don't break actual code/behaviors)
