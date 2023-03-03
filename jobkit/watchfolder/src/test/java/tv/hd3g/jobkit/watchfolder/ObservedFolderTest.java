@@ -78,6 +78,16 @@ class ObservedFolderTest {
 		assertEquals(Set.of("no", "never", "na.nb", "nc.nd", "ne.nf.ng"), observedFolder.getBlockedExtentions());
 		assertEquals(Set.of("/never/here", "/nope/dir"), observedFolder.getIgnoreRelativePaths());
 		assertEquals(Set.of("desktop.ini", ".ds_store"), observedFolder.getIgnoreFiles());
+
+		assertEquals(Set.of(), observedFolder.getAllowedDirNames());
+		assertEquals(Set.of(), observedFolder.getAllowedFileNames());
+		assertEquals(Set.of(), observedFolder.getBlockedDirNames());
+		assertEquals(Set.of(), observedFolder.getBlockedFileNames());
+
+		assertThrows(UnsupportedOperationException.class, () -> observedFolder.getAllowedDirNames().add("")); // NOSONAR S5778
+		assertThrows(UnsupportedOperationException.class, () -> observedFolder.getAllowedFileNames().add(""));// NOSONAR S5778
+		assertThrows(UnsupportedOperationException.class, () -> observedFolder.getBlockedDirNames().add(""));// NOSONAR S5778
+		assertThrows(UnsupportedOperationException.class, () -> observedFolder.getBlockedFileNames().add(""));// NOSONAR S5778
 	}
 
 	@Test

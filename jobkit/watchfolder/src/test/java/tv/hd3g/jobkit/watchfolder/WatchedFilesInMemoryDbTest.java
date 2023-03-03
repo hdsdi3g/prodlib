@@ -38,6 +38,7 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import tv.hd3g.transfertfiles.AbstractFileSystemURL;
@@ -388,6 +389,79 @@ class WatchedFilesInMemoryDbTest {
 		assertWatchedFiles(w, Set.of(), Set.of(), 2);
 		w = watchedFilesDb.update(fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 2);
+	}
+
+	@Nested
+	class AllowedBlocked {
+		@BeforeEach
+		void init() throws IOException {
+			observedFolder.setRecursive(true);
+		}
+
+		@Test
+		void setAllowedDirNames() {
+			observedFolder.setAllowedDirNames(Set.of("ok???dir", "something.else"));
+			watchedFilesDb.setup(observedFolder, FILES_ONLY);
+
+			write("thisfine.ok", "/oksubdir/thisfine.ok", "/sub/sub/dir/anotherfine.ok");
+
+			var w = watchedFilesDb.update(fs);
+			assertWatchedFiles(w, Set.of(), Set.of(), 2);
+
+			w = watchedFilesDb.update(fs);
+			assertWatchedFiles(w,
+					Set.of("thisfine.ok", "/oksubdir/thisfine.ok"),
+					Set.of(), 2);
+		}
+
+		@Test
+		void setBlockedDirNames() {
+			observedFolder.setBlockedDirNames(Set.of("ok???dir", "something.else"));
+			watchedFilesDb.setup(observedFolder, FILES_ONLY);
+
+			write("thisfine.ok", "/oksubdir/thisfine.ok", "/sub/sub/dir/anotherfine.ok");
+
+			var w = watchedFilesDb.update(fs);
+			assertWatchedFiles(w, Set.of(), Set.of(), 2);
+
+			w = watchedFilesDb.update(fs);
+			assertWatchedFiles(w,
+					Set.of("thisfine.ok", "/sub/sub/dir/anotherfine.ok"),
+					Set.of(), 2);
+		}
+
+		@Test
+		void setAllowedFileNames() {
+			observedFolder.setAllowedFileNames(Set.of("*fine.ok", "something.else"));
+			watchedFilesDb.setup(observedFolder, FILES_ONLY);
+
+			write("/oksubdir/thisfine.ok", "/oksubdir2/thisfine.ko", "/sub/sub/dir/fined.ok");
+
+			var w = watchedFilesDb.update(fs);
+			assertWatchedFiles(w, Set.of(), Set.of(), 1);
+
+			w = watchedFilesDb.update(fs);
+			assertWatchedFiles(w,
+					Set.of("/oksubdir/thisfine.ok"),
+					Set.of(), 1);
+		}
+
+		@Test
+		void setBlockedFileNames() {
+			observedFolder.setBlockedFileNames(Set.of("*fine.ok", "something.else"));
+			watchedFilesDb.setup(observedFolder, FILES_ONLY);
+
+			write("/oksubdir/thisfine.ok", "/oksubdir2/thisfine.ko", "/sub/sub/dir/fined.ok");
+
+			var w = watchedFilesDb.update(fs);
+			assertWatchedFiles(w, Set.of(), Set.of(), 1);
+
+			w = watchedFilesDb.update(fs);
+			assertWatchedFiles(w,
+					Set.of("/sub/sub/dir/fined.ok"),
+					Set.of(), 1);
+		}
+
 	}
 
 }

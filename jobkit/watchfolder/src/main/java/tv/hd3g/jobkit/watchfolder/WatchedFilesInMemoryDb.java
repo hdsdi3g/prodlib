@@ -19,6 +19,7 @@ package tv.hd3g.jobkit.watchfolder;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.apache.commons.io.FilenameUtils.wildcardMatch;
 import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.FILES_DIRS;
 
 import java.io.IOException;
@@ -222,6 +223,7 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 					}
 					return ignoreRelativePaths.contains(f.getPath()) == false;
 				})
+				.filter(this::checkAllowedNotBlocked)
 				.filter(f -> f.isDirectory() || f.isSpecial() == false)
 				.toList();
 
@@ -238,6 +240,30 @@ public class WatchedFilesInMemoryDb implements WatchedFilesDb {
 					.filter(CachedFileAttributes::isDirectory)
 					.forEach(f -> actualScan(f.getAbstractFile(), deep - 1, detected));
 		}
+	}
+
+	private boolean checkAllowedNotBlocked(final CachedFileAttributes detectedFile) {
+		final var name = detectedFile.getName();
+		if (detectedFile.isDirectory()) {
+			final var allowedDirNames = observedFolder.getAllowedDirNames();
+			if (allowedDirNames.isEmpty() == false) {
+				return allowedDirNames.stream().anyMatch(w -> wildcardMatch(name, w));
+			}
+			final var blockedDirNames = observedFolder.getBlockedDirNames();
+			if (blockedDirNames.isEmpty() == false) {
+				return blockedDirNames.stream().noneMatch(w -> wildcardMatch(name, w));
+			}
+		} else {
+			final var allowedFileNames = observedFolder.getAllowedFileNames();
+			if (allowedFileNames.isEmpty() == false) {
+				return allowedFileNames.stream().anyMatch(w -> wildcardMatch(name, w));
+			}
+			final var blockedFileNames = observedFolder.getBlockedFileNames();
+			if (blockedFileNames.isEmpty() == false) {
+				return blockedFileNames.stream().noneMatch(w -> wildcardMatch(name, w));
+			}
+		}
+		return true;
 	}
 
 	boolean containExtension(final String baseFileName, final Set<String> candidates) {

@@ -46,6 +46,10 @@ public class ObservedFolder {
 	private Set<String> blockedExtentions;
 	private Set<String> ignoreRelativePaths;
 	private Set<String> ignoreFiles;
+	private Set<String> allowedFileNames;
+	private Set<String> allowedDirNames;
+	private Set<String> blockedFileNames;
+	private Set<String> blockedDirNames;
 	private boolean allowedHidden;
 	private boolean allowedLinks;
 	private boolean recursive;
@@ -105,6 +109,15 @@ public class ObservedFolder {
 				.distinct()
 				.collect(toUnmodifiableSet());
 		minFixedStateTime = Optional.ofNullable(minFixedStateTime).orElse(Duration.ZERO);
+
+		allowedFileNames = Optional.ofNullable(allowedFileNames).orElse(Set.of()).stream()
+				.collect(toUnmodifiableSet());
+		allowedDirNames = Optional.ofNullable(allowedDirNames).orElse(Set.of()).stream()
+				.collect(toUnmodifiableSet());
+		blockedFileNames = Optional.ofNullable(blockedFileNames).orElse(Set.of()).stream()
+				.collect(toUnmodifiableSet());
+		blockedDirNames = Optional.ofNullable(blockedDirNames).orElse(Set.of()).stream()
+				.collect(toUnmodifiableSet());
 	}
 
 	@Override
