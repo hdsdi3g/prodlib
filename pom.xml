@@ -22,6 +22,7 @@
         <module>parent</module>
         <module>parent-web</module>
         <module>interfaces</module>
+        <module>env-version</module>
         <module>app</module>
         <module>app-web</module>
         <module>selfautorestdoc</module>
