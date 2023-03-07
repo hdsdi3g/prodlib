@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 13.3.0
+
+Create project env-version, and add EnvironmentVersion + process pid in (admin/dev) mail footer to MailKit Notifications #91. No setup required.
+
 ## 13.2.0
 
 Implements #95 add allowed/blocked Files/Dirs based on simple willcards.
