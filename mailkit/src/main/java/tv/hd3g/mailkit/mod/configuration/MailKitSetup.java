@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -30,6 +31,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
+import tv.hd3g.commons.version.EnvironmentVersion;
 import tv.hd3g.jobkit.engine.SupervisableManager;
 import tv.hd3g.mailkit.mod.component.Translate;
 import tv.hd3g.mailkit.mod.service.AppNotificationService;
@@ -42,6 +44,7 @@ import tv.hd3g.mailkit.notification.implmail.NotificationMailTemplateToolkit;
 import tv.hd3g.mailkit.notification.implmail.NotificationRouterMail;
 
 @Configuration
+@ComponentScan(basePackages = { "tv.hd3g.commons.version.mod" })
 public class MailKitSetup {
 
 	@Bean
@@ -92,10 +95,11 @@ public class MailKitSetup {
 													  final MailKitConfig config,
 													  final JavaMailSender mailSender,
 													  final Translate translate,
-													  final SupervisableManager supervisableManager) {
+													  final SupervisableManager supervisableManager,
+													  final EnvironmentVersion environmentVersion) {
 		Optional.ofNullable(appNotificationService.getMessageSourceBasename())
 				.ifPresent(rbms::addBasenames);
-		final var toolkit = new NotificationMailTemplateToolkit(translate, config.getEnv());
+		final var toolkit = new NotificationMailTemplateToolkit(translate, config.getEnv(), environmentVersion);
 
 		final var setupEngine = new NotificationEngineMailSetup(
 				supervisableManager,

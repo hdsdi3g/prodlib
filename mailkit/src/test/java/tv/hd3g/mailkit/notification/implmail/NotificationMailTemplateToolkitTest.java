@@ -37,19 +37,26 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 import j2html.tags.DomContent;
 import net.datafaker.Faker;
+import tv.hd3g.commons.version.EnvironmentVersion;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 import tv.hd3g.mailkit.mod.component.Translate;
 import tv.hd3g.mailkit.mod.service.SendAsSimpleNotificationContextPredicate;
 import tv.hd3g.mailkit.notification.NotificationEnvironment;
 import tv.hd3g.mailkit.notification.SupervisableUtility;
 
+@SpringBootTest
 class NotificationMailTemplateToolkitTest {
 	static Faker faker = net.datafaker.Faker.instance();
+
+	@Autowired
+	EnvironmentVersion environmentVersion;
 
 	NotificationMailTemplateToolkit t;
 	Locale lang;
@@ -81,7 +88,7 @@ class NotificationMailTemplateToolkitTest {
 				return true;
 			}
 		};
-		t = new NotificationMailTemplateToolkit(translate, env);
+		t = new NotificationMailTemplateToolkit(translate, env, environmentVersion);
 		listBodyContent = new ArrayList<>();
 		listCSSEntries = new ArrayList<>();
 
@@ -262,7 +269,7 @@ class NotificationMailTemplateToolkitTest {
 	@Test
 	void testMakeDocumentEventEnv() {
 		t.makeDocumentEventEnv(lang, event, listBodyContent, listCSSEntries);
-		assertEquals(1, listBodyContent.size());
+		assertEquals(2, listBodyContent.size());
 		assertEquals(1, listCSSEntries.size());
 	}
 

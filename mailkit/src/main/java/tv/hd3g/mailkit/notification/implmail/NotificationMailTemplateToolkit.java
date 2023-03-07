@@ -58,6 +58,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import j2html.TagCreator;
 import j2html.tags.DomContent;
 import j2html.utils.EscapeUtil;
+import tv.hd3g.commons.version.EnvironmentVersion;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 import tv.hd3g.jobkit.engine.SupervisableMessage;
 import tv.hd3g.jobkit.engine.SupervisableResult;
@@ -80,10 +81,14 @@ public class NotificationMailTemplateToolkit {
 	protected final Translate translate;
 	protected final NotificationEnvironment env;
 	private final ExceptionToString exceptionToString;
+	private final EnvironmentVersion environmentVersion;
 
-	public NotificationMailTemplateToolkit(final Translate translate, final NotificationEnvironment env) {
+	public NotificationMailTemplateToolkit(final Translate translate,
+										   final NotificationEnvironment env,
+										   final EnvironmentVersion environmentVersion) {
 		this.translate = Objects.requireNonNull(translate, "\"translate\" can't to be null");
 		this.env = Objects.requireNonNull(env, "\"env\" can't to be null");
+		this.environmentVersion = Objects.requireNonNull(environmentVersion, "\"environmentVersion\" can't to be null");
 		exceptionToString = new ExceptionToString();
 	}
 
@@ -522,20 +527,34 @@ public class NotificationMailTemplateToolkit {
 				div.sendersource {
 				    color: #BBB
 				}
+				div.senderversion {
+				    color: #BBB
+				}
 				span.envevent {
 				    font-family: 'Consolas', 'Monaco', monospace;
 				    color: #AAA;
 				}
 				""");
 		final var senderSource = translate.i18n(lang, event, "sender",
-				"Notification type: {0}, provided by {1}, runned on spool {2} as {3}, sended by {4} for {5}.",
+				"Notification type: {0}, provided by {1}, runned on spool {2} as {3}, sended by {4}#{5} (started the {6}) for {7}.",
 				escapeNspanWrapp(".envevent.type", event.typeName()),
 				escapeNspanWrapp(".envevent.manager", event.managerName()),
 				escapeNspanWrapp(".envevent.spool", event.spoolName()),
 				escapeNspanWrapp(".envevent.job", event.jobName()),
 				escapeNspanWrapp(".envevent.instance", env.instanceName()),
+				escapeNspanWrapp(".envevent.instancepid", String.valueOf(environmentVersion.pid())),
+				escapeNspanWrapp(".envevent.startedon", formatLongDate(environmentVersion.startupTime(), lang)),
 				escapeNspanWrapp(".envevent.vendor", env.vendorName()));
 		listBodyContent.add(div(attrs(".sendersource"), rawHtml(senderSource)));
+
+		final var senderVersion = translate.i18n(lang, event, "senderversion",
+				"App version: {0}, deps versions: {1}/{2} runned on {3} {4}.",
+				escapeNspanWrapp(".envevent.appversion", environmentVersion.appVersion()),
+				escapeNspanWrapp(".envevent.prodlib", environmentVersion.prodlibVersion()),
+				escapeNspanWrapp(".envevent.framework", environmentVersion.frameworkVersion()),
+				escapeNspanWrapp(".envevent.jvmname", environmentVersion.jvmNameVendor()),
+				escapeNspanWrapp(".envevent.jvmversion", environmentVersion.jvmVersion()));
+		listBodyContent.add(div(attrs(".senderversion"), rawHtml(senderVersion)));
 	}
 
 	public void makeDocumentFooter(final List<DomContent> listBodyContent, final List<String> listCSSEntries) {
