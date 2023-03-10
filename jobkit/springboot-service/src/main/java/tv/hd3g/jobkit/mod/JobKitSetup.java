@@ -46,8 +46,8 @@ public class JobKitSetup {
 	}
 
 	@Bean
-	public SupervisableManager getSupervisableManager(final ApplicationContext applicationContext,
-													  final ObjectMapper jacksonObjectMapper) {
+	SupervisableManager getSupervisableManager(final ApplicationContext applicationContext,
+											   final ObjectMapper jacksonObjectMapper) {
 		var appName = applicationContext.getApplicationName();
 		if (appName.isEmpty()) {
 			appName = "Default";
@@ -63,7 +63,7 @@ public class JobKitSetup {
 	}
 
 	@Bean
-	public SupervisableServiceSupplier getSupervisableSupplier(final SupervisableManager supervisableManager) {
+	SupervisableServiceSupplier getSupervisableSupplier(final SupervisableManager supervisableManager) {
 		return new SupervisableServiceSupplier(supervisableManager);
 	}
 

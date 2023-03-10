@@ -1,4 +1,4 @@
-package tv.hd3g.mailkit.mod;
+package tv.hd3g.mailkit.mod.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.spring5.messageresolver.SpringMessageResolver;
-
-import tv.hd3g.mailkit.mod.configuration.MailKitSetup;
 
 @SpringBootTest
 class MailKitSetupTest {

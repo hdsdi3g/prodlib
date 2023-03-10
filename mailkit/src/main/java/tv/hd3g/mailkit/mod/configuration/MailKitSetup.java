@@ -49,14 +49,14 @@ public class MailKitSetup {
 
 	@Bean
 	@Primary
-	public ResourceBundleMessageSource resourceBundleMessageSource() {
+	ResourceBundleMessageSource resourceBundleMessageSource() {
 		final var rbms = new ResourceBundleMessageSource();
 		rbms.addBasenames("mailkit-messages");
 		return rbms;
 	}
 
 	@Bean
-	public SpringMessageResolver getSpringMessageResolver(final MessageSource rbms) {
+	SpringMessageResolver getSpringMessageResolver(final MessageSource rbms) {
 		final var springMessageResolver = new SpringMessageResolver();
 		springMessageResolver.setMessageSource(rbms);
 		return springMessageResolver;
@@ -74,7 +74,7 @@ public class MailKitSetup {
 	}
 
 	@Bean(name = "htmlTemplateEngine")
-	public TemplateEngine htmlTemplateEngine(final SpringMessageResolver springMessageResolver) {
+	TemplateEngine htmlTemplateEngine(final SpringMessageResolver springMessageResolver) {
 		final var templateEngine = new TemplateEngine();
 		templateEngine.addTemplateResolver(templateResolver(".html", TemplateMode.HTML));
 		templateEngine.addMessageResolver(springMessageResolver);
@@ -82,7 +82,7 @@ public class MailKitSetup {
 	}
 
 	@Bean(name = "subjectTemplateEngine")
-	public TemplateEngine subjectTemplateEngine(final SpringMessageResolver springMessageResolver) {
+	TemplateEngine subjectTemplateEngine(final SpringMessageResolver springMessageResolver) {
 		final var templateEngine = new TemplateEngine();
 		templateEngine.addTemplateResolver(templateResolver(".txt", TemplateMode.TEXT));
 		templateEngine.addMessageResolver(springMessageResolver);
@@ -90,13 +90,13 @@ public class MailKitSetup {
 	}
 
 	@Bean
-	public NotificationManager getNotificationManager(final ResourceBundleMessageSource rbms,
-													  final AppNotificationService appNotificationService,
-													  final MailKitConfig config,
-													  final JavaMailSender mailSender,
-													  final Translate translate,
-													  final SupervisableManager supervisableManager,
-													  final EnvironmentVersion environmentVersion) {
+	NotificationManager getNotificationManager(final ResourceBundleMessageSource rbms,
+											   final AppNotificationService appNotificationService,
+											   final MailKitConfig config,
+											   final JavaMailSender mailSender,
+											   final Translate translate,
+											   final SupervisableManager supervisableManager,
+											   final EnvironmentVersion environmentVersion) {
 		Optional.ofNullable(appNotificationService.getMessageSourceBasename())
 				.ifPresent(rbms::addBasenames);
 		final var toolkit = new NotificationMailTemplateToolkit(translate, config.getEnv(), environmentVersion);

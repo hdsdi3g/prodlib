@@ -27,19 +27,19 @@ public class MockService {
 
 		@Bean
 		@Primary
-		public SendMailService sendMailServiceMock() {
+		SendMailService sendMailServiceMock() {
 			return Mockito.mock(SendMailService.class);
 		}
 
 		@Bean
 		@Primary
-		public ScheduledExecutorService scheduledExecutorService() {
+		ScheduledExecutorService scheduledExecutorService() {
 			return Mockito.mock(ScheduledExecutorService.class);
 		}
 
 		@Bean
 		@Primary
-		public JobKitEngine jobKitEngine() {
+		JobKitEngine jobKitEngine() {
 			return Mockito.mock(JobKitEngine.class);
 		}
 
@@ -51,13 +51,13 @@ public class MockService {
 
 		@Bean
 		@Primary
-		public ResourceBundleMessageSource resourceBundleMessageSource() {
+		ResourceBundleMessageSource resourceBundleMessageSource() {
 			return new ResourceBundleMessageSource();
 		}
 
 		@Bean
 		@Primary
-		public SendMailService sendMailServiceMock() {
+		SendMailService sendMailServiceMock() {
 			return Mockito.mock(SendMailService.class);
 		}
 

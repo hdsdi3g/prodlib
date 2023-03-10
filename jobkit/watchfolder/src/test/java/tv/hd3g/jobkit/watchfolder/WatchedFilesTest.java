@@ -97,6 +97,7 @@ class WatchedFilesTest {
 		verify(updated, times(1)).stream();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	void testGetFoundedAndUpdatedFS() {
 		when(founded.stream()).thenReturn(Stream.of(cfa0));

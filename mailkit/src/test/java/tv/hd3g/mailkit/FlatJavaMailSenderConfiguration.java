@@ -11,7 +11,7 @@ public class FlatJavaMailSenderConfiguration {
 
 	@Bean
 	@Primary
-	public FlatJavaMailSender flatJavaMailSender() {
+	FlatJavaMailSender flatJavaMailSender() {
 		return new FlatJavaMailSender(true);
 	}
 
