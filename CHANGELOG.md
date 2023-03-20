@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 13.3.2
+
+Bug correction: add PBSZ, PROT and OPTS UTF8 commands for FTPS/ES Clients (transfertfiles) #101
+
 ## 13.3.1
 
 Code maintenance update (#99). No changes.
