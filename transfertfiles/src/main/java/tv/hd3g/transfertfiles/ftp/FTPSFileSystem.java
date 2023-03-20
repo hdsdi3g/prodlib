@@ -34,7 +34,7 @@ public class FTPSFileSystem extends FTPESFileSystem {// NOSONAR S2160
 						  final char[] password,
 						  final boolean passiveMode,
 						  final boolean ignoreInvalidCertificates,
-	                      final String basePath) {
+						  final String basePath) {
 		super(host, port, username, password, passiveMode, ignoreInvalidCertificates, basePath);
 		if (ignoreInvalidCertificates) {
 			client = new FTPSClient(true, sslContextNeverCheck);
@@ -45,6 +45,7 @@ public class FTPSFileSystem extends FTPESFileSystem {// NOSONAR S2160
 
 	@Override
 	public FTPClient getClient() {
+		client.setControlEncoding("UTF-8");
 		return client;
 	}
 

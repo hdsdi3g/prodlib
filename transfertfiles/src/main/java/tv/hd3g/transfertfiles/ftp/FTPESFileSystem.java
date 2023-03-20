@@ -16,6 +16,7 @@
  */
 package tv.hd3g.transfertfiles.ftp;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -43,7 +44,7 @@ public class FTPESFileSystem extends FTPFileSystem {// NOSONAR S2160
 						   final char[] password,
 						   final boolean passiveMode,
 						   final boolean ignoreInvalidCertificates,
-	                       final String basePath) {
+						   final String basePath) {
 		super(host, port, username, password, passiveMode, basePath);
 		this.ignoreInvalidCertificates = ignoreInvalidCertificates;
 		if (ignoreInvalidCertificates) {
@@ -51,6 +52,7 @@ public class FTPESFileSystem extends FTPFileSystem {// NOSONAR S2160
 		} else {
 			client = new FTPSClient(false);
 		}
+		client.setControlEncoding("UTF-8");
 	}
 
 	static final SSLContext sslContextNeverCheck;
@@ -100,6 +102,18 @@ public class FTPESFileSystem extends FTPFileSystem {// NOSONAR S2160
 
 	public boolean isIgnoreInvalidCertificates() {
 		return ignoreInvalidCertificates;
+	}
+
+	@Override
+	protected void afterLogin() throws IOException {
+		if ("UTF-8".equalsIgnoreCase(client.getControlEncoding())) {
+			log.trace("Send \"OPTS UTF8 ON\" to {}", this);
+			checkIsPositiveCompletion(client.sendCommand("OPTS UTF8 ON"));
+		}
+		log.trace("Send \"PBSZ 0\" to {}", this);
+		client.execPBSZ(0);
+		log.trace("Send \"PROT P\" to {}", this);
+		client.execPROT("P");
 	}
 
 }

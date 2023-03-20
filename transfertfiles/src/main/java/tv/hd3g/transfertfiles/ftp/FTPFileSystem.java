@@ -32,7 +32,7 @@ import org.apache.logging.log4j.Logger;
 import tv.hd3g.transfertfiles.CommonAbstractFileSystem;
 
 public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
-	private static final Logger log = LogManager.getLogger();
+	protected static final Logger log = LogManager.getLogger();
 
 	protected final InetAddress host;
 	protected final int port;
@@ -75,6 +75,12 @@ public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
 		return passiveMode;
 	}
 
+	protected void afterLogin() throws IOException {
+		/**
+		 * By default, do nothing.
+		 */
+	}
+
 	@Override
 	public void connect() {
 		if (isAvaliable()) {
@@ -98,15 +104,12 @@ public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
 			if (loginOk == false) {
 				throw new IOException("Can't login to FTP server");
 			}
+			afterLogin();
 			if (passiveMode) {
 				log.debug("Switch to passive for {}", this);
 				ftpClient.enterLocalPassiveMode();
-				final var replyCode = ftpClient.getReplyCode();
-				if (FTPReply.isPositiveCompletion(replyCode) == false) {
-					throw new IOException("FTP error: " + replyCode);
-				}
+				checkIsPositiveCompletion(ftpClient.getReplyCode());
 			}
-
 			log.trace("Set binary connection to {}", this);
 			final var setToBin = ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
 			if (setToBin == false) {
@@ -123,6 +126,13 @@ public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
 			}
 			throw new UncheckedIOException(e);
 		}
+	}
+
+	protected static void checkIsPositiveCompletion(final int replyCode) throws IOException {
+		if (FTPReply.isPositiveCompletion(replyCode)) {
+			return;
+		}
+		throw new IOException("FTP error: " + replyCode);
 	}
 
 	@Override
