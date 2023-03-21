@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 13.3.3
+
+Correct implementation bugs with Watchfolder/ObservedFolder: let overload postConfiguration and correct Lombok setups (EqualsAndHashCode) in ObservedFolder (only label and disabled with be used to compute non duplicated entries).
+
 ## 13.3.2
 
 Bug correction: add PBSZ, PROT and OPTS UTF8 commands for FTPS/ES Clients (transfertfiles) #101
