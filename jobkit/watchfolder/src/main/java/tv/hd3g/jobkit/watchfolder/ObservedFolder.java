@@ -30,6 +30,8 @@ import java.util.function.UnaryOperator;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.EqualsAndHashCode;
+import lombok.EqualsAndHashCode.Include;
 import lombok.Getter;
 import lombok.Setter;
 import tv.hd3g.transfertfiles.AbstractFile;
@@ -37,10 +39,12 @@ import tv.hd3g.transfertfiles.AbstractFileSystemURL;
 
 @Getter
 @Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ObservedFolder {
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String targetFolder;
+	@Include
 	private String label;
 	private Set<String> allowedExtentions;
 	private Set<String> blockedExtentions;
@@ -54,6 +58,7 @@ public class ObservedFolder {
 	private boolean allowedLinks;
 	private boolean recursive;
 	private Duration minFixedStateTime;
+	@Include
 	private boolean disabled;
 
 	private static final UnaryOperator<String> removeFirstDot = ext -> {
@@ -67,6 +72,18 @@ public class ObservedFolder {
 		if (disabled) {
 			return;
 		}
+
+		allowedExtentions = Optional.ofNullable(allowedExtentions).orElse(Set.of());
+		blockedExtentions = Optional.ofNullable(blockedExtentions).orElse(Set.of());
+		ignoreRelativePaths = Optional.ofNullable(ignoreRelativePaths).orElse(Set.of());
+		ignoreFiles = Optional.ofNullable(ignoreFiles).orElse(Set.of());
+		minFixedStateTime = Optional.ofNullable(minFixedStateTime).orElse(Duration.ZERO);
+		allowedFileNames = Optional.ofNullable(allowedFileNames).orElse(Set.of());
+		allowedDirNames = Optional.ofNullable(allowedDirNames).orElse(Set.of());
+		blockedFileNames = Optional.ofNullable(blockedFileNames).orElse(Set.of());
+		blockedDirNames = Optional.ofNullable(blockedDirNames).orElse(Set.of());
+		internalPostConfiguration();
+
 		Objects.requireNonNull(targetFolder, "Null targetFolder");
 		try {
 			final var targetFolderF = new File(targetFolder);
@@ -118,6 +135,12 @@ public class ObservedFolder {
 				.collect(toUnmodifiableSet());
 		blockedDirNames = Optional.ofNullable(blockedDirNames).orElse(Set.of()).stream()
 				.collect(toUnmodifiableSet());
+	}
+
+	protected void internalPostConfiguration() {
+		/**
+		 * Overload this as needed
+		 */
 	}
 
 	@Override
