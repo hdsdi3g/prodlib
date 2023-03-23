@@ -23,6 +23,7 @@
         <module>parent-web</module>
         <module>interfaces</module>
         <module>env-version</module>
+        <module>jsconfig</module>
         <module>app</module>
         <module>app-web</module>
         <module>selfautorestdoc</module>
@@ -63,6 +64,7 @@
         <spoon.version>10.1.1</spoon.version>
         <j2html.version>1.6.0</j2html.version>
         <esapi.version>2.5.0.0</esapi.version>
+        <graalvm.version>22.3.1</graalvm.version>
         <log4j2.version>2.17.2</log4j2.version>
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
