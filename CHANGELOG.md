@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 13.4.0
+
+Create project jsconfig: let load dynamically (hot reloaded) JS files and run internal JS functions as Java functions #104
+
 ## 13.3.3
 
 Correct implementation bugs with Watchfolder/ObservedFolder: let overload postConfiguration and correct Lombok setups (EqualsAndHashCode) in ObservedFolder (only label and disabled with be used to compute non duplicated entries).
