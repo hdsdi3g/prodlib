@@ -17,7 +17,6 @@
 package tv.hd3g.commons.jsconfig;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.graalvm.polyglot.HostAccess.ALL;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,24 +30,22 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.EnvironmentAccess;
+import org.graalvm.polyglot.Context.Builder;
 import org.graalvm.polyglot.Value;
 
 import lombok.Getter;
 import tv.hd3g.commons.jsconfig.mod.JSConfigConfig;
 
 @Getter
-public class JSConfigContext {
+public class JSContextLoader {
 	private static final Logger log = LogManager.getLogger();
-
-	static {
-		System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
-	}
 
 	private final Context context;
 	private final Value binding;
 
-	public JSConfigContext(final Set<File> jsFiles, final JSConfigConfig config) {
+	public JSContextLoader(final Set<File> jsFiles,
+						   final JSConfigConfig config,
+						   final Builder contextBuilder) {
 		final var allJsContent = jsFiles.stream()
 				.map(File::getAbsoluteFile)
 				.sorted()
@@ -63,17 +60,6 @@ public class JSConfigContext {
 				})
 				.map(t -> t.replace("\r", ""))
 				.collect(Collectors.joining("\n"));
-
-		final var contextBuilder = Context.newBuilder("js")
-				.allowHostAccess(ALL)
-				.allowHostClassLookup(className -> true)
-				.allowCreateProcess(config.isAllowCreateProcess())
-				.allowCreateThread(config.isAllowCreateThread())
-				.allowEnvironmentAccess(EnvironmentAccess.INHERIT)
-				.allowExperimentalOptions(config.isAllowExperimentalOptions())
-				.allowHostClassLoading(config.isDisableHostClassLoading() == false)
-				.allowIO(config.isAllowIO())
-				.allowNativeAccess(config.isAllowNativeAccess());
 
 		if (config.isFineLevelLogger()) {
 			contextBuilder

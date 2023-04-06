@@ -19,14 +19,23 @@ package tv.hd3g.commons.jsconfig.mod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import tv.hd3g.commons.jsconfig.JSConfigRunner;
+import tv.hd3g.commons.jsconfig.JSContextRunner;
+import tv.hd3g.commons.jsconfig.JSUpdateWatcher;
+import tv.hd3g.commons.jsconfig.mod.component.ContextBuilderProvider;
 
 @Configuration
 public class JSConfigSetup {
 
 	@Bean
-	JSConfigRunner getJSConfigContextBindingsProvider(final JSConfigConfig config) {
-		return new JSConfigRunner(config);
+	JSContextRunner getJSConfigContextBindingsProvider(final JSConfigConfig config,
+													   final ContextBuilderProvider contextBuilderProvider,
+													   final JSUpdateWatcher jsUpdateWatcher) {
+		return new JSContextRunner(config, contextBuilderProvider, jsUpdateWatcher);
+	}
+
+	@Bean
+	JSUpdateWatcher getJSUpdateWatcher(final JSConfigConfig config) {
+		return new JSUpdateWatcher(config);
 	}
 
 }

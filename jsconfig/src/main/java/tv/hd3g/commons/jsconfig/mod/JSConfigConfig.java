@@ -16,8 +16,16 @@
  */
 package tv.hd3g.commons.jsconfig.mod;
 
+import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toUnmodifiableSet;
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -45,5 +53,34 @@ public class JSConfigConfig {
 	private boolean disableEnvironmentAccess;
 	private boolean fineLevelLogger;
 	private boolean disableWatchfolder;
+
+	public List<File> getFileDirSrc() {
+		return Optional.ofNullable(src).stream()
+				.flatMap(List::stream)
+				.distinct()
+				.map(f -> {
+					if (f.exists() == false) {
+						throw new UncheckedIOException(new FileNotFoundException("File/dir don't exists: " + f));
+					}
+					try {
+						return f.getCanonicalFile();
+					} catch (final IOException e) {
+						throw new UncheckedIOException("Can't access to file/dir", e);
+					}
+				})
+				.toList();
+	}
+
+	public Set<File> getDirSrc() {
+		return getFileDirSrc().stream()
+				.filter(File::isDirectory)
+				.collect(toUnmodifiableSet());
+	}
+
+	public Set<File> getFileSrc() {
+		return getFileDirSrc().stream()
+				.filter(not(File::isDirectory))
+				.collect(toUnmodifiableSet());
+	}
 
 }

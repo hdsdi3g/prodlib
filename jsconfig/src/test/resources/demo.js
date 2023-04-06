@@ -1,3 +1,3 @@
 function testJS(inputValue) {
-	return inputValue + "-test";
+    return inputValue + "-test";
 }

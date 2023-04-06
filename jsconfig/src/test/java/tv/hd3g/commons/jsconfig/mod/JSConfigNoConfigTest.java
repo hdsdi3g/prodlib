@@ -22,13 +22,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import tv.hd3g.commons.jsconfig.JSConfigRunner;
+import tv.hd3g.commons.jsconfig.JSContextRunner;
 
 @SpringBootTest
 class JSConfigNoConfigTest {
 
 	@Autowired
-	JSConfigRunner runner;
+	JSContextRunner runner;
 
 	@Test
 	void testExecute() {
