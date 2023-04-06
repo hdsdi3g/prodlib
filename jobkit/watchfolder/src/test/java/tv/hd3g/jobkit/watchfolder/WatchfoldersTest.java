@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atMostOnce;
 import static org.mockito.Mockito.doThrow;
@@ -37,7 +36,6 @@ import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.RETRY_FOUNDE
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.NoSuchFileException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
@@ -111,17 +109,11 @@ class WatchfoldersTest {
 		assertTrue(jobKitEngine.isEmptyActiveServicesList());
 		watchfolders.startScans();
 
-		jobKitEngine.runAllServicesOnce();
-
-		assertFalse(jobKitEngine.isEmptyActiveServicesList());
-		verify(folderActivity, times(1)).onScanErrorFolder(eq(observedFolder),
-				argThat(f -> f.getCause() instanceof NoSuchFileException));
-
 		assertThrows(IllegalStateException.class, () -> jobKitEngine.runAllServicesOnce());
 
 		assertFalse(jobKitEngine.isEmptyActiveServicesList());
-		verify(folderActivity, times(1)).onScanErrorFolder(eq(observedFolder), any(Exception.class));
-
+		assertThrows(IllegalStateException.class, () -> jobKitEngine.runAllServicesOnce());
+		assertFalse(jobKitEngine.isEmptyActiveServicesList());
 		assertThrows(IllegalStateException.class, () -> jobKitEngine.runAllServicesOnce());
 
 		/**
@@ -130,7 +122,6 @@ class WatchfoldersTest {
 		observedFolder.setTargetFolder("file://localhost/" + new File("").getAbsolutePath());
 		jobKitEngine.runAllServicesOnce();
 		verify(folderActivity, times(1)).onStartScans(List.of(observedFolder));
-		verify(folderActivity, times(1)).onScanErrorFolder(eq(observedFolder), any(Exception.class));
 
 		verify(folderActivity, times(1)).getPickUpType(observedFolder);
 		verify(folderActivity, atMostOnce()).onBeforeScan(observedFolder);

@@ -24,13 +24,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
-import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import tv.hd3g.transfertfiles.InvalidURLException;
 import tv.hd3g.transfertfiles.ftp.FTPFileSystem;
 
 class ObservedFolderTest {
@@ -101,9 +101,9 @@ class ObservedFolderTest {
 	void testPostConfiguration_errors() {
 		assertThrows(NullPointerException.class, () -> observedFolder.postConfiguration());
 		observedFolder.setTargetFolder(new File("/" + String.valueOf(System.nanoTime())).getPath());
-		assertThrows(NullPointerException.class, () -> observedFolder.postConfiguration());
+		assertThrows(InvalidURLException.class, () -> observedFolder.postConfiguration());
 		observedFolder.setTargetFolder(new File("pom.xml").getPath());
-		assertThrows(UncheckedIOException.class, () -> observedFolder.postConfiguration());
+		assertThrows(InvalidURLException.class, () -> observedFolder.postConfiguration());
 	}
 
 	@Test

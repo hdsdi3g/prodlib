@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.UnknownHostException;
 
 import org.junit.jupiter.api.AfterEach;
@@ -39,6 +38,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import net.datafaker.Faker;
 import tv.hd3g.transfertfiles.ftp.FTPESFileSystem;
 import tv.hd3g.transfertfiles.ftp.FTPFileSystem;
 import tv.hd3g.transfertfiles.ftp.FTPSFileSystem;
@@ -157,20 +157,19 @@ class AbstractFileSystemURLTest {
 
 	@Test
 	void testBadResolve() throws IOException {
-		final var url = "ftpes://this-host-dont-exists/";
+		final var url = "ftpes://" + Faker.instance().numerify("this-host-dont-exists###") + "/";
 		try (var afs = new AbstractFileSystemURL(url)) {
 			fail("Expect exception");
-		} catch (final UncheckedIOException e) {
-			assertTrue(e.getCause().getClass().isAssignableFrom(UnknownHostException.class));
-			assertEquals("Can't resolve hostname: \"this-host-dont-exists\"", e.getMessage());
+		} catch (final InvalidURLException e) {
+			assertEquals("Can't resolve hostname: " + url, e.getMessage());
 		}
 	}
 
 	static class TestAbstractFileSystemURL extends AbstractFileSystemURL {
 
 		public TestAbstractFileSystemURL(final String protectedRessourceURL,
-		                                 final AbstractFileSystem<?> fileSystem,
-		                                 final String basePath) {
+										 final AbstractFileSystem<?> fileSystem,
+										 final String basePath) {
 			super(protectedRessourceURL, fileSystem, basePath);
 		}
 	}

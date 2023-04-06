@@ -16,10 +16,11 @@
  */
 package tv.hd3g.transfertfiles.ftp;
 
+import static tv.hd3g.transfertfiles.InvalidURLException.requireNonNull;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.InetAddress;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -30,6 +31,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import tv.hd3g.transfertfiles.CommonAbstractFileSystem;
+import tv.hd3g.transfertfiles.InvalidURLException;
 
 public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
 	protected static final Logger log = LogManager.getLogger();
@@ -53,11 +55,11 @@ public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
 						 final boolean passiveMode,
 						 final String basePath) {
 		super(basePath, username + "@" + host.getHostName() + ":" + port);
-		this.host = Objects.requireNonNull(host);
+		this.host = requireNonNull(host, "Missing FTP host name");
 		this.port = port;
-		this.username = Objects.requireNonNull(username, "FTP username");
+		this.username = requireNonNull(username, "Missing FTP username");
 		if (username.length() == 0) {
-			throw new IllegalArgumentException("Invalid (empty) username");
+			throw new InvalidURLException("Invalid (empty) username");
 		}
 		this.password = Optional.ofNullable(password).orElse(new char[] {});
 		this.passiveMode = passiveMode;

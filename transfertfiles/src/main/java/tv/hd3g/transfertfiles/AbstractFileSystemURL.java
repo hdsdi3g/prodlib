@@ -16,14 +16,13 @@
  */
 package tv.hd3g.transfertfiles;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static tv.hd3g.transfertfiles.AbstractFile.normalizePath;
+import static tv.hd3g.transfertfiles.InvalidURLException.requireNonNull;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -71,10 +70,10 @@ public class AbstractFileSystemURL implements Closeable {
 	public AbstractFileSystemURL(final String ressourceURL) {
 		final var url = new URLAccess(ressourceURL);
 
-		final var protocol = requireNonNull(url.getProtocol());
+		final var protocol = requireNonNull(url.getProtocol(), "Missing URL Protocol", url);
 		basePath = normalizePath(Optional.ofNullable(url.getPath()).orElse("/"));
 		final var host = resolveHostname(url);
-		final var query = requireNonNull(url.getOptionZone());
+		final var query = requireNonNull(url.getOptionZone(), "Missing option zone", url);
 		final var username = url.getUsername();
 		protectedRessourceURL = url.getProtectedRessourceURL() + " [" + host.getHostAddress() + "]";
 		final var password = url.getPassword();
@@ -88,10 +87,10 @@ public class AbstractFileSystemURL implements Closeable {
 				.toList();
 
 		log.trace("Parsed URL: {}", Map.of(
-				"protocol", Optional.ofNullable(protocol).orElse("null"),
+				"protocol", protocol,
 				"basePath", Optional.ofNullable(basePath).orElse("null"),
 				"host", Optional.ofNullable(host).map(Object::toString).orElse("null"),
-				"query", Optional.ofNullable(query).map(Object::toString).orElse("null"),
+				"query", query,
 				"username", Optional.ofNullable(username).orElse("null"),
 				"protectedRessourceURL", Optional.ofNullable(protectedRessourceURL).orElse("null"),
 				"port", port,
@@ -126,8 +125,7 @@ public class AbstractFileSystemURL implements Closeable {
 			fileSystem = new FTPESFileSystem(host, port, username, password, passive,
 					ignoreInvalidCertificates, basePath);
 		} else {
-			throw new UncheckedIOException(
-					new IOException("Can't manage protocol \"" + protocol + "\" in URL: " + toString()));
+			throw new InvalidURLException("Can't manage protocol \"" + protocol + "\"", url);
 		}
 
 		final var timeout = query.getOrDefault("timeout", List.of()).stream()
@@ -143,7 +141,8 @@ public class AbstractFileSystemURL implements Closeable {
 		try {
 			return InetAddress.getByName(Optional.ofNullable(url.getHost()).orElse("localhost"));
 		} catch (final UnknownHostException e) {
-			throw new UncheckedIOException("Can't resolve hostname: \"" + url.getHost() + "\"", e);
+			log.debug("Can't resolve hostname in URL {}", url, e);
+			throw new InvalidURLException("Can't resolve hostname", url);
 		}
 	}
 

@@ -16,6 +16,8 @@
  */
 package tv.hd3g.transfertfiles.sftp;
 
+import static tv.hd3g.transfertfiles.InvalidURLException.requireNonNull;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -36,6 +38,7 @@ import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 import tv.hd3g.transfertfiles.CommonAbstractFileSystem;
+import tv.hd3g.transfertfiles.InvalidURLException;
 
 public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 	private static final Logger log = LogManager.getLogger();
@@ -64,11 +67,11 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 		super(basePath, username + "@" + host.getHostName() + ":" + port);
 		client = new SSHClient();
 		wasConnected = false;
-		this.host = Objects.requireNonNull(host);
+		this.host = requireNonNull(host, "Missing host name");
 		this.port = port;
-		this.username = Objects.requireNonNull(username, "SSH username");
+		this.username = requireNonNull(username, "Missing SSH username");
 		if (username.length() == 0) {
-			throw new IllegalArgumentException("Invalid (empty) username");
+			throw new InvalidURLException("Invalid (empty) SSH username");
 		}
 		authKeys = new HashSet<>();
 		this.absoluteBasePath = absoluteBasePath;

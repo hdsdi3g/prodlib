@@ -19,6 +19,7 @@ package tv.hd3g.transfertfiles;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.mapping;
 import static tv.hd3g.transfertfiles.AbstractFile.normalizePath;
+import static tv.hd3g.transfertfiles.InvalidURLException.requireNonNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,7 +29,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,11 +45,11 @@ public class URLAccess {
 	private final int port;
 
 	public static final Map<String, Integer> defaultPorts = Map.of(
-	        "file", -1,
-	        "ftp", 21,
-	        "ftps", 989,
-	        "ftpes", 21,
-	        "sftp", 22);
+			"file", -1,
+			"ftp", 21,
+			"ftps", 989,
+			"ftpes", 21,
+			"sftp", 22);
 
 	/**
 	 * @param url like "uuu://user:password@host:port/path/dir/subdir?option0=value0&option1&password="o&^o:o?o|o+0\\o=O,O#o0@;;o&!0-o_o~o\"&option3=ff" ...
@@ -73,11 +73,11 @@ public class URLAccess {
 			throw new IllegalArgumentException("Invalid URL: \"" + url + "\"", e);
 		}
 
-		protocol = Objects.requireNonNull(internalURI.getScheme(), "Missing protocol");
+		protocol = requireNonNull(internalURI.getScheme(), "Missing protocol", url);
 		path = normalizePath(Optional.ofNullable(internalURI.getPath()).orElse("/"));
 		host = Optional.ofNullable(internalURI.getHost()).orElse("localhost");
 		final var userPasswordEntry = parseUserInfo(internalURI.getUserInfo(),
-		        getFirstKeyValue(optionZone, "password", ""));
+				getFirstKeyValue(optionZone, "password", ""));
 		if (internalURI.getPort() < 1) {
 			port = defaultPorts.getOrDefault(protocol, -1);
 		} else {
@@ -118,29 +118,29 @@ public class URLAccess {
 
 	private static Map<String, List<String>> splitURLQuery(final String qList) {
 		return protectedSplit(qList)
-		        .map(it -> {
-			        final var idx = it.indexOf('=');
-			        final var key = idx > 0 ? it.substring(0, idx) : it;
-			        final var value = idx > 0 && it.length() > idx + 1 ? it.substring(idx + 1) : null;
-			        return new SimpleImmutableEntry<>(key, value);
-		        })
-		        .collect(Collectors.groupingBy(SimpleImmutableEntry::getKey,
-		                LinkedHashMap::new, mapping(Map.Entry::getValue, Collectors.toList())));
+				.map(it -> {
+					final var idx = it.indexOf('=');
+					final var key = idx > 0 ? it.substring(0, idx) : it;
+					final var value = idx > 0 && it.length() > idx + 1 ? it.substring(idx + 1) : null;
+					return new SimpleImmutableEntry<>(key, value);
+				})
+				.collect(Collectors.groupingBy(SimpleImmutableEntry::getKey,
+						LinkedHashMap::new, mapping(Map.Entry::getValue, Collectors.toList())));
 	}
 
 	private static String getFirstKeyValue(final Map<String, List<String>> query,
-	                                       final String key,
-	                                       final String defaultValue) {
+										   final String key,
+										   final String defaultValue) {
 		return query.entrySet().stream()
-		        .filter(es -> key.equalsIgnoreCase(es.getKey()))
-		        .flatMap(es -> Optional.ofNullable(es.getValue()).stream())
-		        .findFirst()
-		        .flatMap(l -> l.stream().findFirst())
-		        .orElse(defaultValue);
+				.filter(es -> key.equalsIgnoreCase(es.getKey()))
+				.flatMap(es -> Optional.ofNullable(es.getValue()).stream())
+				.findFirst()
+				.flatMap(l -> l.stream().findFirst())
+				.orElse(defaultValue);
 	}
 
 	private static SimpleImmutableEntry<String, String> parseUserInfo(final String userInfo,
-	                                                                  final String defaultPassword) {
+																	  final String defaultPassword) {
 		if (userInfo == null || userInfo.equals("")) {
 			return new SimpleImmutableEntry<>(null, defaultPassword);
 		}
@@ -180,6 +180,11 @@ public class URLAccess {
 
 	public String getProtectedRessourceURL() {
 		return protectedRessourceURL;
+	}
+
+	@Override
+	public String toString() {
+		return protectedRessourceURL;// TODO test
 	}
 
 	public char[] getPassword() {

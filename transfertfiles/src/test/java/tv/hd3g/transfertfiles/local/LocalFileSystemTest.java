@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
-import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.InvalidPathException;
@@ -33,6 +32,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import tv.hd3g.transfertfiles.InvalidURLException;
 
 class LocalFileSystemTest {
 
@@ -60,7 +61,7 @@ class LocalFileSystemTest {
 	@Test
 	void testGetFromPath_ok() {
 		assertEquals(new File(root, "this/path").getAbsoluteFile(),
-		        fs.getFromPath("this/path").getInternalFile());
+				fs.getFromPath("this/path").getInternalFile());
 		assertThrows(IllegalArgumentException.class, () -> fs.getFromPath("this/../path"));
 	}
 
@@ -104,9 +105,9 @@ class LocalFileSystemTest {
 	@Test
 	void testLocalFileSystem_error() {
 		final var f0 = new File("zz:/dfdf\\dd");
-		assertThrows(UncheckedIOException.class, () -> new LocalFileSystem(f0));
+		assertThrows(InvalidURLException.class, () -> new LocalFileSystem(f0));
 		final var f1 = new File("a:/thisFileDontExists");
-		assertThrows(UncheckedIOException.class, () -> new LocalFileSystem(f1));
+		assertThrows(InvalidURLException.class, () -> new LocalFileSystem(f1));
 	}
 
 	@Test

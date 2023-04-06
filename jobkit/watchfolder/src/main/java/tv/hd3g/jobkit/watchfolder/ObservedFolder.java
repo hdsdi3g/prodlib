@@ -36,6 +36,8 @@ import lombok.Getter;
 import lombok.Setter;
 import tv.hd3g.transfertfiles.AbstractFile;
 import tv.hd3g.transfertfiles.AbstractFileSystemURL;
+import tv.hd3g.transfertfiles.InvalidURLException;
+import tv.hd3g.transfertfiles.URLAccess;
 
 @Getter
 @Setter
@@ -68,6 +70,23 @@ public class ObservedFolder {
 		return ext;
 	};
 
+	private static AbstractFileSystemURL initURL(final String url) throws IOException {
+		try (var fs = new AbstractFileSystemURL(url)) {
+			return fs;
+		}
+	}
+
+	private static AbstractFileSystemURL checkURL(final String url) throws IOException {
+		AbstractFileSystemURL checkParse;
+		try {
+			new URLAccess(url);
+		} catch (final Exception e) {
+			throw new InvalidURLException("Can't found directory, or it doesn't seem to be an valid URL", url);
+		}
+		checkParse = initURL(url);
+		return checkParse;
+	}
+
 	void postConfiguration() {
 		if (disabled) {
 			return;
@@ -91,12 +110,11 @@ public class ObservedFolder {
 			if (targetFolderF.exists()) {
 				final var newTargetFolder = "file://localhost" + normalizePath(targetFolderF.getCanonicalFile()
 						.getAbsolutePath());
-				checkParse = new AbstractFileSystemURL(newTargetFolder);
+				checkParse = initURL(newTargetFolder);
 				targetFolder = newTargetFolder;
 			} else {
-				checkParse = new AbstractFileSystemURL(targetFolder);
+				checkParse = checkURL(targetFolder);
 			}
-			checkParse.close();
 
 			if (label == null || label.isEmpty()) {
 				label = checkParse.toString();

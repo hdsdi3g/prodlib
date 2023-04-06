@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 
 import tv.hd3g.transfertfiles.AbstractFile;
 import tv.hd3g.transfertfiles.CommonAbstractFileSystem;
+import tv.hd3g.transfertfiles.InvalidURLException;
 
 public class LocalFileSystem extends CommonAbstractFileSystem<LocalFile> {
 	private static final Logger log = LogManager.getLogger();
@@ -40,11 +41,10 @@ public class LocalFileSystem extends CommonAbstractFileSystem<LocalFile> {
 			this.relativePath = Objects.requireNonNull(relativePath).getCanonicalFile()
 					.toPath().toRealPath().normalize().toFile();
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new InvalidURLException(e);
 		}
 		if (relativePath.exists() == false || relativePath.isDirectory() == false || relativePath.canRead() == false) {
-			throw new UncheckedIOException(
-					new IOException("Can't access to \"" + relativePath + "\" directory"));
+			throw new InvalidURLException("Can't access to \"" + relativePath + "\" directory");
 		}
 		log.debug("Init LocalFileSystem with {}", relativePath);
 	}
