@@ -1,5 +1,11 @@
 # All ProdLib projects upgrades
 
+## 13.4.1
+
+Bug correction: correct behavior with missing directory in a Watchfolder target configuration, and refactor error behaviors with transfertfile protocols load missing setup #93
+
+Refactor JSConfig and split responsibilities (tests will be more stable)
+
 ## 13.4.0
 
 Create project jsconfig: let load dynamically (hot reloaded) JS files and run internal JS functions as Java functions #104
