@@ -19,7 +19,7 @@ package tv.hd3g.transfertfiles;
 import java.io.IOException;
 import java.util.Optional;
 
-public class InvalidURLException extends IllegalArgumentException {// TODO test
+public class InvalidURLException extends IllegalArgumentException {
 
 	public InvalidURLException(final String cause) {
 		this(cause, null);

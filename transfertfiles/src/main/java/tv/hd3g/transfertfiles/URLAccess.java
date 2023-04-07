@@ -184,7 +184,7 @@ public class URLAccess {
 
 	@Override
 	public String toString() {
-		return protectedRessourceURL;// TODO test
+		return protectedRessourceURL;
 	}
 
 	public char[] getPassword() {
