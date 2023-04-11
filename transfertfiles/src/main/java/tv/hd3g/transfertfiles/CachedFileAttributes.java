@@ -20,8 +20,6 @@ import static tv.hd3g.transfertfiles.json.TransfertFilesSerializer.DEFAULT_HASHC
 
 import java.util.Objects;
 
-import org.apache.commons.io.FilenameUtils;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -30,17 +28,9 @@ import tv.hd3g.transfertfiles.json.TransfertFilesSerializer.CachedFileAttributes
 
 @JsonSerialize(using = CachedFileAttributeSerializer.class)
 @JsonDeserialize(using = CachedFileAttributesDeserializer.class)
-public class CachedFileAttributes {
+public class CachedFileAttributes extends FileAttributesReference {
 
 	private final AbstractFile abstractFile;
-	private final String path;
-	private final long length;
-	private final long lastModified;
-	private final boolean exists;
-	private final boolean directory;
-	private final boolean file;
-	private final boolean link;
-	private final boolean special;
 	private final int hashCode;
 
 	/**
@@ -54,15 +44,8 @@ public class CachedFileAttributes {
 								final boolean file,
 								final boolean link,
 								final boolean special) {
+		super(abstractFile.getPath(), length, lastModified, exists, directory, file, link, special);
 		this.abstractFile = Objects.requireNonNull(abstractFile);
-		path = abstractFile.getPath();
-		this.length = length;
-		this.lastModified = lastModified;
-		this.exists = exists;
-		this.directory = directory;
-		this.file = file;
-		this.link = link;
-		this.special = special;
 		hashCode = abstractFile.hashCode();
 	}
 
@@ -70,15 +53,15 @@ public class CachedFileAttributes {
 	 * Not optimized approach directly derived from AbstractFile.
 	 */
 	public CachedFileAttributes(final AbstractFile abstractFile) {
+		super(abstractFile.getPath(),
+				abstractFile.length(),
+				abstractFile.lastModified(),
+				abstractFile.exists(),
+				abstractFile.isDirectory(),
+				abstractFile.isFile(),
+				abstractFile.isLink(),
+				abstractFile.isSpecial());
 		this.abstractFile = Objects.requireNonNull(abstractFile);
-		path = abstractFile.getPath();
-		length = abstractFile.length();
-		lastModified = abstractFile.lastModified();
-		exists = abstractFile.exists();
-		directory = abstractFile.isDirectory();
-		file = abstractFile.isFile();
-		link = abstractFile.isLink();
-		special = abstractFile.isSpecial();
 		hashCode = abstractFile.hashCode();
 	}
 
@@ -93,55 +76,9 @@ public class CachedFileAttributes {
 		return abstractFile;
 	}
 
-	public String getName() {
-		return FilenameUtils.getName(path);
-	}
-
-	public String getPath() {
-		return path;
-	}
-
-	@Override
-	public String toString() {
-		return getPath();
-	}
-
-	public String getParentPath() {
-		return FilenameUtils.getFullPathNoEndSeparator(path);
-	}
-
-	public boolean isHidden() {
-		return getName().startsWith(".");
-	}
-
-	public long length() {
-		return length;
-	}
-
-	public long lastModified() {
-		return lastModified;
-	}
-
-	public boolean exists() {
-		return exists;
-	}
-
-	public boolean isDirectory() {
-		return directory;
-	}
-
-	public boolean isFile() {
-		return file;
-	}
-
-	public boolean isLink() {
-		return link;
-	}
-
-	public boolean isSpecial() {
-		return special;
-	}
-
+	/**
+	 * Take abstractFile.hashCode();
+	 */
 	@Override
 	public int hashCode() {
 		if (hashCode == DEFAULT_HASHCODE) {
@@ -150,6 +87,9 @@ public class CachedFileAttributes {
 		return hashCode;
 	}
 
+	/**
+	 * Take abstractFile.hashCode();
+	 */
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj) {

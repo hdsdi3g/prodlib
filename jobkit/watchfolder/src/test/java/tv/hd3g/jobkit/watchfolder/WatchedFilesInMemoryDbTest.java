@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Test;
 
 import tv.hd3g.transfertfiles.AbstractFileSystemURL;
 import tv.hd3g.transfertfiles.CachedFileAttributes;
+import tv.hd3g.transfertfiles.FileAttributesReference;
 import tv.hd3g.transfertfiles.local.LocalFile;
 
 class WatchedFilesInMemoryDbTest {
@@ -91,24 +92,24 @@ class WatchedFilesInMemoryDbTest {
 	@Test
 	void testUpdate_found() {
 		watchedFilesDb.setup(observedFolder, FILES_ONLY);
-		var w = watchedFilesDb.update(fs);
+		var w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 0);
 
 		write("thisfine.ok", "thisfine.ok.long", "thisnotfine.no",
 				"thisnotfine.no.long", "/whysubdir/thisfine.ok", "ignoreme.ok");
 
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 2);
 
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of("thisfine.ok", "thisfine.ok.long"), Set.of(), 2);
 
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 2);
 
 		delete("thisfine.ok");
 		delete("thisfine.ok.long");
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 0);
 	}
 
@@ -117,18 +118,18 @@ class WatchedFilesInMemoryDbTest {
 		watchedFilesDb.setup(observedFolder, FILES_ONLY);
 
 		write("thisfine2.ok");
-		var w = watchedFilesDb.update(fs);
+		var w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 1);
 
 		write("thisfine2.ok");
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 1);
 
 		write("thisfine2.ok");
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 1);
 
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of("thisfine2.ok"), Set.of(), 1);
 	}
 
@@ -138,13 +139,13 @@ class WatchedFilesInMemoryDbTest {
 
 		write("thisfine5.ok");
 		final var thisfine5 = toAbsolutePath("thisfine5.ok");
-		var w = watchedFilesDb.update(fs);
+		var w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 1);
 
 		Thread.sleep(100);// NOSONAR
 		FileUtils.touch(thisfine5);
 		final var firstDate = thisfine5.lastModified();
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 1);
 
 		Thread.sleep(100);// NOSONAR
@@ -155,11 +156,11 @@ class WatchedFilesInMemoryDbTest {
 			/**
 			 * This filesystem can't handle dates at ms precision
 			 */
-			w = watchedFilesDb.update(fs);
+			w = watchedFilesDb.update(observedFolder, fs);
 			assertWatchedFiles(w, Set.of(), Set.of(), 1);
 		}
 
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of("thisfine5.ok"), Set.of(), 1);
 	}
 
@@ -168,10 +169,10 @@ class WatchedFilesInMemoryDbTest {
 		watchedFilesDb.setup(observedFolder, FILES_ONLY);
 
 		write("thisfine3.ok");
-		var w = watchedFilesDb.update(fs);
+		var w = watchedFilesDb.update(observedFolder, fs);
 
 		delete("thisfine3.ok");
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of("thisfine3.ok"), 0);
 	}
 
@@ -179,14 +180,13 @@ class WatchedFilesInMemoryDbTest {
 	void testUpdate_subdir() {
 		observedFolder.setRecursive(true);
 		watchedFilesDb.setup(observedFolder, FILES_ONLY);
-		assertEquals(10, watchedFilesDb.getMaxDeep());
 
 		write("thisfine.ok", "/oksubdir/thisfine.ok", "/sub/sub/dir/anotherfine.ok");
 
-		var w = watchedFilesDb.update(fs);
+		var w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 3);
 
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w,
 				Set.of("thisfine.ok", "/oksubdir/thisfine.ok", "/sub/sub/dir/anotherfine.ok"),
 				Set.of(), 3);
@@ -196,14 +196,13 @@ class WatchedFilesInMemoryDbTest {
 	void testUpdate_onlyDir() {
 		observedFolder.setRecursive(true);
 		watchedFilesDb.setup(observedFolder, DIRS_ONLY);
-		assertEquals(10, watchedFilesDb.getMaxDeep());
 
 		write("thisfine.ok", "/oksubdir/thisfine.ok", "/sub/sub/dir/anotherfine.ok");
 
-		var w = watchedFilesDb.update(fs);
+		var w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 4);
 
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w,
 				Set.of("/oksubdir", "/sub", "/sub/sub", "/sub/sub/dir"),
 				Set.of(), 4);
@@ -213,14 +212,13 @@ class WatchedFilesInMemoryDbTest {
 	void testUpdate_FilesDir() {
 		observedFolder.setRecursive(true);
 		watchedFilesDb.setup(observedFolder, FILES_DIRS);
-		assertEquals(10, watchedFilesDb.getMaxDeep());
 
 		write("thisfine.ok", "/oksubdir/thisfine.ok", "/sub/sub/dir/anotherfine.ok");
 
-		var w = watchedFilesDb.update(fs);
+		var w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 4 + 3);
 
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w,
 				Set.of("/oksubdir", "/sub", "/sub/sub", "/sub/sub/dir",
 						"thisfine.ok", "/oksubdir/thisfine.ok", "/sub/sub/dir/anotherfine.ok"),
@@ -232,18 +230,18 @@ class WatchedFilesInMemoryDbTest {
 		watchedFilesDb.setup(observedFolder, FILES_ONLY);
 
 		write("thisfine.ok", ".thisnotfine.ok");
-		var w = watchedFilesDb.update(fs);
+		var w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 1);
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of("thisfine.ok"), Set.of(), 1);
 
 		observedFolder.setAllowedHidden(true);
 		watchedFilesDb = new WatchedFilesInMemoryDb();
 		watchedFilesDb.setup(observedFolder, FILES_ONLY);
 
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 2);
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of("thisfine.ok", ".thisnotfine.ok"), Set.of(), 2);
 	}
 
@@ -254,9 +252,9 @@ class WatchedFilesInMemoryDbTest {
 		watchedFilesDb.setup(observedFolder, FILES_ONLY);
 
 		write("thisfine");
-		var w = watchedFilesDb.update(fs);
+		var w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 1);
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of("thisfine"), Set.of(), 1);
 	}
 
@@ -266,18 +264,18 @@ class WatchedFilesInMemoryDbTest {
 		watchedFilesDb.setup(observedFolder, FILES_ONLY);
 
 		write("thisfine.ok", "/never/here/thisfine.ok");
-		var w = watchedFilesDb.update(fs);
+		var w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 1);
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of("thisfine.ok"), Set.of(), 1);
 
 		observedFolder.setIgnoreRelativePaths(null);
 		watchedFilesDb = new WatchedFilesInMemoryDb();
 		watchedFilesDb.setup(observedFolder, FILES_ONLY);
 
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 2);
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of("thisfine.ok", "/never/here/thisfine.ok"), Set.of(), 2);
 	}
 
@@ -337,8 +335,9 @@ class WatchedFilesInMemoryDbTest {
 		}
 	}
 
-	private Set<File> revealRealFiles(final Set<CachedFileAttributes> fileAttr) {
+	private Set<File> revealRealFiles(final Set<? extends FileAttributesReference> fileAttr) {
 		return fileAttr.stream()
+				.map(f -> (CachedFileAttributes) f)
 				.map(CachedFileAttributes::getAbstractFile)
 				.map(af -> (LocalFile) af)
 				.map(LocalFile::getInternalFile)
@@ -346,26 +345,13 @@ class WatchedFilesInMemoryDbTest {
 	}
 
 	@Test
-	void testSetup() {
+	void testSetup() {// NOSONAR S2699
 		observedFolder.setRecursive(false);
 		watchedFilesDb.setup(observedFolder, FILES_DIRS);
-		assertEquals(0, watchedFilesDb.getMaxDeep());
 
 		observedFolder.setRecursive(true);
 		watchedFilesDb = new WatchedFilesInMemoryDb();
 		watchedFilesDb.setup(observedFolder, FILES_DIRS);
-		assertEquals(10, watchedFilesDb.getMaxDeep());
-	}
-
-	@Test
-	void testGetMaxDeep() {
-		assertEquals(10, watchedFilesDb.getMaxDeep());
-	}
-
-	@Test
-	void testSetMaxDeep() {
-		watchedFilesDb.setMaxDeep(5);
-		assertEquals(5, watchedFilesDb.getMaxDeep());
 	}
 
 	@Test
@@ -374,20 +360,20 @@ class WatchedFilesInMemoryDbTest {
 
 		write("thisfine.ok", "thisfine.ok.long", "thisnotfine.no", "thisnotfine.no.long",
 				"/whysubdir/thisfine.ok", "ignoreme.ok");
-		var w = watchedFilesDb.update(fs);
+		var w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 2);
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of("thisfine.ok", "thisfine.ok.long"), Set.of(), 2);
 
-		watchedFilesDb.reset(w.founded());
+		watchedFilesDb.reset(observedFolder, w.founded());
 
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 2);
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of("thisfine.ok", "thisfine.ok.long"), Set.of(), 2);
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 2);
-		w = watchedFilesDb.update(fs);
+		w = watchedFilesDb.update(observedFolder, fs);
 		assertWatchedFiles(w, Set.of(), Set.of(), 2);
 	}
 
@@ -405,10 +391,10 @@ class WatchedFilesInMemoryDbTest {
 
 			write("thisfine.ok", "/oksubdir/thisfine.ok", "/sub/sub/dir/anotherfine.ok");
 
-			var w = watchedFilesDb.update(fs);
+			var w = watchedFilesDb.update(observedFolder, fs);
 			assertWatchedFiles(w, Set.of(), Set.of(), 2);
 
-			w = watchedFilesDb.update(fs);
+			w = watchedFilesDb.update(observedFolder, fs);
 			assertWatchedFiles(w,
 					Set.of("thisfine.ok", "/oksubdir/thisfine.ok"),
 					Set.of(), 2);
@@ -421,10 +407,10 @@ class WatchedFilesInMemoryDbTest {
 
 			write("thisfine.ok", "/oksubdir/thisfine.ok", "/sub/sub/dir/anotherfine.ok");
 
-			var w = watchedFilesDb.update(fs);
+			var w = watchedFilesDb.update(observedFolder, fs);
 			assertWatchedFiles(w, Set.of(), Set.of(), 2);
 
-			w = watchedFilesDb.update(fs);
+			w = watchedFilesDb.update(observedFolder, fs);
 			assertWatchedFiles(w,
 					Set.of("thisfine.ok", "/sub/sub/dir/anotherfine.ok"),
 					Set.of(), 2);
@@ -437,10 +423,10 @@ class WatchedFilesInMemoryDbTest {
 
 			write("/oksubdir/thisfine.ok", "/oksubdir2/thisfine.ko", "/sub/sub/dir/fined.ok");
 
-			var w = watchedFilesDb.update(fs);
+			var w = watchedFilesDb.update(observedFolder, fs);
 			assertWatchedFiles(w, Set.of(), Set.of(), 1);
 
-			w = watchedFilesDb.update(fs);
+			w = watchedFilesDb.update(observedFolder, fs);
 			assertWatchedFiles(w,
 					Set.of("/oksubdir/thisfine.ok"),
 					Set.of(), 1);
@@ -453,10 +439,10 @@ class WatchedFilesInMemoryDbTest {
 
 			write("/oksubdir/thisfine.ok", "/oksubdir2/thisfine.ko", "/sub/sub/dir/fined.ok");
 
-			var w = watchedFilesDb.update(fs);
+			var w = watchedFilesDb.update(observedFolder, fs);
 			assertWatchedFiles(w, Set.of(), Set.of(), 1);
 
-			w = watchedFilesDb.update(fs);
+			w = watchedFilesDb.update(observedFolder, fs);
 			assertWatchedFiles(w,
 					Set.of("/sub/sub/dir/fined.ok"),
 					Set.of(), 1);

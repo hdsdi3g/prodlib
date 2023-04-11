@@ -17,7 +17,7 @@
 package tv.hd3g.jobkit.watchfolder;
 
 import java.time.Duration;
-import java.util.Set;
+import java.util.Collection;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -102,7 +102,7 @@ class FileInMemoryDb {
 	}
 
 	boolean canBePickupFromType() {
-		return isDirectory && pickUpDirs == true || isDirectory == false && pickUpFiles == true;
+		return isDirectory && pickUpDirs || isDirectory == false && pickUpFiles;
 	}
 
 	FileInMemoryDb setMarkedAsDone() {
@@ -127,7 +127,7 @@ class FileInMemoryDb {
 		return lastFile;
 	}
 
-	boolean absentInSet(final Set<CachedFileAttributes> detected) {
+	boolean absentInSet(final Collection<CachedFileAttributes> detected) {
 		return detected.contains(lastFile) == false;
 	}
 }

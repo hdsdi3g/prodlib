@@ -1,5 +1,5 @@
 /*
- * This file is part of jobkit-engine.
+ * This file is part of JobKit.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -16,17 +16,11 @@
  */
 package tv.hd3g.jobkit.watchfolder;
 
-import java.util.Set;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
-import tv.hd3g.transfertfiles.AbstractFileSystemURL;
-import tv.hd3g.transfertfiles.CachedFileAttributes;
-
-public interface WatchedFilesDb {
-
-	void setup(final ObservedFolder observedFolder, final WatchFolderPickupType pickUp);
-
-	WatchedFiles update(final ObservedFolder observedFolder, AbstractFileSystemURL fileSystem);
-
-	void reset(final ObservedFolder observedFolder, Set<CachedFileAttributes> foundedFiles);
+@Configuration
+@ComponentScan(basePackages = { "tv.hd3g.jobkit.mod", "tv.hd3g.jobkit.watchfolder" })
+public class Setup {
 
 }

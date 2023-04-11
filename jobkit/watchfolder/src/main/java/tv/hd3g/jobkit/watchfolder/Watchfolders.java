@@ -100,7 +100,7 @@ public class Watchfolders {
 			jobKitEngine.runOneShot("Watchfolder start dir scan for " + label, spoolEvents, 0,
 					() -> eventActivity.onBeforeScan(folder), justLogAfterBadUserRun);
 			final var startTime = System.currentTimeMillis();
-			final var scanResult = wfDBForFolder.get(folder).update(fs);
+			final var scanResult = wfDBForFolder.get(folder).update(folder, fs);
 			final var scanTime = Duration.of(System.currentTimeMillis() - startTime, MILLIS);
 
 			jobKitEngine.runOneShot("On event on watchfolder scan for " + getWFName(), spoolEvents, 0,
@@ -115,7 +115,7 @@ public class Watchfolders {
 							log.error("Can't process user event of onAfterScan ({} founded), policy is {}",
 									founded.size(), policy, e);
 							if (policy == RETRY_FOUNDED_FILE) {
-								wfDBForFolder.get(folder).reset(founded);
+								wfDBForFolder.get(folder).reset(folder, founded);
 							}
 						} else {
 							log.error("Can't process user event of onAfterScan", e);

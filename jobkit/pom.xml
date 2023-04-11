@@ -21,6 +21,7 @@
         <module>engine</module>
         <module>watchfolder</module>
         <module>springboot-service</module>
+        <module>watchfolder-jpa</module>
     </modules>
 
     <dependencies>

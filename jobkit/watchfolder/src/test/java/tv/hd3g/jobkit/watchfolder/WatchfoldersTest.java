@@ -79,7 +79,7 @@ class WatchfoldersTest {
 		when(folderActivity.retryScanPolicyOnUserError(any(ObservedFolder.class),
 				eq(watchedFiles), any(Exception.class)))
 						.thenReturn(RETRY_FOUNDED_FILE);
-		when(watchedFilesDb.update(any(AbstractFileSystemURL.class))).thenReturn(watchedFiles);
+		when(watchedFilesDb.update(eq(observedFolder), any(AbstractFileSystemURL.class))).thenReturn(watchedFiles);
 	}
 
 	@AfterEach
@@ -126,7 +126,7 @@ class WatchfoldersTest {
 		verify(folderActivity, times(1)).getPickUpType(observedFolder);
 		verify(folderActivity, atMostOnce()).onBeforeScan(observedFolder);
 		verify(folderActivity, atMostOnce()).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-		verify(watchedFilesDb, atMostOnce()).update(any(AbstractFileSystemURL.class));
+		verify(watchedFilesDb, atMostOnce()).update(eq(observedFolder), any(AbstractFileSystemURL.class));
 		verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068
 	}
 
@@ -142,7 +142,7 @@ class WatchfoldersTest {
 		assertFalse(jobKitEngine.isEmptyActiveServicesList());
 		verify(folderActivity, times(1)).onStartScans(List.of(observedFolder));
 		verify(folderActivity, times(1)).onBeforeScan(observedFolder);
-		verify(watchedFilesDb, times(1)).update(any(AbstractFileSystemURL.class));
+		verify(watchedFilesDb, times(1)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
 		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
 		verify(folderActivity, times(0)).onStopScans(List.of(observedFolder));
 
@@ -152,7 +152,7 @@ class WatchfoldersTest {
 		assertTrue(jobKitEngine.isEmptyActiveServicesList());
 		verify(folderActivity, times(1)).onStartScans(List.of(observedFolder));
 		verify(folderActivity, times(1)).onBeforeScan(observedFolder);
-		verify(watchedFilesDb, times(1)).update(any(AbstractFileSystemURL.class));
+		verify(watchedFilesDb, times(1)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
 		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
 		verify(folderActivity, times(0)).onStopScans(List.of(observedFolder));
 
@@ -163,7 +163,7 @@ class WatchfoldersTest {
 		assertFalse(jobKitEngine.isEmptyActiveServicesList());
 		verify(folderActivity, times(2)).onStartScans(List.of(observedFolder));
 		verify(folderActivity, times(2)).onBeforeScan(observedFolder);
-		verify(watchedFilesDb, times(2)).update(any(AbstractFileSystemURL.class));
+		verify(watchedFilesDb, times(2)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
 		verify(folderActivity, times(2)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
 		verify(folderActivity, times(0)).onStopScans(List.of(observedFolder));
 
@@ -174,11 +174,11 @@ class WatchfoldersTest {
 		assertTrue(jobKitEngine.isEmptyActiveServicesList());
 		verify(folderActivity, times(2)).onStartScans(List.of(observedFolder));
 		verify(folderActivity, times(2)).onBeforeScan(observedFolder);
-		verify(watchedFilesDb, times(2)).update(any(AbstractFileSystemURL.class));
+		verify(watchedFilesDb, times(2)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
 		verify(folderActivity, times(2)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
 		verify(folderActivity, times(0)).onStopScans(List.of(observedFolder));
 
-		verify(folderActivity, times(0)).onScanErrorFolder(any(ObservedFolder.class), any(Exception.class));
+		verify(folderActivity, times(0)).onScanErrorFolder(eq(observedFolder), any(Exception.class));
 
 		verify(folderActivity, times(1)).getPickUpType(observedFolder);
 
@@ -222,8 +222,8 @@ class WatchfoldersTest {
 
 		assertFalse(jobKitEngine.isEmptyActiveServicesList());
 		verify(folderActivity, times(1)).onBeforeScan(observedFolder);
-		verify(watchedFilesDb, times(1)).update(any(AbstractFileSystemURL.class));
-		verify(watchedFilesDb, times(0)).reset(any());
+		verify(watchedFilesDb, times(1)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
+		verify(watchedFilesDb, times(0)).reset(eq(observedFolder), any());
 		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
 		verify(watchedFiles, times(1)).founded();
 
@@ -231,8 +231,8 @@ class WatchfoldersTest {
 
 		assertFalse(jobKitEngine.isEmptyActiveServicesList());
 		verify(folderActivity, times(2)).onBeforeScan(observedFolder);
-		verify(watchedFilesDb, times(2)).update(any(AbstractFileSystemURL.class));
-		verify(watchedFilesDb, times(0)).reset(any());
+		verify(watchedFilesDb, times(2)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
+		verify(watchedFilesDb, times(0)).reset(eq(observedFolder), any());
 		verify(folderActivity, times(2)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
 		verify(watchedFiles, times(2)).founded();
 
@@ -241,8 +241,8 @@ class WatchfoldersTest {
 
 		assertFalse(jobKitEngine.isEmptyActiveServicesList());
 		verify(folderActivity, times(3)).onBeforeScan(observedFolder);
-		verify(watchedFilesDb, times(3)).update(any(AbstractFileSystemURL.class));
-		verify(watchedFilesDb, times(1)).reset(Set.of(cfa));
+		verify(watchedFilesDb, times(3)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
+		verify(watchedFilesDb, times(1)).reset(observedFolder, Set.of(cfa));
 		verify(folderActivity, times(3)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
 		verify(watchedFiles, times(3)).founded();
 
@@ -252,8 +252,8 @@ class WatchfoldersTest {
 		jobKitEngine.runAllServicesOnce();
 
 		verify(folderActivity, times(1)).onBeforeScan(observedFolder);
-		verify(watchedFilesDb, times(4)).update(any(AbstractFileSystemURL.class));
-		verify(watchedFilesDb, times(1)).reset(Set.of(cfa));
+		verify(watchedFilesDb, times(4)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
+		verify(watchedFilesDb, times(1)).reset(observedFolder, Set.of(cfa));
 		verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068
 		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
 		verify(watchedFiles, times(3)).founded();

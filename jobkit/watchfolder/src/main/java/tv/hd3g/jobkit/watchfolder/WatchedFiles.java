@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import tv.hd3g.transfertfiles.AbstractFile;
 import tv.hd3g.transfertfiles.AbstractFileSystem;
 import tv.hd3g.transfertfiles.CachedFileAttributes;
+import tv.hd3g.transfertfiles.FileAttributesReference;
 
 /**
  * @param founded file/dir added on scanned folder
@@ -35,7 +36,7 @@ import tv.hd3g.transfertfiles.CachedFileAttributes;
  * @param totalFiles total file/dir count on scanned folder (valided)
  */
 public record WatchedFiles(Set<CachedFileAttributes> founded,
-						   Set<CachedFileAttributes> losted,
+						   Set<? extends FileAttributesReference> losted,
 						   Set<CachedFileAttributes> updated,
 						   int totalFiles) {
 
@@ -45,7 +46,7 @@ public record WatchedFiles(Set<CachedFileAttributes> founded,
 		builder.append("WatchedFiles [founded=");
 		builder.append(founded.stream().map(CachedFileAttributes::getPath).collect(joining(", ")));
 		builder.append(", losted=");
-		builder.append(losted.stream().map(CachedFileAttributes::getPath).collect(joining(", ")));
+		builder.append(losted.stream().map(FileAttributesReference::getPath).collect(joining(", ")));
 		builder.append(", updated=");
 		builder.append(updated.stream().map(CachedFileAttributes::getPath).collect(joining(", ")));
 		builder.append(", totalFiles=");
