@@ -21,11 +21,9 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import tv.hd3g.authkit.mod.entity.Audit;
 
-@Repository
 public interface AuditRepository extends JpaRepository<Audit, Long> {
 
 	@Query("SELECT a FROM Audit a WHERE a.useruuid = ?1 AND a.created > ?2 ORDER BY a.created DESC")

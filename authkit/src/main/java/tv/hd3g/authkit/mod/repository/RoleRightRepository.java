@@ -20,11 +20,9 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import tv.hd3g.authkit.mod.entity.RoleRight;
 
-@Repository
 public interface RoleRightRepository extends JpaRepository<RoleRight, Long> {
 
 	// @Query("SELECT rr.name FROM RoleRight rr JOIN rr.role r WHERE r.name = ?1")

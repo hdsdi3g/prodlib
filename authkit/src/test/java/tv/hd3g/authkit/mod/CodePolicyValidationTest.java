@@ -11,4 +11,11 @@ class CodePolicyValidationTest extends CheckPolicy {
 		 */
 	}
 
+	@Override
+	public void springBootNotRepositoryInRepositoryPackage() {
+		/**
+		 * Remove after switch to CodePolicyValidation v2.n
+		 */
+	}
+
 }

@@ -31,7 +31,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 public class Setup {
 
 	@Bean
-	public MessageSource messageSource() {
+	MessageSource messageSource() {
 		return new ResourceBundleMessageSource();
 	}
 

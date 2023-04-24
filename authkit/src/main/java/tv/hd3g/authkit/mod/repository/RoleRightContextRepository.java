@@ -20,11 +20,9 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import tv.hd3g.authkit.mod.entity.RoleRightContext;
 
-@Repository
 public interface RoleRightContextRepository extends JpaRepository<RoleRightContext, Long> {
 
 	@Query("SELECT rrc.name FROM RoleRightContext rrc WHERE rrc.roleRight.name = ?2 AND rrc.roleRight.role.name = ?1")

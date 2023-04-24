@@ -20,12 +20,10 @@ import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import tv.hd3g.authkit.mod.entity.Credential;
 import tv.hd3g.authkit.mod.entity.Totpbackupcode;
 
-@Repository
 public interface TotpbackupcodeRepository extends JpaRepository<Totpbackupcode, Long> {
 
 	@Query("SELECT bc.code FROM Totpbackupcode bc JOIN bc.credential c JOIN c.user u WHERE u.uuid = ?1")

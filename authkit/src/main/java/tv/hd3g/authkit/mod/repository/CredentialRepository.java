@@ -18,14 +18,12 @@ package tv.hd3g.authkit.mod.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import tv.hd3g.authkit.mod.entity.Credential;
 
 /**
  * See https://docs.spring.io/spring-data/jpa/docs/1.5.0.RELEASE/reference/html/jpa.repositories.html
  */
-@Repository
 public interface CredentialRepository extends JpaRepository<Credential, Long> {
 
 	@Query("SELECT c FROM Credential c WHERE c.realm = ?1 AND c.login = ?2 ")

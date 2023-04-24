@@ -21,11 +21,9 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import tv.hd3g.authkit.mod.entity.Userprivacy;
 
-@Repository
 public interface UserPrivacyRepository extends JpaRepository<Userprivacy, Long> {
 
 	@Query("SELECT up FROM Userprivacy up WHERE up.userUUID IN (?1)")
