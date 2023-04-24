@@ -13,7 +13,7 @@
     <parent>
         <groupId>tv.hd3g.commons</groupId>
         <artifactId>starter</artifactId>
-        <version>13.4.3</version>
+        <version>14.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
