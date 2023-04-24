@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 13.4.2
+
+Code maintenance: update ESAPI deps version (https://snyk.io/vuln/SNYK-JAVA-COMMONSFILEUPLOAD-3326457)
+
 ## 13.4.1
 
 Bug correction: correct behavior with missing directory in a Watchfolder target configuration, and refactor error behaviors with transfertfile protocols load missing setup #93
