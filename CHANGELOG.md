@@ -1,8 +1,11 @@
 # All ProdLib projects upgrades
 
-## 13.4.2
+## 13.4.3 (inc. 13.4.2)
 
-Code maintenance: update ESAPI deps version (https://snyk.io/vuln/SNYK-JAVA-COMMONSFILEUPLOAD-3326457)
+Maintenance:
+
+ - Update ESAPI deps version (https://snyk.io/vuln/SNYK-JAVA-COMMONSFILEUPLOAD-3326457)
+ - Update spring-boot-starter-parent from 2.7.9 to 2.7.11
 
 ## 13.4.1
 

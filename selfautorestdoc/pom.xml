@@ -13,7 +13,7 @@
     <parent>
         <groupId>tv.hd3g.commons</groupId>
         <artifactId>parent-web</artifactId>
-        <version>13.4.3-SNAPSHOT</version>
+        <version>13.4.3</version>
         <relativePath>../parent-web/pom.xml</relativePath>
     </parent>
 
@@ -21,7 +21,7 @@
         <dependency>
             <groupId>tv.hd3g.commons</groupId>
             <artifactId>interfaces</artifactId>
-            <version>13.4.3-SNAPSHOT</version>
+            <version>13.4.3</version>
         </dependency>
         <dependency>
             <groupId>fr.inria.gforge.spoon</groupId>
