@@ -20,6 +20,7 @@ import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableMap;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
+import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.FILES_ONLY;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -81,7 +82,9 @@ public class Watchfolders {
 						observedFolder -> {
 							final var watchedFilesDb = watchedFilesDbBuilder.get();
 							final var pickUp = eventActivity.getPickUpType(observedFolder);
-							watchedFilesDb.setup(observedFolder, pickUp);
+							watchedFilesDb.setup(
+									observedFolder,
+									Optional.ofNullable(pickUp).orElse(FILES_ONLY));
 							return watchedFilesDb;
 						}));
 	}

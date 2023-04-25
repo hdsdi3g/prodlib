@@ -28,6 +28,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.EqualsAndHashCode;
@@ -43,6 +46,7 @@ import tv.hd3g.transfertfiles.URLAccess;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ObservedFolder {
+	private static final Logger log = LogManager.getLogger();
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String targetFolder;
@@ -118,6 +122,7 @@ public class ObservedFolder {
 
 			if (label == null || label.isEmpty()) {
 				label = checkParse.toString();
+				log.warn("You should setup a label for {}", label);
 			}
 		} catch (final IOException e1) {
 			throw new UncheckedIOException(new IOException("Can't load: \"" + targetFolder + "\""));
