@@ -1,5 +1,13 @@
 # All ProdLib projects upgrades
 
+## 14.0.0
+
+Create project watchfolder-jpa #107
+
+Protect agains missing labels in watchfolders conf (just warn), protect against missing pickUp file type in watchfolder (set Files only by default - in the case of mocks)
+
+Remove unnecessary Repository annotations on AuthKit (code clean)
+
 ## 13.4.3 (inc. 13.4.2)
 
 Maintenance:
