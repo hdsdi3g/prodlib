@@ -53,6 +53,8 @@ import tv.hd3g.transfertfiles.TransfertObserver;
 import tv.hd3g.transfertfiles.TransfertObserver.TransfertDirection;
 
 public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2160
+	private static final String CAN_T_STAT = "Can't stat \"";
+
 	private static final Logger log = LogManager.getLogger();
 
 	private final SFTPClient sftpClient;
@@ -89,7 +91,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 			if (isNoSuchFileInError(e)) {
 				return 0L;
 			}
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't extract size \"" + sftpAbsolutePath + "\"", e);
 		}
 	}
 
@@ -98,7 +100,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 		try {
 			return sftpClient.statExistence(sftpAbsolutePath) != null;
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException(CAN_T_STAT + sftpAbsolutePath + "\"", e);
 		}
 	}
 
@@ -124,7 +126,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 			if (isNoSuchFileInError(e)) {
 				return false;
 			}
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException(CAN_T_STAT + sftpAbsolutePath + "\"", e);
 		}
 	}
 
@@ -136,7 +138,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 			if (isNoSuchFileInError(e)) {
 				return false;
 			}
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException(CAN_T_STAT + sftpAbsolutePath + "\"", e);
 		}
 	}
 
@@ -148,7 +150,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 			if (isNoSuchFileInError(e)) {
 				return false;
 			}
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException(CAN_T_STAT + sftpAbsolutePath + "\"", e);
 		}
 	}
 
@@ -163,7 +165,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 			if (isNoSuchFileInError(e)) {
 				return false;
 			}
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException(CAN_T_STAT + sftpAbsolutePath + "\"", e);
 		}
 	}
 
@@ -175,7 +177,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 			if (isNoSuchFileInError(e)) {
 				return 0;
 			}
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException(CAN_T_STAT + sftpAbsolutePath + "\"", e);
 		}
 	}
 
@@ -196,7 +198,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 			if (isNoSuchFileInError(e)) {
 				return CachedFileAttributes.notExists(this);
 			}
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException(CAN_T_STAT + sftpAbsolutePath + "\"", e);
 		}
 	}
 
@@ -219,7 +221,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 			if (isNoSuchFileInError(e) || e.getMessage().equals("Accessed location is not a directory")) {
 				return Stream.empty();
 			}
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't list \"" + sftpAbsolutePath + "\"", e);
 		}
 	}
 
@@ -233,7 +235,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 			if (isNoSuchFileInError(e) || e.getMessage().equals("Accessed location is not a directory")) {
 				return Stream.empty();
 			}
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't list \"" + sftpAbsolutePath + "\"", e);
 		}
 	}
 
@@ -242,7 +244,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 		try {
 			sftpClient.mkdirs(sftpAbsolutePath);
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't mkdir(s) \"" + sftpAbsolutePath + "\"", e);
 		}
 	}
 
@@ -262,7 +264,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 			}
 			return fileSystem.getFromPath(newPath);
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't rename \"" + sftpAbsolutePath + "\"", e);
 		}
 	}
 
@@ -339,7 +341,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 			log.info("Stop copy SSH file from \"{}\" to \"{}\", ({}/{} bytes)",
 					source, dest, e.transferred, sizeToTransfert);
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't copy \"" + sftpAbsolutePath + "\"", e);
 		}
 	}
 
@@ -355,7 +357,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 			} catch (final StoppedTransfertException e) {
 				log.debug("Manually stop ssh download", e);
 			} catch (final IOException e) {
-				throw new UncheckedIOException(e);
+				throw new UncheckedIOException("Can't download from \"" + sftpAbsolutePath + "\"", e);
 			} finally {
 				sftpClient.getFileTransfer().setTransferListener(null);
 				try {
@@ -382,7 +384,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 			} catch (final StoppedTransfertException e) {
 				log.debug("Manually stop ssh upload", e);
 			} catch (final IOException e) {
-				throw new UncheckedIOException(e);
+				throw new UncheckedIOException("Can't upload from \"" + sftpAbsolutePath + "\"", e);
 			} finally {
 				sftpClient.getFileTransfer().setTransferListener(null);
 				try {

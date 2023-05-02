@@ -126,7 +126,7 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 				}
 			}
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't copy \"" + source + "\"", e);
 		}
 
 		if (stopped) {
@@ -143,7 +143,7 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 		try (var inputStream = new BufferedInputStream(new FileInputStream(internalFile), bufferSize)) {
 			return observableCopyStream(inputStream, outputStream, bufferSize, copyCallback);
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't download to \"" + internalFile + "\"", e);
 		} finally {
 			try {
 				outputStream.close();
@@ -160,7 +160,7 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 		try (var outputStream = new BufferedOutputStream(new FileOutputStream(internalFile), bufferSize)) {
 			return observableCopyStream(inputStream, outputStream, bufferSize, copyCallback);
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't upload from \"" + internalFile + "\"", e);
 		} finally {
 			try {
 				inputStream.close();
@@ -221,7 +221,7 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 					.map(BasicFileAttributes::isOther)
 					.orElse(false);
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't extract attributes from \"" + internalFile + "\"", e);
 		}
 	}
 
@@ -249,7 +249,7 @@ public class LocalFile extends CommonAbstractFile<LocalFileSystem> {// NOSONAR S
 		try {
 			FileUtils.forceMkdir(internalFile);
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't mkdir \"" + internalFile + "\"", e);
 		}
 	}
 

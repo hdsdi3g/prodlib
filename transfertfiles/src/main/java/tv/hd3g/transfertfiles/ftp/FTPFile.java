@@ -123,7 +123,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 						.orElse(0L);
 			}
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't list \"" + absolutePath + "\"", e);
 		}
 	}
 
@@ -196,7 +196,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 								return MLSD;
 							}
 						} catch (final IOException e) {
-							throw new UncheckedIOException("Error during FTP  hasFeature", e);
+							throw new UncheckedIOException("Error during FTP hasFeature", e);
 						}
 						return LIST;
 					})
@@ -224,7 +224,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 				throw new CannotDeleteException(this, directory, new IOException("Can't delete " + fileSystem + path));
 			}
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't delete \"" + absolutePath + "\"", e);
 		}
 	}
 
@@ -236,7 +236,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 				throw new IOException("Can't mkdir " + fileSystem + path);
 			}
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't mkdir \"" + absolutePath + "\"", e);
 		}
 	}
 
@@ -269,7 +269,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 			}
 			return fileSystem.getFromPath(path);
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't rename/move \"" + absolutePath + "\"", e);
 		}
 	}
 
@@ -454,9 +454,9 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 					}
 					return;
 				}
-				throw new UncheckedIOException(e);
+				throw new UncheckedIOException("Can't copy \"" + absolutePath + "\"", e);
 			} catch (final IOException e) {
-				throw new UncheckedIOException(e);
+				throw new UncheckedIOException("Can't copy \"" + absolutePath + "\"", e);
 			} finally {
 				ftpClient.setCopyStreamListener(null);
 			}
@@ -486,7 +486,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 				ftpClient.abort();
 			}
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't download \"" + absolutePath + "\"", e);
 		} finally {
 			try {
 				outputStream.close();
@@ -511,7 +511,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 			}
 			copied = observableCopyStream(inputStream, outputStream, bufferSize, copyCallback);
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't upload \"" + absolutePath + "\"", e);
 		} finally {
 			try {
 				inputStream.close();
@@ -530,7 +530,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 						new IOException(message + " [" + absolutePath + "]: " + ftpClient.getReplyString()));
 			}
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Invalid FTP command: \"" + message + "\" on \"" + absolutePath + "\"", e);
 		}
 	}
 }
