@@ -1,5 +1,16 @@
 # All ProdLib projects upgrades
 
+## 14.1.0
+
+Better error messages for TransfertFiles on I/O actions #113
+
+Mailkit notifications bug correction (#114):
+
+ - Don't display empty steps zone on Mailkit notifications
+ - Correct raw html presence in mail
+ - Correct display semicolon
+ - Correct exception displays
+
 ## 14.0.0
 
 Create project watchfolder-jpa #107
