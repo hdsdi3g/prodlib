@@ -399,10 +399,7 @@ public class NotificationMailTemplateToolkit {
 						.sorted()
 						.map(key -> {
 							final var value = json.get(key);
-							var keyName = i18nKey.apply(key);
-							if (value.isContainerNode() == false) {
-								keyName = keyName + ":";
-							}
+							final var keyName = i18nKey.apply(key) + ":";
 							return li(span(attrs(".json.key"),
 									keyName),
 									jsonToDom(value, i18nKey, filterKey));
