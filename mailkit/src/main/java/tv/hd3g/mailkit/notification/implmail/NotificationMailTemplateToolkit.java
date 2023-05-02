@@ -36,6 +36,7 @@ import static j2html.TagCreator.ul;
 import static j2html.attributes.Attr.HTTP_EQUIV;
 import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.function.Predicate.not;
+import static tv.hd3g.mailkit.notification.ExceptionToString.exceptionRefCleaner;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -95,7 +96,7 @@ public class NotificationMailTemplateToolkit {
 	public String processSubject(final Locale lang, final SupervisableEndEvent event) {
 		if (event.error() != null) {
 			return translate.i18n(lang, event, "subject.error",
-					"Error for {0}: {1}", env.appName(), event.error().getMessage());
+					"Error for {0}: {1}", env.appName(), exceptionRefCleaner(event.error().getMessage()));
 		}
 		final var result = event.result();
 		if (result != null) {
@@ -364,6 +365,8 @@ public class NotificationMailTemplateToolkit {
 			var message = event.error().getMessage();
 			if (message == null || message.isEmpty()) {
 				message = "\"" + event.error().getClass().getSimpleName() + "\"";
+			} else {
+				message = exceptionRefCleaner(message);
 			}
 			final var subTitle = translate.i18n(lang, event, "title.error.message", "{0}",
 					escapeNspanWrapp(".errormessage", message));

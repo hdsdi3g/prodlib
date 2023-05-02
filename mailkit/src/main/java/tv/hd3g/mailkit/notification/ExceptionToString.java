@@ -98,4 +98,17 @@ public class ExceptionToString {
 		}
 	}
 
+	public static String exceptionRefCleaner(final String line) {
+		if (line == null) {
+			return null;
+		}
+		return line
+				.replace("java.util.concurrent.ExecutionException:", "")
+				.replace("java.io.UncheckedIOException:", "")
+				.replace("java.io.IOException:", "")
+				.replace("java.lang.NullPointerException:", "")
+				.replace("java.lang.IllegalStateException:", "")
+				.trim();
+	}
+
 }

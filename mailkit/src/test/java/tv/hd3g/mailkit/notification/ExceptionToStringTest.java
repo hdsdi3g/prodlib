@@ -19,6 +19,7 @@ package tv.hd3g.mailkit.notification;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static tv.hd3g.mailkit.notification.ExceptionToString.exceptionRefCleaner;
 
 import java.io.FileNotFoundException;
 
@@ -82,6 +83,16 @@ class ExceptionToStringTest {
 		assertNotNull(result);
 		assertTrue(result.startsWith("Exception: " + e.getMessage()));
 		assertEquals(2, result.lines().count());
+	}
+
+	@Test
+	void testExceptionRefCleaner() {
+		final var error = "Can&#x27;t start FTP download [/INPUT]: 550 Failed to open file.";
+		final var line = "java.util.concurrent.ExecutionException: java.io.UncheckedIOException: java.io.IOException: "
+						 + error;
+
+		assertEquals(error, exceptionRefCleaner(line));
+		assertEquals(error, exceptionRefCleaner(error));
 	}
 
 }
