@@ -234,7 +234,9 @@ public class NotificationMailTemplateToolkit {
 						  final boolean verbose,
 						  final List<DomContent> listBodyContent,
 						  final List<String> listCSSEntries) {
-
+		if (event.steps().isEmpty()) {
+			return;
+		}
 		final var stepLines = each(event.steps(),
 				step -> stepLineToString(lang, event, step, verbose));
 		listBodyContent.add(div(attrs(".steps"), stepLines));
