@@ -37,8 +37,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 
@@ -51,11 +49,9 @@ import tv.hd3g.mailkit.mod.service.SendAsSimpleNotificationContextPredicate;
 import tv.hd3g.mailkit.notification.NotificationEnvironment;
 import tv.hd3g.mailkit.notification.SupervisableUtility;
 
-@SpringBootTest
 class NotificationMailTemplateToolkitTest {
 	static Faker faker = net.datafaker.Faker.instance();
 
-	@Autowired
 	EnvironmentVersion environmentVersion;
 
 	NotificationMailTemplateToolkit t;
@@ -88,6 +84,8 @@ class NotificationMailTemplateToolkitTest {
 				return true;
 			}
 		};
+		environmentVersion = EnvironmentVersion.makeEnvironmentVersion(
+				"appVersion", "prodlibVersion", "frameworkVersion");
 		t = new NotificationMailTemplateToolkit(translate, env, environmentVersion);
 		listBodyContent = new ArrayList<>();
 		listCSSEntries = new ArrayList<>();
