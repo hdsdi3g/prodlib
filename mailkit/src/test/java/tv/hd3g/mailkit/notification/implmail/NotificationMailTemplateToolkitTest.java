@@ -121,10 +121,10 @@ class NotificationMailTemplateToolkitTest {
 	}
 
 	@Test
-	void testEscapeNspanWrapp() {
+	void testSpanWrapp() {
 		final var attrs = faker.animal().name().replace(" ", "");
 		final var textToEscape = faker.aviation().airport();
-		final var result = t.escapeNspanWrapp("." + attrs, textToEscape);
+		final var result = t.spanWrapp("." + attrs, textToEscape);
 		assertEquals("<span class=\"" + attrs + "\">" + textToEscape + "</span>", result);
 	}
 

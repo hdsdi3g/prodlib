@@ -58,7 +58,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import j2html.TagCreator;
 import j2html.tags.DomContent;
-import j2html.utils.EscapeUtil;
 import tv.hd3g.commons.version.EnvironmentVersion;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 import tv.hd3g.jobkit.engine.SupervisableMessage;
@@ -159,10 +158,10 @@ public class NotificationMailTemplateToolkit {
 	}
 
 	/**
-	 * @return span tag to raw string, with attrs as class and escape(textToEscape) in it.
+	 * @return span tag to raw string, with attrs as class in it.
 	 */
-	String escapeNspanWrapp(final String attrs, final String textToEscape) {
-		return span(attrs(attrs), EscapeUtil.escape(textToEscape)).render();
+	String spanWrapp(final String attrs, final String text) {
+		return span(attrs(attrs), text).render();
 	}
 
 	public String formatLongDate(final Date date, final Locale locale) {
@@ -321,7 +320,7 @@ public class NotificationMailTemplateToolkit {
 											   final SupervisableEndEvent event,
 											   final List<DomContent> listBodyContent) {
 		final var title = translate.i18n(lang, event, "title.ok", "Process done for {0}",
-				escapeNspanWrapp(APPNAME, env.appName()));
+				spanWrapp(APPNAME, env.appName()));
 		listBodyContent.add(h1(rawHtml(title)));
 	}
 
@@ -338,8 +337,8 @@ public class NotificationMailTemplateToolkit {
 		final var cssResultState = result.state().name().toLowerCase();
 		final var title = translate.i18n(lang, event, "title.okwithresult",
 				"Process {0} for {1}",
-				escapeNspanWrapp(".resultstate." + cssResultState, getResultStateI18n(lang, event)),
-				escapeNspanWrapp(APPNAME, env.appName()));
+				spanWrapp(".resultstate." + cssResultState, getResultStateI18n(lang, event)),
+				spanWrapp(APPNAME, env.appName()));
 		listBodyContent.add(h1(rawHtml(title)));
 
 		Optional.ofNullable(event.result().message())
@@ -352,7 +351,7 @@ public class NotificationMailTemplateToolkit {
 									   final boolean displayVerboseError,
 									   final boolean displayFullStackTrace) {
 		final var title = translate.i18n(lang, event, "title.error", "Error for {0}",
-				escapeNspanWrapp(APPNAME, env.appName()));
+				spanWrapp(APPNAME, env.appName()));
 		listBodyContent.add(h1(rawHtml(title)));
 
 		if (displayVerboseError) {
@@ -369,7 +368,7 @@ public class NotificationMailTemplateToolkit {
 				message = exceptionRefCleaner(message);
 			}
 			final var subTitle = translate.i18n(lang, event, "title.error.message", "{0}",
-					escapeNspanWrapp(".errormessage", message));
+					spanWrapp(".errormessage", message));
 			listBodyContent.add(h3(rawHtml(subTitle)));
 		}
 	}
@@ -379,9 +378,9 @@ public class NotificationMailTemplateToolkit {
 								  final List<DomContent> listBodyContent) {
 		final var dates = translate.i18n(lang, event, "dates",
 				"Created the {0}, started at {1}, ended at {2}.",
-				escapeNspanWrapp(".event.date.create", formatLongDate(event.creationDate(), lang)),
-				escapeNspanWrapp(".event.date.start", formatShortTime(event.startDate(), lang)),
-				escapeNspanWrapp(".event.date.end", formatShortTime(event.endDate(), lang)));
+				spanWrapp(".event.date.create", formatLongDate(event.creationDate(), lang)),
+				spanWrapp(".event.date.start", formatShortTime(event.startDate(), lang)),
+				spanWrapp(".event.date.end", formatShortTime(event.endDate(), lang)));
 		listBodyContent.add(div(attrs(".dates"), rawHtml(dates)));
 	}
 
@@ -514,9 +513,9 @@ public class NotificationMailTemplateToolkit {
 				""");
 
 		final var resultCaller = translate.i18n(lang, event, "result.caller", "Result caller source: {0}.",
-				escapeNspanWrapp(".result.caller", callerToString(event.result().caller())));
+				spanWrapp(".result.caller", callerToString(event.result().caller())));
 		final var resultDate = translate.i18n(lang, event, "result.date", "Result caller provided at {0}.",
-				escapeNspanWrapp(".result.date", formatShortDate(event.result().date(), lang)));
+				spanWrapp(".result.date", formatShortDate(event.result().date(), lang)));
 		listBodyContent.add(div(attrs(".result.caller"), rawHtml(resultCaller)));
 		listBodyContent.add(div(attrs(".result.date"), rawHtml(resultDate)));
 	}
@@ -539,23 +538,23 @@ public class NotificationMailTemplateToolkit {
 				""");
 		final var senderSource = translate.i18n(lang, event, "sender",
 				"Notification type: {0}, provided by {1}, runned on spool {2} as {3}, sended by {4}#{5} (started the {6}) for {7}.",
-				escapeNspanWrapp(".envevent.type", event.typeName()),
-				escapeNspanWrapp(".envevent.manager", event.managerName()),
-				escapeNspanWrapp(".envevent.spool", event.spoolName()),
-				escapeNspanWrapp(".envevent.job", event.jobName()),
-				escapeNspanWrapp(".envevent.instance", env.instanceName()),
-				escapeNspanWrapp(".envevent.instancepid", String.valueOf(environmentVersion.pid())),
-				escapeNspanWrapp(".envevent.startedon", formatLongDate(environmentVersion.startupTime(), lang)),
-				escapeNspanWrapp(".envevent.vendor", env.vendorName()));
+				spanWrapp(".envevent.type", event.typeName()),
+				spanWrapp(".envevent.manager", event.managerName()),
+				spanWrapp(".envevent.spool", event.spoolName()),
+				spanWrapp(".envevent.job", event.jobName()),
+				spanWrapp(".envevent.instance", env.instanceName()),
+				spanWrapp(".envevent.instancepid", String.valueOf(environmentVersion.pid())),
+				spanWrapp(".envevent.startedon", formatLongDate(environmentVersion.startupTime(), lang)),
+				spanWrapp(".envevent.vendor", env.vendorName()));
 		listBodyContent.add(div(attrs(".sendersource"), rawHtml(senderSource)));
 
 		final var senderVersion = translate.i18n(lang, event, "senderversion",
 				"App version: {0}, deps versions: {1}/{2} runned on {3} {4}.",
-				escapeNspanWrapp(".envevent.appversion", environmentVersion.appVersion()),
-				escapeNspanWrapp(".envevent.prodlib", environmentVersion.prodlibVersion()),
-				escapeNspanWrapp(".envevent.framework", environmentVersion.frameworkVersion()),
-				escapeNspanWrapp(".envevent.jvmname", environmentVersion.jvmNameVendor()),
-				escapeNspanWrapp(".envevent.jvmversion", environmentVersion.jvmVersion()));
+				spanWrapp(".envevent.appversion", environmentVersion.appVersion()),
+				spanWrapp(".envevent.prodlib", environmentVersion.prodlibVersion()),
+				spanWrapp(".envevent.framework", environmentVersion.frameworkVersion()),
+				spanWrapp(".envevent.jvmname", environmentVersion.jvmNameVendor()),
+				spanWrapp(".envevent.jvmversion", environmentVersion.jvmVersion()));
 		listBodyContent.add(div(attrs(".senderversion"), rawHtml(senderVersion)));
 	}
 
