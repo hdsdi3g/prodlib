@@ -84,7 +84,8 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 			FileUtils.forceMkdirParent(knownHostFile);
 			client.addHostKeyVerifier(new DefaultKnownHostsVerifier(knownHostFile));
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't load known_hosts file during SSH/SFTP client loading: "
+										   + knownHostFile, e);
 		}
 	}
 
@@ -139,7 +140,7 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 				return client.loadKeys(privateKey.getPath());
 			}
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't load provided SSH/SCP private key: " + privateKey, e);
 		}
 	}
 
@@ -149,7 +150,8 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 	public void manuallyAddPrivatekeyAuth(final File privateKey, final char[] keyPassword) {
 		Objects.requireNonNull(privateKey);
 		if (privateKey.exists() == false) {
-			throw new UncheckedIOException(new FileNotFoundException(privateKey.getPath()));
+			throw new UncheckedIOException("Can't found SSH/SCP private key: " + privateKey,
+					new FileNotFoundException());
 		} else if (privateKey.isDirectory()) {
 			authKeys.addAll(Stream.of("id_rsa", "id_dsa", "id_ed25519", "id_ecdsa")
 					.map(f -> new File(privateKey, f))
@@ -198,7 +200,7 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 		if (isAvaliable()) {
 			return;
 		} else if (wasConnected == true) {
-			throw new UncheckedIOException(new IOException("Client is not avaliable to use"));
+			throw new UncheckedIOException("Client is not avaliable to use " + this, new IOException());
 		}
 		log.debug("Start to connect to {}", this);
 		wasConnected = true;
@@ -219,7 +221,7 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 			log.info("Connected to {}", this);
 			createANewSFTPClient();
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't connect to server: " + this, e);
 		}
 	}
 
@@ -247,7 +249,7 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 			}
 			sftpClient.getFileTransfer().setPreserveAttributes(false);
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't start a new SFTP client on server: " + this, e);
 		}
 	}
 
@@ -260,7 +262,7 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 			}
 			sftpClient = null;
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't disconnect from the SSH/SFTP server: " + this, e);
 		}
 	}
 
@@ -268,11 +270,11 @@ public class SFTPFileSystem extends CommonAbstractFileSystem<SFTPFile> {
 	public synchronized SFTPFile getFromPath(final String path) {
 		if (isAvaliable() == false) {
 			if (wasConnected == false) {
-				throw new UncheckedIOException(
-						new IOException("Non-active SSH client, try to connect before"));
+				throw new UncheckedIOException("Can't use client, inactive SSH/SCP client on server: " + this,
+						new IOException());
 			} else {
-				throw new UncheckedIOException(
-						new IOException("SSH client was disconnected. Please retry with another instance."));
+				throw new UncheckedIOException("Can't use client, disconnected SSH/SCP client on server: " + this,
+						new IOException());
 			}
 		}
 		final var aPath = getPathFromRelative(path);

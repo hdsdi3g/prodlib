@@ -77,7 +77,7 @@ public class LocalFileSystem extends CommonAbstractFileSystem<LocalFile> {
 				realPath = file.getPath();
 			}
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't access to root path for \"" + file.getPath() + "\"", e);
 		}
 		final var rootPath = relativePath.getPath();
 		if (realPath.startsWith(rootPath) == false) {

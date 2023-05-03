@@ -126,7 +126,7 @@ public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
 					log.error("Can't disconnect properly after login error", e1);
 				}
 			}
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't connect to FTP server " + this, e);
 		}
 	}
 
@@ -166,7 +166,7 @@ public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
 				ftpClient.disconnect();
 			}
 		} catch (final IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Can't disconnect from FTP server " + this, e);
 		}
 	}
 
@@ -187,7 +187,7 @@ public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
 	@Override
 	public FTPFile getFromPath(final String path) {
 		if (isAvaliable() == false) {
-			throw new UncheckedIOException(new IOException("FTP client not connected"));
+			throw new UncheckedIOException("The FTP client is not connected", new IOException());
 		}
 		final var aPath = getPathFromRelative(path);
 		log.trace("Create new FTPFile to \"{}\" relative to \"{}\"", this, aPath);
