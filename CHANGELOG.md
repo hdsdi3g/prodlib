@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 14.2.0
+
+Better error messages for TransfertFiles on I/O actions (bis) #116
+
 ## 14.1.0
 
 Better error messages for TransfertFiles on I/O actions #113
