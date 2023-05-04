@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 14.2.1
+
+Bug fix: the FTP uploads don't manage subdirs path #119
+
 ## 14.2.0
 
 Better error messages for TransfertFiles on I/O actions (bis) #116
