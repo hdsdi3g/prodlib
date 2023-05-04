@@ -503,7 +503,7 @@ public class FTPFile extends CommonAbstractFile<FTPFileSystem> {// NOSONAR S2160
 							   final int bufferSize,
 							   final SizedStoppableCopyCallback copyCallback) {
 		var copied = 0L;
-		try (var outputStream = ftpClient.storeFileStream(getName())) {
+		try (var outputStream = ftpClient.storeFileStream(absolutePath)) {
 			if (outputStream == null) {
 				throw new UncheckedIOException(
 						new IOException(
