@@ -17,19 +17,23 @@
 package tv.hd3g.authkit.mod.dto.ressource;
 
 import java.util.Date;
-import java.util.Objects;
 import java.util.function.Function;
 
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.lang.Nullable;
 
 import jakarta.validation.constraints.Size;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import tv.hd3g.authkit.mod.dto.ExternalAuthUserDto;
 import tv.hd3g.authkit.mod.entity.Userprivacy;
 
 /**
  * In and Out DTO
  */
+@EqualsAndHashCode(callSuper = false)
+@Getter
 public class UserPrivacyDto extends RepresentationModel<UserPrivacyDto> {
 
 	/**
@@ -42,25 +46,41 @@ public class UserPrivacyDto extends RepresentationModel<UserPrivacyDto> {
 	 */
 	@Nullable
 	private String userUUID;
+
 	@Nullable
+	@Setter
 	private String name;
+
 	@Nullable
+	@Setter
 	private String address;
+
 	@Nullable
 	@Size(max = 16)
+	@Setter
 	private String postalcode;
+
 	@Nullable
 	@Size(max = 3)
+	@Setter
 	private String country;
+
 	@Nullable
 	@Size(max = 3)
+	@Setter
 	private String lang;
+
 	@Nullable
+	@Setter
 	private String email;
+
 	@Nullable
 	@Size(max = 128)
+	@Setter
 	private String company;
+
 	@Nullable
+	@Setter
 	private String phone;
 
 	public UserPrivacyDto() {
@@ -116,106 +136,6 @@ public class UserPrivacyDto extends RepresentationModel<UserPrivacyDto> {
 		if (phone != null) {
 			user.setPhone(cipher.apply(phone));
 		}
-	}
-
-	@Override
-	public int hashCode() {
-		final var prime = 31;
-		var result = super.hashCode();
-		result = prime * result + Objects.hash(address, company, country, created, email, lang, name,
-				phone, postalcode, userUUID);
-		return result;
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final var other = (UserPrivacyDto) obj;
-		return Objects.equals(address, other.address) && Objects.equals(company, other.company) && Objects.equals(
-				country, other.country) && Objects.equals(created, other.created) && Objects.equals(email, other.email)
-			   && Objects.equals(lang, other.lang) && Objects.equals(
-					   name, other.name) && Objects.equals(phone, other.phone) && Objects.equals(postalcode,
-							   other.postalcode) && Objects.equals(userUUID, other.userUUID);
-	}
-
-	public Date getCreated() {
-		return created;
-	}
-
-	public String getUserUUID() {
-		return userUUID;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getAddress() {
-		return address;
-	}
-
-	public String getPostalcode() {
-		return postalcode;
-	}
-
-	public String getCountry() {
-		return country;
-	}
-
-	public String getLang() {
-		return lang;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public String getCompany() {
-		return company;
-	}
-
-	public String getPhone() {
-		return phone;
-	}
-
-	public void setName(final String name) {
-		this.name = name;
-	}
-
-	public void setAddress(final String address) {
-		this.address = address;
-	}
-
-	public void setPostalcode(final String postalcode) {
-		this.postalcode = postalcode;
-	}
-
-	public void setCountry(final String country) {
-		this.country = country;
-	}
-
-	public void setLang(final String lang) {
-		this.lang = lang;
-	}
-
-	public void setEmail(final String email) {
-		this.email = email;
-	}
-
-	public void setCompany(final String company) {
-		this.company = company;
-	}
-
-	public void setPhone(final String phone) {
-		this.phone = phone;
 	}
 
 }
