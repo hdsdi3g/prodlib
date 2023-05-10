@@ -36,7 +36,6 @@
         <dependency>
             <groupId>com.j2html</groupId>
             <artifactId>j2html</artifactId>
-            <version>${j2html.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

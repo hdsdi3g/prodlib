@@ -188,8 +188,8 @@ class FTPFileSystemTest {
 		fs.connect();
 		final var f = fs.getFromPath("target");
 		assertTrue(f.list()
-		        .map(AbstractFile::getName)
-		        .anyMatch(sf -> sf.equalsIgnoreCase("testfs-ftp")));
+				.map(AbstractFile::getName)
+				.anyMatch(sf -> sf.equalsIgnoreCase("testfs-ftp")));
 		fs.close();
 	}
 
@@ -224,8 +224,6 @@ class FTPFileSystemTest {
 		fs.connect();
 		final var client = fs.getClient();
 		assertEquals(fs.getTimeout(), client.getConnectTimeout());
-		assertEquals(fs.getTimeout(), client.getControlKeepAliveReplyTimeout());
-		assertEquals(fs.getTimeout(), client.getControlKeepAliveTimeout());
 		assertEquals(fs.getTimeout(), client.getDefaultTimeout());
 	}
 

@@ -92,10 +92,7 @@ public class FTPFileSystem extends CommonAbstractFileSystem<FTPFile> {
 
 		if (timeoutDuration > 0) {
 			client.setConnectTimeout((int) timeoutDuration);
-			client.setControlKeepAliveReplyTimeout((int) timeoutDuration);
-			client.setControlKeepAliveTimeout(timeoutDuration);
 			client.setDefaultTimeout((int) timeoutDuration);
-			client.setDataTimeout((int) timeoutDuration);
 		}
 		try {
 			log.debug("Start to connect to {}", this);
