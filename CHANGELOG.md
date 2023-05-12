@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 15.2.0
+
+Add new JobKit logic: create a gracefully stop for Jobkit with a shutdown hook, and an adaptative logic to wait or not the spools to ends #118. So, if you're using JobKit now, you need to add in JobKitEngine spool names on `spoolsNamesToKeepRunningToTheEnd`, so that everything run until all these pending jobs are executed, for *these* spools (the others are cleaned up). In all cases, it waits for the end of execution of the current jobs in progress.
+
 ## 15.1.0
 
 Bug fix: stop sending an email after a Watchfolder scan error if the retry process is enabled: create a new FolderActivity "onStopRetryOnError" #125

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.atLeast;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -64,7 +65,7 @@ class BackgroundServiceEventTest {
 	@AfterEach
 	void close() {
 		service.disable();
-		spooler.shutdown();
+		spooler.shutdown(Set.of());
 		scheduledExecutorService.shutdown();
 	}
 

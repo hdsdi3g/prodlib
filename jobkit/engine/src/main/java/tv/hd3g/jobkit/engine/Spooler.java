@@ -1,6 +1,7 @@
 package tv.hd3g.jobkit.engine;
 
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -10,7 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class Spooler {
-
 	private static Logger log = LogManager.getLogger();
 
 	private final ConcurrentHashMap<String, SpoolExecutor> spoolExecutors;
@@ -54,23 +54,29 @@ public class Spooler {
 	/**
 	 * Blocking
 	 */
-	public void shutdown() {
+	public void shutdown(final Set<String> spoolsNamesToKeepRunningToTheEnd) {
 		if (shutdown.get()) {
 			return;
 		}
 		shutdown.set(true);
 
 		final var count = getRunningQueuesCount();
-		if (count > 0) {
-			log.info("Shutdown all ({}) spoolExecutors. {} are running jobs and {} in waiting...",
-					spoolExecutors.mappingCount(),
-					count,
-					getAllQueuesSize());
-		} else {
-			log.info("Shutdown all ({}) spoolExecutors. No running jobs or waiting jobs.",
-					spoolExecutors.mappingCount());
-		}
-		getSpoolExecutorStream().forEach(SpoolExecutor::shutdown);
+		log.info("Shutdown all ({}) spoolExecutors. {} are running jobs and {} in waiting...",
+				spoolExecutors.mappingCount(),
+				count,
+				getAllQueuesSize());
+
+		getSpoolExecutorStream().forEach(SpoolExecutor::stopToAcceptNewJobs);
+
+		spoolExecutors.entrySet().stream()
+				.filter(entry -> spoolsNamesToKeepRunningToTheEnd.contains(entry.getKey()) == false)
+				.map(Entry::getValue)
+				.forEach(se -> se.clean(true));
+
+		spoolExecutors.entrySet().stream()
+				.filter(entry -> spoolsNamesToKeepRunningToTheEnd.contains(entry.getKey()))
+				.map(Entry::getValue)
+				.forEach(se -> se.clean(false));
 
 		final var s = new Supervisable(Thread.currentThread().toString(), "ShutdownSpooler", supervisableEvents);
 		s.start();

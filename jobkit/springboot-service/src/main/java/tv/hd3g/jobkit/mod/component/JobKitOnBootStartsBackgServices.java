@@ -18,7 +18,6 @@ package tv.hd3g.jobkit.mod.component;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -27,7 +26,7 @@ import org.springframework.stereotype.Component;
 import tv.hd3g.jobkit.engine.JobKitEngine;
 
 @Component
-public class JobKitOnBootStartsBackgServices implements DisposableBean {
+public class JobKitOnBootStartsBackgServices {
 	private static Logger log = LogManager.getLogger();
 
 	@Autowired
@@ -39,10 +38,4 @@ public class JobKitOnBootStartsBackgServices implements DisposableBean {
 		jobKitEngine.onApplicationReadyRunBackgroundServices();
 	}
 
-	@Override
-	public void destroy() throws Exception {
-		log.info("App want to close: shutdown jobKitEngine...");
-		jobKitEngine.shutdown();
-		log.debug("JobKitEngine is now closed");
-	}
 }

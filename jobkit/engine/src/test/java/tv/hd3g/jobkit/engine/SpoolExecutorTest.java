@@ -1,6 +1,5 @@
 package tv.hd3g.jobkit.engine;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -264,58 +263,68 @@ class SpoolExecutorTest {
 	}
 
 	@Test
-	void testShutdown_simple() throws InterruptedException {
-		spoolExecutor.shutdown();
-
-		final var smCmd = new CountDownLatch(1);
+	void testStopToAcceptNewJobs() throws InterruptedException {
+		spoolExecutor.stopToAcceptNewJobs();
+		final var count = new AtomicInteger(0);
 		assertFalse(spoolExecutor.addToQueue(() -> {
-			smCmd.countDown();
+			count.getAndIncrement();
 		}, name, 0, e -> {
+			count.getAndIncrement();
 		}));
-		assertFalse(smCmd.await(10, MILLISECONDS));
 
-		verify(event, times(0)).shutdownSpooler(any(Supervisable.class));
-	}
-
-	@Test
-	void testShutdown() {
-		final var count = new AtomicInteger(0);
-
-		spoolExecutor.addToQueue(() -> {
-			Thread.sleep(100);// NOSONAR
-			count.incrementAndGet();
-		}, name, 0, e -> {
-			count.incrementAndGet();
-		});
-
+		Thread.sleep(10);// NOSONAR
 		assertEquals(0, count.get());
-		spoolExecutor.shutdown();
-		assertEquals(2, count.get());
-
-		verify(event, times(0)).shutdownSpooler(any(Supervisable.class));
-		verify(sEvent, times(4)).onEnd(any(), eq(Optional.empty()));
 	}
 
 	@Test
-	void testShutdown_multiple() {
+	void testClean_purgeWaitList_noEmpty() {
+		final var total = 1000;
 		final var count = new AtomicInteger(0);
-		final var total = 10;
 
-		for (var i = 0; i < total; i++) {
+		for (var pos = 0; pos < total; pos++) {
 			assertTrue(spoolExecutor.addToQueue(() -> {
-				Thread.sleep(20);// NOSONAR
 				count.incrementAndGet();
+				Thread.sleep(10);// NOSONAR
 			}, name, 0, e -> {
 				count.incrementAndGet();
 			}));
 		}
 
-		assertEquals(0, count.get());
-		spoolExecutor.shutdown();
-		assertEquals(total * 2, count.get());
+		spoolExecutor.clean(true);
+		assertTrue(count.get() / 2 < total);
+		verify(sEvent, atLeast(1)).onEnd(any(), any());
+	}
 
-		verify(event, times(0)).shutdownSpooler(any(Supervisable.class));
-		verify(sEvent, times(total * 4)).onEnd(any(), eq(Optional.empty()));
+	@Test
+	void testClean_purgeWaitList_empty() {
+		spoolExecutor.clean(true);
+		verify(sEvent, times(0)).onEnd(any(), any());
+	}
+
+	@Test
+	void testClean_notPurgeWaitList_empty() {
+		spoolExecutor.clean(false);
+		verify(sEvent, times(0)).onEnd(any(), any());
+	}
+
+	@Test
+	void testClean_notPurgeWaitList() throws InterruptedException {
+		final var total = 100;
+		final var smCmd = new CountDownLatch(total * 2);
+
+		for (var pos = 0; pos < total; pos++) {
+			assertTrue(spoolExecutor.addToQueue(() -> {
+				smCmd.countDown();
+				Thread.sleep(1);// NOSONAR
+			}, name, 0, e -> {
+				smCmd.countDown();
+			}));
+		}
+
+		spoolExecutor.clean(false);
+
+		assertTrue(smCmd.await(total * 10, SECONDS));
+		checkSupervisableEventOnEnd(total * 4, true);
 	}
 
 	@Test

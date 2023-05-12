@@ -182,8 +182,6 @@ class WatchfoldersTest {
 
 		verify(folderActivity, times(1)).getPickUpType(observedFolder);
 
-		jobKitEngine.shutdown();
-		verify(folderActivity, times(4)).onStopScans(List.of(observedFolder));
 		verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068
 	}
 
@@ -202,8 +200,6 @@ class WatchfoldersTest {
 		verify(folderActivity, times(1)).onStartScans(List.of(observedFolder));
 		verify(folderActivity, times(1)).onStopScans(List.of(observedFolder));
 
-		jobKitEngine.shutdown();
-		verify(folderActivity, times(2)).onStopScans(List.of(observedFolder));
 		verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068
 	}
 

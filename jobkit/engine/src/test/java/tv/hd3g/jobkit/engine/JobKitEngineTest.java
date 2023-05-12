@@ -2,25 +2,29 @@ package tv.hd3g.jobkit.engine;
 
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.time.Duration;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +33,6 @@ import org.mockito.MockitoAnnotations;
 
 class JobKitEngineTest {
 
-	static ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
 	static Random random = new Random();
 
 	@Mock
@@ -47,12 +50,14 @@ class JobKitEngineTest {
 	String spoolName;
 	JobKitEngine jobKitEngine;
 	Spooler spooler;
+	ScheduledExecutorService scheduledExecutor;
 
 	@BeforeEach
 	void init() throws Exception {
 		MockitoAnnotations.openMocks(this).close();
 		name = String.valueOf(random.nextLong());
 		spoolName = String.valueOf(random.nextLong());
+		scheduledExecutor = Executors.newScheduledThreadPool(1);
 		jobKitEngine = new JobKitEngine(scheduledExecutor, executionEvent, backgroundServiceEvent);
 		spooler = jobKitEngine.getSpooler();
 	}
@@ -60,11 +65,6 @@ class JobKitEngineTest {
 	@AfterEach
 	void close() throws Exception {
 		jobKitEngine.shutdown();
-	}
-
-	@AfterAll
-	static void end() {
-		scheduledExecutor.shutdownNow();
 	}
 
 	@Test
@@ -130,9 +130,68 @@ class JobKitEngineTest {
 	}
 
 	@Test
-	void testShutdown() {
-		jobKitEngine.startService(name, spoolName, 1, TimeUnit.DAYS, task, disableTask);
-		assertDoesNotThrow(() -> jobKitEngine.shutdown());
+	void testShutdown_noMoreTasks() {
+		jobKitEngine.shutdown();
+		assertThrows(IllegalStateException.class,
+				() -> jobKitEngine.runOneShot(name, spoolName, 0, task, afterRunCommand));
+		verifyNoMoreInteractions(task, afterRunCommand);
+	}
+
+	@Test
+	void testShutdown_stopService() throws Exception {
+		final var smAfter = new CountDownLatch(1);
+		final var supervisable = new AtomicReference<Supervisable>();
+
+		final var service = jobKitEngine.startService(name, spoolName, 1, TimeUnit.DAYS, task,
+				() -> {
+					supervisable.set(Supervisable.getSupervisable());
+					smAfter.countDown();
+				});
+
+		jobKitEngine.shutdown();
+
+		assertFalse(service.isEnabled());
+		assertFalse(service.isHasFirstStarted());
+		assertTrue(smAfter.await(1, SECONDS));
+
+		assertFalse(service.isEnabled());
+		assertFalse(service.isHasFirstStarted());
+		assertNotNull(supervisable.get());
+
+		verifyNoMoreInteractions(task);
+	}
+
+	@Test
+	void testShutdown_keepRun() throws Exception {
+		final var spoolsNamesToKeepRunningToTheEnd = jobKitEngine.getSpoolsNamesToKeepRunningToTheEnd();
+		assertNotNull(spoolsNamesToKeepRunningToTheEnd);
+		assertTrue(spoolsNamesToKeepRunningToTheEnd.isEmpty());
+		spoolsNamesToKeepRunningToTheEnd.add(spoolName + "A");
+
+		final var total = 100;
+		final var countA = new AtomicInteger(0);
+		final var countB = new AtomicInteger(0);
+
+		for (var pos = 0; pos < total; pos++) {
+			assertTrue(jobKitEngine.runOneShot(name, spoolName + "A", 0,
+					() -> {
+						countA.getAndIncrement();
+						Thread.sleep(1);// NOSONAR
+					},
+					afterRunCommand));
+			assertTrue(jobKitEngine.runOneShot(name, spoolName + "B", 0,
+					() -> {
+						countB.getAndIncrement();
+						Thread.sleep(1);// NOSONAR
+					},
+					afterRunCommand));
+		}
+
+		jobKitEngine.shutdown();
+
+		assertEquals(total, countA.get());
+		assertTrue(total > countB.get());
+		verify(afterRunCommand, atLeast(total)).accept(isNull());
 	}
 
 	@Test

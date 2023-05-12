@@ -51,14 +51,14 @@ public class Supervisable {
 
 	public static final Supervisable getSupervisable() {
 		final var t = Thread.currentThread();
-		if (t instanceof final SpoolJobStatus status) {
+		if (t instanceof final SupervisableSupplier status) {
 			log.trace("Get for {}", status);
 			return status.getSupervisable();
 		} else {
 			final var manually = manuallyRegistedSupervisables.get();
 			if (manually == null) {
 				throw new IllegalThreadStateException("Can't extract Supervisable, current Thread " + t.getName()
-													  + " is not a SpoolJobStatus: " + t.getClass().getName());
+													  + " is not a SupervisableSupplier: " + t.getClass().getName());
 			} else {
 				return manually;
 			}

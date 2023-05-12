@@ -5,19 +5,28 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class JobKitEngine implements JobTrait {
+	private static Logger log = LogManager.getLogger();
 
 	private final List<BackgroundService> backgroundServices;
 	private final ScheduledExecutorService scheduledExecutor;
 	private final BackgroundServiceEvent backgroundServiceEvent;
 	private final Spooler spooler;
 	private final SupervisableManager supervisableManager;
+	private final AtomicBoolean shutdown;
+	private final Set<String> spoolsNamesToKeepRunningToTheEnd;
 
 	public JobKitEngine(final ScheduledExecutorService scheduledExecutor,
 						final ExecutionEvent executionEvent,
@@ -26,13 +35,17 @@ public class JobKitEngine implements JobTrait {
 		this.scheduledExecutor = scheduledExecutor;
 		this.backgroundServiceEvent = backgroundServiceEvent;
 		backgroundServices = Collections.synchronizedList(new ArrayList<>());
+		spoolsNamesToKeepRunningToTheEnd = Collections.synchronizedSet(new HashSet<>());
 		this.supervisableManager = supervisableManager;
+		shutdown = new AtomicBoolean(false);
 
 		if (supervisableManager == null) {
 			spooler = new Spooler(executionEvent, SupervisableManager.voidSupervisableEvents());
 		} else {
 			spooler = new Spooler(executionEvent, supervisableManager);
 		}
+
+		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
 	}
 
 	public JobKitEngine(final ScheduledExecutorService scheduledExecutor,
@@ -47,6 +60,14 @@ public class JobKitEngine implements JobTrait {
 		spooler = null;
 		backgroundServices = null;
 		supervisableManager = null;
+		shutdown = new AtomicBoolean(false);
+		spoolsNamesToKeepRunningToTheEnd = null;
+	}
+
+	private void checkNoShutdown() {
+		if (shutdown.get()) {
+			throw new IllegalStateException("JobKit and app is currently to close. Can't add new jobs.");
+		}
 	}
 
 	/**
@@ -58,20 +79,22 @@ public class JobKitEngine implements JobTrait {
 							  final int priority,
 							  final RunnableWithException task,
 							  final Consumer<Exception> afterRunCommand) {
+		checkNoShutdown();
 		return spooler.getExecutor(spoolName).addToQueue(task, name, priority, afterRunCommand);
 	}
 
 	public BackgroundService createService(final String name, // NOSONAR S1133
 										   final String spoolName,
-										   final RunnableWithException task,
-										   final RunnableWithException disableTask) {
+										   final RunnableWithException serviceTask,
+										   final RunnableWithException onServiceDisableTask) {
+		checkNoShutdown();
 		final var service = new BackgroundService(name,
 				spoolName,
 				spooler,
 				scheduledExecutor,
 				backgroundServiceEvent,
-				task,
-				disableTask);
+				serviceTask,
+				onServiceDisableTask);
 		backgroundServices.add(service);
 		return service;
 	}
@@ -83,9 +106,10 @@ public class JobKitEngine implements JobTrait {
 										  final String spoolName,
 										  final long timedInterval,
 										  final TimeUnit unit,
-										  final RunnableWithException task,
-										  final RunnableWithException disableTask) {
-		return createService(name, spoolName, task, disableTask)
+										  final RunnableWithException serviceTask,
+										  final RunnableWithException onServiceDisableTask) {
+		checkNoShutdown();
+		return createService(name, spoolName, serviceTask, onServiceDisableTask)
 				.setTimedInterval(timedInterval, unit)
 				.enable();
 	}
@@ -96,28 +120,55 @@ public class JobKitEngine implements JobTrait {
 	public BackgroundService startService(final String name,
 										  final String spoolName,
 										  final Duration duration,
-										  final RunnableWithException task,
-										  final RunnableWithException disableTask) {
-		return startService(name, spoolName, duration.toMillis(), MILLISECONDS, task, disableTask);
+										  final RunnableWithException serviceTask,
+										  final RunnableWithException onServiceDisableTask) {
+		checkNoShutdown();
+		return startService(name, spoolName, duration.toMillis(), MILLISECONDS, serviceTask, onServiceDisableTask);
 	}
 
 	public Spooler getSpooler() {
 		return spooler;
 	}
 
+	public void onApplicationReadyRunBackgroundServices() {
+		checkNoShutdown();
+		backgroundServices.forEach(BackgroundService::runFirstOnStartup);
+	}
+
+	public Set<String> getSpoolsNamesToKeepRunningToTheEnd() {
+		return spoolsNamesToKeepRunningToTheEnd;
+	}
+
 	/**
-	 * Stop all services and shutdown spooler.
-	 * Blocking.
-	 * Don't forget to shutdown the scheduled executor.
+	 * This should never be called outside ShutdownHook. Only visible here for test purpose.
 	 */
-	public void shutdown() {
+	void shutdown() {
+		log.warn("App want to close: shutdown jobKitEngine...");
+		shutdown.set(true);
 		backgroundServices.forEach(BackgroundService::disable);
-		spooler.shutdown();
+		scheduledExecutor.shutdown();
+		spooler.shutdown(spoolsNamesToKeepRunningToTheEnd);
 		Optional.ofNullable(supervisableManager).ifPresent(SupervisableManager::close);
 	}
 
-	public void onApplicationReadyRunBackgroundServices() {
-		backgroundServices.forEach(BackgroundService::runFirstOnStartup);
+	private class ShutdownHook extends Thread {
+
+		public ShutdownHook() {
+			setName("JobKit ShutdownHook");
+			setPriority(Thread.MAX_PRIORITY);
+			setDaemon(true);
+		}
+
+		@Override
+		public void run() {
+			if (shutdown.get()) {
+				log.warn("Why on God do you have run shutdown() before here?");
+				return;
+			}
+			shutdown();
+			log.warn("JobKitEngine is now closed properly");
+		}
+
 	}
 
 }

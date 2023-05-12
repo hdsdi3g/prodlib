@@ -18,7 +18,6 @@ package tv.hd3g.jobkit.mod.component;
 
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +51,5 @@ class JobKitOnBootStartsBackgServicesTest {
 	@Test
 	void test() throws Exception {
 		verify(jobKitEngine, only()).onApplicationReadyRunBackgroundServices();
-		onBoot.destroy();
-		verify(jobKitEngine, times(1)).shutdown();
 	}
 }

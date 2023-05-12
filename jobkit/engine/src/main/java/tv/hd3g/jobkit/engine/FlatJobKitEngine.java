@@ -161,7 +161,7 @@ public class FlatJobKitEngine extends JobKitEngine {
 	}
 
 	@Override
-	public void shutdown() {
+	void shutdown() {
 		disableTaskList.forEach(d -> d.toRunnable().run());
 	}
 

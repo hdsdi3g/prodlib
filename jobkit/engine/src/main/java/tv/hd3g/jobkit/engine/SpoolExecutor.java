@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class SpoolExecutor {
+class SpoolExecutor {
 
 	private static Logger log = LogManager.getLogger();
 
@@ -25,10 +25,10 @@ public class SpoolExecutor {
 	private final AtomicBoolean shutdown;
 	private final SupervisableEvents supervisableEvents;
 
-	public SpoolExecutor(final String name,
-						 final ExecutionEvent event,
-						 final AtomicLong threadCount,
-						 final SupervisableEvents supervisableEvents) {
+	SpoolExecutor(final String name,
+				  final ExecutionEvent event,
+				  final AtomicLong threadCount,
+				  final SupervisableEvents supervisableEvents) {
 		this.name = name;
 		this.event = event;
 		this.threadCount = threadCount;
@@ -39,10 +39,10 @@ public class SpoolExecutor {
 		currentOperation = new AtomicComputeReference<>();
 	}
 
-	public boolean addToQueue(final RunnableWithException command,
-							  final String name,
-							  final int priority,
-							  final Consumer<Exception> afterRunCommand) {
+	boolean addToQueue(final RunnableWithException command,
+					   final String name,
+					   final int priority,
+					   final Consumer<Exception> afterRunCommand) {
 		if (shutdown.get()) {
 			log.error("Can't add to queue new command \"{}\" by \"{}\": the spool is shutdown", name, this.name);
 			return false;
@@ -53,16 +53,19 @@ public class SpoolExecutor {
 		return true;
 	}
 
-	public int getQueueSize() {
+	int getQueueSize() {
 		return queue.size();
 	}
 
-	public boolean isRunning() {
+	boolean isRunning() {
 		return currentOperation.computePredicate(Thread::isAlive);
 	}
 
 	private void runNext() {
 		if (shutdown.get()) {
+			/**
+			 * shutdown() will keep run the last jobs on queue
+			 */
 			return;
 		}
 		synchronized (queue) {
@@ -78,32 +81,45 @@ public class SpoolExecutor {
 		}
 	}
 
+	void stopToAcceptNewJobs() {
+		log.debug("Stop spool {} to accept new jobs", name);
+		shutdown.set(true);
+	}
+
 	/**
 	 * Blocking
 	 */
-	public void shutdown() {
-		if (shutdown.get()) {
-			return;
-		}
-		shutdown.set(true);
-		log.debug("Set shutdown for spool {}, wait to close...", name);
+	void clean(final boolean purgeWaitList) {
+		log.debug("Clean spool {}", name);
 
+		if (purgeWaitList) {
+			queue.clear();
+		}
 		while (isRunning()) {
 			Thread.onSpinWait();
 		}
-		Thread endOperation;
-		endOperation = queue.poll();
-		while (endOperation != null) {
-			endOperation.start();
-			while (endOperation.isAlive()) {
-				Thread.onSpinWait();
-			}
-			endOperation = queue.poll();
+
+		if (purgeWaitList) {
+			log.debug("Spool {} is cleaned (with {} canceled task(s))", name, queue.size());
+			return;
 		}
-		log.debug("Spool {} is now closed", name);
+		if (queue.isEmpty() == false) {
+			log.debug("Wait {} jobs to run before clean spool {}...", name, queue.size());
+
+			Thread endOperation;
+			endOperation = queue.poll();
+			while (endOperation != null) {
+				endOperation.start();
+				while (endOperation.isAlive()) {
+					Thread.onSpinWait();
+				}
+				endOperation = queue.poll();
+			}
+		}
+		log.debug("Spool {} is now empty, without running tasks", name);
 	}
 
-	private class SpoolJob extends Thread implements SpoolJobStatus {
+	private class SpoolJob extends Thread implements SupervisableSupplier {
 
 		final RunnableWithException command;
 		final String commandName;
@@ -200,21 +216,6 @@ public class SpoolExecutor {
 				currentOperation.reset();
 			}
 			runNext();
-		}
-
-		@Override
-		public String getJobName() {
-			return commandName;
-		}
-
-		@Override
-		public String getSpoolName() {
-			return name;
-		}
-
-		@Override
-		public int getJobPriority() {
-			return priority;
 		}
 
 		@Override
