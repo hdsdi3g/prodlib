@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.6</version>
+        <version>3.1.0</version>
         <relativePath />
     </parent>
 
@@ -51,6 +51,7 @@
         <commons.io.version>2.11.0</commons.io.version>
         <commons.compress.version>1.22</commons.compress.version>
         <commons.collections4.version>4.4</commons.collections4.version>
+        <httpclient.version>4.5.14</httpclient.version>
         <sshj.version>0.33.0</sshj.version>
         <bouncycastle.version>1.70</bouncycastle.version>
         <xz.version>1.8</xz.version>
