@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 15.0.2
+
+Maintenance version: switch Spring Boot version from 3.0.6 to 3.1.0 #127
+
 ## 15.0.1
 
 Maintenance version: update Commons Net from 3.8.0 to 3.9.0 and remove deprecated code, explicit versions deps in starter pom, ignore xercesImpl from AuthKit/ESAPI dep #122
