@@ -21,6 +21,7 @@ import static org.springframework.mail.javamail.MimeMessageHelper.MULTIPART_MODE
 import static tv.hd3g.commons.mailkit.SendMailDto.MessageGrade.SECURITY;
 
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -90,11 +91,19 @@ public class NotificationRouterMail implements NotificationRouter {
 		}
 	}
 
-	private void sendOkKoEvent(final SupervisableEndEvent event) {
+	private void sendToEndUserEvent(final SupervisableEndEvent event) {
 		final var endUserscontacts = setup.appNotificationService()
 				.getEndUserContactsToSendEvent(event, setup.supervisableManager().createContextExtractor(event));
 
-		endUserscontacts.forEach((lang, addr) -> send(SendKind.END_USER, lang, addr, engineSimpleTemplate, event));
+		Optional.ofNullable(endUserscontacts).stream()
+				.map(Map::entrySet)
+				.flatMap(Set::stream)
+				.forEach(entry -> send(
+						SendKind.END_USER, entry.getKey(), entry.getValue(), engineSimpleTemplate, event));
+	}
+
+	private void sendOkKoEvent(final SupervisableEndEvent event) {
+		sendToEndUserEvent(event);
 
 		if (oGroupAdmin.isPresent()) {
 			send(SendKind.ADMIN, oGroupAdmin.get().addrList(), oGroupAdmin.get().lang(), engineFullTemplate, event);
@@ -102,10 +111,7 @@ public class NotificationRouterMail implements NotificationRouter {
 	}
 
 	void sendErrorEvent(final SupervisableEndEvent event) {
-		final var endUserscontacts = setup.appNotificationService()
-				.getEndUserContactsToSendEvent(event, setup.supervisableManager().createContextExtractor(event));
-
-		endUserscontacts.forEach((lang, addr) -> send(SendKind.END_USER, lang, addr, engineSimpleTemplate, event));
+		sendToEndUserEvent(event);
 
 		if (oGroupAdmin.isPresent()) {
 			send(SendKind.ADMIN, oGroupAdmin.get().addrList(), oGroupAdmin.get().lang(), engineFullTemplate, event);
