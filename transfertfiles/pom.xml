@@ -13,7 +13,7 @@
     <parent>
         <groupId>tv.hd3g.commons</groupId>
         <artifactId>starter</artifactId>
-        <version>15.0.2</version>
+        <version>15.0.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -21,7 +21,7 @@
         <dependency>
             <groupId>tv.hd3g.commons</groupId>
             <artifactId>interfaces</artifactId>
-            <version>15.0.2</version>
+            <version>15.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>commons-net</groupId>
