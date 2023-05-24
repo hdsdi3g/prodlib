@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 15.0.3
+
+Correct NPE with NotificationRouterMail (MailKit) when endUserscontacts is null #126
+
 ## 15.0.2
 
 Maintenance version: switch Spring Boot version from 3.0.6 to 3.1.0 #127
