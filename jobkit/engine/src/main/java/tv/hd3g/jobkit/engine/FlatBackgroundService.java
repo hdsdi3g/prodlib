@@ -23,17 +23,21 @@ class FlatBackgroundService extends BackgroundService {
 
 	private final FlatScheduledFuture runReference;
 	private final FlatScheduledExecutorService scheduledExecutor;
+	private final RunnableWithException disableTask;
 
 	FlatBackgroundService(final FlatScheduledExecutorService scheduledExecutor,
-						  final Runnable task) {
+						  final Runnable task,
+						  final RunnableWithException disableTask) {
 		super(null, null, null, scheduledExecutor, null, null, null);
 		runReference = new FlatScheduledFuture(task);
+		this.disableTask = disableTask;
 		this.scheduledExecutor = scheduledExecutor;
 	}
 
 	@Override
 	public synchronized BackgroundService disable() {
 		scheduledExecutor.remove(runReference);
+		disableTask.toRunnable().run();
 		return this;
 	}
 

@@ -19,14 +19,26 @@ package tv.hd3g.jobkit.engine;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.openMocks;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 class FlatBackgroundServiceTest {
+
+	@Mock
+	RunnableWithException endTask;
+	@Mock
+	Runnable endRun;
 
 	FlatScheduledExecutorService scheduledExecutor;
 	Runnable task;
@@ -34,11 +46,18 @@ class FlatBackgroundServiceTest {
 	FlatBackgroundService flatBackgroundService;
 
 	@BeforeEach
-	void init() {
+	void init() throws Exception {
+		openMocks(this).close();
 		scheduledExecutor = new FlatScheduledExecutorService();
 		task = () -> {
 		};
-		flatBackgroundService = new FlatBackgroundService(scheduledExecutor, task);
+		when(endTask.toRunnable()).thenReturn(endRun);
+		flatBackgroundService = new FlatBackgroundService(scheduledExecutor, task, endTask);
+	}
+
+	@AfterEach
+	void end() {
+		verifyNoMoreInteractions(endTask, endRun);
 	}
 
 	@Test
@@ -52,6 +71,8 @@ class FlatBackgroundServiceTest {
 		flatBackgroundService.enable();
 		flatBackgroundService.disable();
 		assertFalse(scheduledExecutor.contain(new FlatScheduledFuture(task)));
+		verify(endTask, times(1)).toRunnable();
+		verify(endRun, times(1)).run();
 	}
 
 	@Test

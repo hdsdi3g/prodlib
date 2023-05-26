@@ -25,6 +25,8 @@ import java.util.List;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 
 public interface FolderActivity {
+	String OBSERVEDFOLDER = "ObservedFolder";
+	String OBSERVEDFOLDERS = "ObservedFolders";
 
 	void onAfterScan(final ObservedFolder observedFolder,
 					 final Duration scanTime,
@@ -32,16 +34,23 @@ public interface FolderActivity {
 
 	default void onStartScans(final List<? extends ObservedFolder> observedFolders) throws IOException {
 		getSupervisable()
-				.setContext("ObservedFolders", observedFolders)
+				.setContext(OBSERVEDFOLDERS, observedFolders)
 				.markAsInternalStateChange()
 				.resultDone("startscans", "Start scans");
 	}
 
 	default void onStopScans(final List<? extends ObservedFolder> observedFolders) throws IOException {
 		getSupervisable()
-				.setContext("ObservedFolders", observedFolders)
+				.setContext(OBSERVEDFOLDERS, observedFolders)
 				.markAsInternalStateChange()
 				.resultDone("stopscans", "Stop scans");
+	}
+
+	default void onStopRetryOnError(final ObservedFolder observedFolder) throws IOException {
+		getSupervisable()
+				.setContext(OBSERVEDFOLDER, observedFolder)
+				.markAsInternalStateChange()
+				.resultDone("stopretry", "Back to normal regular scans");
 	}
 
 	default void onBeforeScan(final ObservedFolder observedFolder) throws IOException {
@@ -53,7 +62,7 @@ public interface FolderActivity {
 
 	default void onScanErrorFolder(final ObservedFolder observedFolder, final Exception e) throws IOException {
 		getSupervisable()
-				.setContext("ObservedFolder", observedFolder)
+				.setContext(OBSERVEDFOLDER, observedFolder)
 				.markAsInternalStateChange()
 				.resultError(e);
 	}
@@ -66,7 +75,7 @@ public interface FolderActivity {
 
 	static boolean isFolderActivityEvent(final SupervisableEndEvent event) {
 		return event.isInternalStateChangeMarked() &&
-			   ("ObservedFolder".equalsIgnoreCase(event.typeName())
-				|| "ObservedFolders".equalsIgnoreCase(event.typeName()));
+			   (OBSERVEDFOLDER.equalsIgnoreCase(event.typeName())
+				|| OBSERVEDFOLDERS.equalsIgnoreCase(event.typeName()));
 	}
 }

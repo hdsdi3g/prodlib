@@ -26,6 +26,8 @@ import static org.mockito.MockitoAnnotations.openMocks;
 import static org.mockito.internal.verification.VerificationModeFactory.only;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static tv.hd3g.jobkit.engine.SupervisableResultState.WORKS_DONE;
+import static tv.hd3g.jobkit.watchfolder.FolderActivity.OBSERVEDFOLDER;
+import static tv.hd3g.jobkit.watchfolder.FolderActivity.OBSERVEDFOLDERS;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
 import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.FILES_ONLY;
 
@@ -78,7 +80,7 @@ class FolderActivityTest {
 		event = jobKit.getEndEventsList().get(0);
 		assertTrue(event.isInternalStateChangeMarked());
 		assertEquals(WORKS_DONE, event.result().state());
-		assertEquals("ObservedFolders", event.typeName());
+		assertEquals(OBSERVEDFOLDERS, event.typeName());
 		assertTrue(FolderActivity.isFolderActivityEvent(event));
 	}
 
@@ -89,7 +91,7 @@ class FolderActivityTest {
 		event = jobKit.getEndEventsList().get(0);
 		assertTrue(event.isInternalStateChangeMarked());
 		assertEquals(WORKS_DONE, event.result().state());
-		assertEquals("ObservedFolders", event.typeName());
+		assertEquals(OBSERVEDFOLDERS, event.typeName());
 		assertTrue(FolderActivity.isFolderActivityEvent(event));
 	}
 
@@ -97,6 +99,17 @@ class FolderActivityTest {
 	void testOnBeforeScan() {
 		run(() -> a.onBeforeScan(observedFolder));
 		assertTrue(jobKit.getEndEventsList().isEmpty());
+	}
+
+	@Test
+	void testOnStopRetryOnError() {
+		run(() -> a.onStopRetryOnError(observedFolder));
+
+		event = jobKit.getEndEventsList().get(0);
+		assertTrue(event.isInternalStateChangeMarked());
+		assertEquals(WORKS_DONE, event.result().state());
+		assertEquals(OBSERVEDFOLDER, event.typeName());
+		assertTrue(FolderActivity.isFolderActivityEvent(event));
 	}
 
 	@Test
@@ -111,7 +124,7 @@ class FolderActivityTest {
 		event = jobKit.getEndEventsList().get(0);
 		assertTrue(event.isInternalStateChangeMarked());
 		assertEquals(exception, event.error());
-		assertEquals("ObservedFolder", event.typeName());
+		assertEquals(OBSERVEDFOLDER, event.typeName());
 		assertTrue(FolderActivity.isFolderActivityEvent(event));
 	}
 

@@ -73,7 +73,7 @@ public class FlatJobKitEngine extends JobKitEngine {
 										   final RunnableWithException disableTask) {
 		log.debug("Create service {}, spool {}", name, spoolName);
 		disableTaskList.add(disableTask);
-		return new FlatBackgroundService(flatShExecutor, task.toRunnable());
+		return new FlatBackgroundService(flatShExecutor, task.toRunnable(), disableTask);
 	}
 
 	@Override

@@ -199,7 +199,7 @@ public class Watchfolders {
 					Optional.ofNullable(onErrorObservedFolders.remove(newInError))
 							.ifPresent(BackgroundService::disable);
 				},
-				() -> eventActivity.onStopScans(observedFolders));
+				() -> eventActivity.onStopRetryOnError(newInError));
 	}
 
 	private void retryInError(final List<? extends ObservedFolder> newInError) {
@@ -211,6 +211,10 @@ public class Watchfolders {
 			onErrorObservedFolders.put(oF, serviceRetry);
 			serviceRetry.enable();
 		});
+	}
+
+	Map<ObservedFolder, BackgroundService> getOnErrorObservedFolders() {
+		return onErrorObservedFolders;
 	}
 
 }
