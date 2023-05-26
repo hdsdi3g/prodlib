@@ -1,5 +1,13 @@
 # All ProdLib projects upgrades
 
+## 15.1.0
+
+Bug fix: stop sending an email after a Watchfolder scan error if the retry process is enabled: create a new FolderActivity "onStopRetryOnError" #125
+
+Little code clean with FolderActivity
+
+Bug fix: correct a bug with FlatBackgroundService who doesn't run disableTask on disable service
+
 ## 15.0.3
 
 Correct NPE with NotificationRouterMail (MailKit) when endUserscontacts is null #126
