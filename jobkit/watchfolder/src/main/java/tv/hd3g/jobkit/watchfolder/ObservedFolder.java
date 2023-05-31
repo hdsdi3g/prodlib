@@ -52,6 +52,11 @@ public class ObservedFolder {
 	private String targetFolder;
 	@Include
 	private String label;
+	private Duration timeBetweenScans;
+	private String spoolScans;
+	private String spoolEvents;
+	private int jobsPriority;
+	private int retryAfterTimeFactor;
 	private Set<String> allowedExtentions;
 	private Set<String> blockedExtentions;
 	private Set<String> ignoreRelativePaths;

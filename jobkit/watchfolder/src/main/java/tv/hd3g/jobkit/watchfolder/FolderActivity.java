@@ -17,40 +17,32 @@
 package tv.hd3g.jobkit.watchfolder;
 
 import static tv.hd3g.jobkit.engine.Supervisable.getSupervisable;
+import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.List;
 
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 
 public interface FolderActivity {
 	String OBSERVEDFOLDER = "ObservedFolder";
-	String OBSERVEDFOLDERS = "ObservedFolders";
 
 	void onAfterScan(final ObservedFolder observedFolder,
 					 final Duration scanTime,
 					 final WatchedFiles scanResult) throws IOException;
 
-	default void onStartScans(final List<? extends ObservedFolder> observedFolders) throws IOException {
-		getSupervisable()
-				.setContext(OBSERVEDFOLDERS, observedFolders)
-				.markAsInternalStateChange()
-				.resultDone("startscans", "Start scans");
-	}
-
-	default void onStopScans(final List<? extends ObservedFolder> observedFolders) throws IOException {
-		getSupervisable()
-				.setContext(OBSERVEDFOLDERS, observedFolders)
-				.markAsInternalStateChange()
-				.resultDone("stopscans", "Stop scans");
-	}
-
-	default void onStopRetryOnError(final ObservedFolder observedFolder) throws IOException {
+	default void onStartScan(final ObservedFolder observedFolder) throws IOException {
 		getSupervisable()
 				.setContext(OBSERVEDFOLDER, observedFolder)
 				.markAsInternalStateChange()
-				.resultDone("stopretry", "Back to normal regular scans");
+				.resultDone("startscan", "Start scans");
+	}
+
+	default void onStopScan(final ObservedFolder observedFolder) throws IOException {
+		getSupervisable()
+				.setContext(OBSERVEDFOLDER, observedFolder)
+				.markAsInternalStateChange()
+				.resultDone("stopscan", "Stop scans");
 	}
 
 	default void onBeforeScan(final ObservedFolder observedFolder) throws IOException {
@@ -70,12 +62,11 @@ public interface FolderActivity {
 	default RetryScanPolicyOnUserError retryScanPolicyOnUserError(final ObservedFolder observedFolder,
 																  final WatchedFiles scanResult,
 																  final Exception e) {
-		return RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
+		return RETRY_FOUNDED_FILE;
 	}
 
 	static boolean isFolderActivityEvent(final SupervisableEndEvent event) {
 		return event.isInternalStateChangeMarked() &&
-			   (OBSERVEDFOLDER.equalsIgnoreCase(event.typeName())
-				|| OBSERVEDFOLDERS.equalsIgnoreCase(event.typeName()));
+			   OBSERVEDFOLDER.equalsIgnoreCase(event.typeName());
 	}
 }

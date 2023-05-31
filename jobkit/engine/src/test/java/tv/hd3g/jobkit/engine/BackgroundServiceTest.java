@@ -84,6 +84,11 @@ class BackgroundServiceTest {
 	}
 
 	@Test
+	void testGetSpoolName() {
+		assertEquals(spoolName, backgroundService.getSpoolName());
+	}
+
+	@Test
 	void testIsEnabled() {
 		assertFalse(backgroundService.isEnabled());
 	}

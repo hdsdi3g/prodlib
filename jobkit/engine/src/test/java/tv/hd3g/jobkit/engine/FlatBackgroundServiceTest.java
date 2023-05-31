@@ -16,6 +16,7 @@
  */
 package tv.hd3g.jobkit.engine;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,7 +34,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
+import net.datafaker.Faker;
+
 class FlatBackgroundServiceTest {
+	static final Faker faker = Faker.instance();
 
 	@Mock
 	RunnableWithException endTask;
@@ -41,8 +45,8 @@ class FlatBackgroundServiceTest {
 	Runnable endRun;
 
 	FlatScheduledExecutorService scheduledExecutor;
+	String spoolName;
 	Runnable task;
-
 	FlatBackgroundService flatBackgroundService;
 
 	@BeforeEach
@@ -52,7 +56,8 @@ class FlatBackgroundServiceTest {
 		task = () -> {
 		};
 		when(endTask.toRunnable()).thenReturn(endRun);
-		flatBackgroundService = new FlatBackgroundService(scheduledExecutor, task, endTask);
+		spoolName = faker.numerify("spoolName###");
+		flatBackgroundService = new FlatBackgroundService(scheduledExecutor, spoolName, task, endTask);
 	}
 
 	@AfterEach
@@ -95,6 +100,11 @@ class FlatBackgroundServiceTest {
 	@Test
 	void testSetRetryAfterTimeFactor() {
 		assertNotNull(flatBackgroundService.setRetryAfterTimeFactor(0));
+	}
+
+	@Test
+	void testGetSpoolName() {
+		assertEquals(spoolName, flatBackgroundService.getSpoolName());
 	}
 
 }

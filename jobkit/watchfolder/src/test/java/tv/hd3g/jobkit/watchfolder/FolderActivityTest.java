@@ -27,12 +27,10 @@ import static org.mockito.internal.verification.VerificationModeFactory.only;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static tv.hd3g.jobkit.engine.SupervisableResultState.WORKS_DONE;
 import static tv.hd3g.jobkit.watchfolder.FolderActivity.OBSERVEDFOLDER;
-import static tv.hd3g.jobkit.watchfolder.FolderActivity.OBSERVEDFOLDERS;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
 import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.FILES_ONLY;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,24 +72,24 @@ class FolderActivityTest {
 	}
 
 	@Test
-	void testOnStartScans() {
-		run(() -> a.onStartScans(List.of(observedFolder)));
+	void testOnStartScan() {
+		run(() -> a.onStartScan(observedFolder));
 
 		event = jobKit.getEndEventsList().get(0);
 		assertTrue(event.isInternalStateChangeMarked());
 		assertEquals(WORKS_DONE, event.result().state());
-		assertEquals(OBSERVEDFOLDERS, event.typeName());
+		assertEquals(OBSERVEDFOLDER, event.typeName());
 		assertTrue(FolderActivity.isFolderActivityEvent(event));
 	}
 
 	@Test
-	void testOnStopScans() {
-		run(() -> a.onStopScans(List.of(observedFolder)));
+	void testOnStopScan() {
+		run(() -> a.onStopScan(observedFolder));
 
 		event = jobKit.getEndEventsList().get(0);
 		assertTrue(event.isInternalStateChangeMarked());
 		assertEquals(WORKS_DONE, event.result().state());
-		assertEquals(OBSERVEDFOLDERS, event.typeName());
+		assertEquals(OBSERVEDFOLDER, event.typeName());
 		assertTrue(FolderActivity.isFolderActivityEvent(event));
 	}
 
@@ -99,17 +97,6 @@ class FolderActivityTest {
 	void testOnBeforeScan() {
 		run(() -> a.onBeforeScan(observedFolder));
 		assertTrue(jobKit.getEndEventsList().isEmpty());
-	}
-
-	@Test
-	void testOnStopRetryOnError() {
-		run(() -> a.onStopRetryOnError(observedFolder));
-
-		event = jobKit.getEndEventsList().get(0);
-		assertTrue(event.isInternalStateChangeMarked());
-		assertEquals(WORKS_DONE, event.result().state());
-		assertEquals(OBSERVEDFOLDER, event.typeName());
-		assertTrue(FolderActivity.isFolderActivityEvent(event));
 	}
 
 	@Test
@@ -150,7 +137,7 @@ class FolderActivityTest {
 		assertFalse(FolderActivity.isFolderActivityEvent(event));
 
 		verify(event, times(1)).isInternalStateChangeMarked();
-		verify(event, times(2)).typeName();
+		verify(event, times(1)).typeName();
 		verifyNoMoreInteractions(event);
 	}
 

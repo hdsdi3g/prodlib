@@ -54,6 +54,10 @@ public class BackgroundService {
 		sequentialErrorCount = new AtomicInteger(0);
 	}
 
+	public String getSpoolName() {
+		return spoolName;
+	}
+
 	private void ifNextRunReferenceScheduled(final Runnable ifReady) {
 		if (nextRunReference != null
 			&& nextRunReference.isDone() == false
