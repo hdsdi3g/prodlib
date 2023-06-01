@@ -32,7 +32,13 @@ class SpoolExecutor {
 		this.name = name;
 		this.event = event;
 		this.threadCount = threadCount;
-		queueComparator = (l, r) -> Integer.compare(r.priority, l.priority);
+		queueComparator = (l, r) -> {
+			final var compared = Integer.compare(r.priority, l.priority);
+			if (compared == 0) {
+				return Long.compare(l.createdIndex, r.createdIndex);
+			}
+			return compared;
+		};
 		queue = new PriorityBlockingQueue<>(1, queueComparator);
 		shutdown = new AtomicBoolean(false);
 		this.supervisableEvents = supervisableEvents;
@@ -126,14 +132,17 @@ class SpoolExecutor {
 		final int priority;
 		final Consumer<Exception> afterRunCommand;
 		final SpoolExecutor executorReferer;
-		AtomicReference<Supervisable> supervisableReference;
+		final AtomicReference<Supervisable> supervisableReference;
+		final long createdIndex;
 
 		SpoolJob(final RunnableWithException command,
 				 final String commandName,
 				 final int priority,
 				 final Consumer<Exception> afterRunCommand,
 				 final SpoolExecutor executorReferer) {
-			super("SpoolExecutor #" + threadCount.getAndIncrement());
+			super();
+			createdIndex = threadCount.getAndIncrement();
+			setName("SpoolExecutor #" + createdIndex);
 			setPriority(MIN_PRIORITY);
 			setDaemon(false);
 

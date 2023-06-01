@@ -10,8 +10,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.longThat;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -38,7 +42,7 @@ class SpoolExecutorTest {
 	static Random random = new Random();
 
 	@Mock
-	private ExecutionEvent event;
+	ExecutionEvent event;
 	@Mock
 	SupervisableEvents sEvent;
 	@Captor
@@ -49,11 +53,13 @@ class SpoolExecutorTest {
 	String threadName;
 	SpoolExecutor spoolExecutor;
 	AtomicLong threadCount;
+	List<Integer> runnedTasks;
 
 	@BeforeEach
 	void init() throws Exception {
 		MockitoAnnotations.openMocks(this).close();
 		name = "InternalTest " + String.valueOf(System.nanoTime());
+		runnedTasks = Collections.synchronizedList(new ArrayList<>());
 
 		spoolExecutorName = "Internal test Spool executor";
 		threadName = "SpoolExecutor #0";
@@ -63,7 +69,11 @@ class SpoolExecutorTest {
 
 	@AfterEach
 	void ends() {
-		Mockito.verifyNoMoreInteractions(sEvent);
+		verifyNoMoreInteractions(sEvent);
+
+		for (var pos = 0; pos < runnedTasks.size(); pos++) {
+			assertEquals(pos, runnedTasks.get(pos));
+		}
 	}
 
 	@Test
@@ -156,8 +166,10 @@ class SpoolExecutorTest {
 		final var count = new AtomicInteger(0);
 
 		for (var pos = 0; pos < total; pos++) {
+			final var val = pos;
 			assertTrue(spoolExecutor.addToQueue(() -> {
 				count.incrementAndGet();
+				runnedTasks.add(val);
 			}, name, 0, e -> {
 				smAfter.countDown();
 			}));
@@ -174,9 +186,11 @@ class SpoolExecutorTest {
 		final var count = new AtomicInteger(0);
 
 		for (var pos = 0; pos < total; pos++) {
+			final var val = pos;
 			final var smAfter = new CountDownLatch(1);
 			assertTrue(spoolExecutor.addToQueue(() -> {
 				count.incrementAndGet();
+				runnedTasks.add(val);
 			}, name, 0, e -> {
 				smAfter.countDown();
 			}));
