@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 16.0.0
+
+Implement parallel running Watchfolder logic #97
+
 ## 15.2.1
 
 Bug fix: set SpoolExecutor order execution by add order (and keep priority) #132
