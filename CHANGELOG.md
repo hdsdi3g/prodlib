@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 17.0.1
+
+Bug fix: correct old Watchfolders notification messages #138
+
 ## 17.0.0
 
 Remove all log4j calls and replace it by slf4j and logback, adapt code for this #135

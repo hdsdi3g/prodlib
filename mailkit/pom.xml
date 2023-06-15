@@ -13,7 +13,7 @@
     <parent>
         <groupId>tv.hd3g.commons</groupId>
         <artifactId>parent-web</artifactId>
-        <version>17.0.1-SNAPSHOT</version>
+        <version>17.0.1</version>
         <relativePath>../parent-web/pom.xml</relativePath>
     </parent>
 
@@ -21,17 +21,17 @@
         <dependency>
             <groupId>tv.hd3g.commons</groupId>
             <artifactId>interfaces</artifactId>
-            <version>17.0.1-SNAPSHOT</version>
+            <version>17.0.1</version>
         </dependency>
         <dependency>
             <groupId>tv.hd3g</groupId>
             <artifactId>jobkit</artifactId>
-            <version>17.0.1-SNAPSHOT</version>
+            <version>17.0.1</version>
         </dependency>
         <dependency>
             <groupId>tv.hd3g.commons</groupId>
             <artifactId>env-version</artifactId>
-            <version>17.0.1-SNAPSHOT</version>
+            <version>17.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.j2html</groupId>
