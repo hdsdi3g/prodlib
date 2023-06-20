@@ -132,6 +132,8 @@ public class AbstractFileSystemURL implements Closeable {
 				.orElse(0);
 		if (timeout > 0) {
 			fileSystem.setTimeout(timeout, SECONDS);
+		} else {
+			fileSystem.setTimeout(30, SECONDS);
 		}
 	}
 

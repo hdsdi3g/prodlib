@@ -67,6 +67,10 @@ public interface AbstractFileSystem<T extends AbstractFile> extends Closeable {
 	default void setTimeout(final long duration, final TimeUnit unit) {
 	}
 
+	default long getTimeout() {
+		return 30000;
+	}
+
 	/**
 	 * If disconnected, can we re-connect after ?
 	 */

@@ -190,13 +190,17 @@ public interface AbstractFile {
 		}
 	}
 
+	default Duration getDataExchangeTimeout() {
+		return Duration.ofSeconds(30);
+	}
+
 	default DataExchangeInOutStream copyAbstractToAbstract(final AbstractFile destination,
 														   final DataExchangeObserver dataExchangeObserver,
 														   final DataExchangeFilter... filters) {
 		final var bufferSize = Math.max(8192,
 				Math.max(destination.getFileSystem().getIOBufferSize(),
 						getFileSystem().getIOBufferSize()));
-		final var exchange = new DataExchangeInOutStream();
+		final var exchange = new DataExchangeInOutStream(getDataExchangeTimeout());
 		Stream.of(filters).forEach(exchange::addFilter);
 		copyAbstractToAbstract(destination, bufferSize, dataExchangeObserver, exchange);
 		return exchange;

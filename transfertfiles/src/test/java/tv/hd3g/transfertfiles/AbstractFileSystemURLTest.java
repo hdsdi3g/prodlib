@@ -146,7 +146,7 @@ class AbstractFileSystemURLTest {
 		assertNotNull(fs);
 		assertTrue(fs instanceof CommonAbstractFileSystem);
 		final var cfs = (CommonAbstractFileSystem<?>) fs;
-		assertEquals(0, cfs.timeoutDuration);
+		assertEquals(30000, cfs.timeoutDuration);
 	}
 
 	@Test

@@ -19,6 +19,7 @@ package tv.hd3g.transfertfiles.randomfs;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.Duration;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
@@ -169,4 +170,8 @@ public class RandomFile extends CommonAbstractFile<RandomFileSystem> {
 		return this;
 	}
 
+	@Override
+	public Duration getDataExchangeTimeout() {
+		return Duration.ofMinutes(1);
+	}
 }

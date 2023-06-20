@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,7 +37,7 @@ import tv.hd3g.transfertfiles.filters.DataExchangeFilter;
  * Not reusable
  */
 @Slf4j
-public class DataExchangeInOutStream {
+public class DataExchangeInOutStream implements TimeOutTrait {
 
 	private final InternalInputStream internalInputStream;
 	private final InternalOutputStream internalOutputStream;
@@ -47,11 +48,14 @@ public class DataExchangeInOutStream {
 	private final HashMap<DataExchangeFilter, Long> filterPerformance;
 	private final HashMap<DataExchangeFilter, Long> filterDeltaThroughput;
 	private final AtomicLong ioWaitTime;
+	private final Duration timeOut;
 
 	private volatile State state;
 
 	public enum State {
 		WORKING(false, false),
+		READ_TIMEOUT(false, true),
+		WRITE_TIMEOUT(true, false),
 		STOPPED_BY_USER(true, false),
 		STOPPED_BY_FILTER(true, false),
 		WRITER_MANUALLY_CLOSED(false, true),
@@ -67,6 +71,11 @@ public class DataExchangeInOutStream {
 	}
 
 	public DataExchangeInOutStream() {
+		this(Duration.ofSeconds(30));
+	}
+
+	public DataExchangeInOutStream(final Duration timeOut) {
+		this.timeOut = timeOut;
 		internalInputStream = new InternalInputStream();
 		internalOutputStream = new InternalOutputStream();
 		filters = Collections.synchronizedList(new ArrayList<>());
@@ -76,6 +85,11 @@ public class DataExchangeInOutStream {
 		filterPerformance = new HashMap<>();
 		filterDeltaThroughput = new HashMap<>();
 		ioWaitTime = new AtomicLong(0);
+	}
+
+	@Override
+	public Duration getTimeout() {
+		return timeOut;
 	}
 
 	private class InternalInputStream extends InputStream {
@@ -92,11 +106,14 @@ public class DataExchangeInOutStream {
 				log.trace("Read event (wait) of {} byte(s), {} in queue...", len, readQueue.size());
 			}
 
-			while (readQueue.isEmpty()
-				   && state == State.WORKING
-				   && readerClosed == false) {
-				Thread.onSpinWait();
-			}
+			whileToTimeout(() -> readQueue.isEmpty()
+								 && state == State.WORKING
+								 && readerClosed == false,
+					() -> {
+						log.error("Read timeout");
+						readerClosed = true;
+						state = State.READ_TIMEOUT;
+					});
 
 			if (readerClosed) {
 				throw new IOException("Closed InputStream (reader)");
@@ -178,9 +195,11 @@ public class DataExchangeInOutStream {
 			}
 
 			if (state == State.WORKING) {
-				while (readQueue.isEmpty() == false) {
-					Thread.onSpinWait();
-				}
+				whileToTimeout(() -> readQueue.isEmpty() == false,
+						() -> {
+							log.error("Write timeout");
+							state = State.WRITE_TIMEOUT;
+						});
 
 				final var now = System.currentTimeMillis();
 				buffers.write(b, off, len);
@@ -406,4 +425,5 @@ public class DataExchangeInOutStream {
 		}
 		return this;
 	}
+
 }

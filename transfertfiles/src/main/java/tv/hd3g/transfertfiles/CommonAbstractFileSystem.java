@@ -97,6 +97,7 @@ public abstract class CommonAbstractFileSystem<T extends AbstractFile> implement
 		}
 	}
 
+	@Override
 	public long getTimeout() {
 		return timeoutDuration;
 	}

@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.joining;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -41,6 +42,11 @@ public abstract class CommonAbstractFile<T extends AbstractFileSystem<?>> implem
 		this.path = AbstractFile.normalizePath(Stream.of(path)
 				.filter(not(Objects::isNull))
 				.collect(joining("/")));
+	}
+
+	@Override
+	public Duration getDataExchangeTimeout() {
+		return Duration.ofMillis(fileSystem.getTimeout());
 	}
 
 	@Override

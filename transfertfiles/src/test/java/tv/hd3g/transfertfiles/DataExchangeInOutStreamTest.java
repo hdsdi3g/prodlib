@@ -19,6 +19,7 @@ package tv.hd3g.transfertfiles;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableList;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -26,15 +27,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static tv.hd3g.transfertfiles.DataExchangeInOutStream.State.FILTER_ERROR;
+import static tv.hd3g.transfertfiles.DataExchangeInOutStream.State.READ_TIMEOUT;
 import static tv.hd3g.transfertfiles.DataExchangeInOutStream.State.STOPPED_BY_FILTER;
 import static tv.hd3g.transfertfiles.DataExchangeInOutStream.State.STOPPED_BY_USER;
 import static tv.hd3g.transfertfiles.DataExchangeInOutStream.State.WORKING;
 import static tv.hd3g.transfertfiles.DataExchangeInOutStream.State.WRITER_MANUALLY_CLOSED;
+import static tv.hd3g.transfertfiles.DataExchangeInOutStream.State.WRITE_TIMEOUT;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -1149,6 +1154,52 @@ class DataExchangeInOutStreamTest {
 		assertNotNull(tStats);
 		assertTrue(tStats.getDeltaTranfered() >= 0);
 		assertTrue(tStats.getTotalDuration() >= 0);
+	}
+
+	interface RunWithIOException {
+		void run() throws IOException;
+	}
+
+	@Nested
+	class Blocking {
+
+		byte[] dataInput;
+		byte[] dataOutput;
+
+		@BeforeEach
+		void init() {
+			exchange = new DataExchangeInOutStream(Duration.ofMillis(100));
+			dataInput = "0123456789".getBytes();
+			dataOutput = new byte[dataInput.length];
+		}
+
+		CompletableFuture<Void> async(final RunWithIOException run) {
+			return CompletableFuture.runAsync(() -> {
+				try {
+					run.run();
+				} catch (final IOException e) {
+					throw new UncheckedIOException(e);
+				}
+			});
+		}
+
+		@Test
+		void testWriteEmpty() throws IOException, InterruptedException, ExecutionException, TimeoutException {
+			assertThrows(InterruptedIOException.class,
+					() -> exchange.getSourceOriginStream().read(dataOutput));
+
+			assertArrayEquals(new byte[dataOutput.length], dataOutput);
+			assertEquals(READ_TIMEOUT, exchange.getState());
+		}
+
+		@Test
+		void testReadEmpty() throws IOException, InterruptedException, ExecutionException, TimeoutException {
+			exchange.getDestTargetStream().write(dataInput);
+			assertThrows(InterruptedIOException.class,
+					() -> exchange.getDestTargetStream().write(dataInput));
+
+			assertEquals(WRITE_TIMEOUT, exchange.getState());
+		}
 	}
 
 }
