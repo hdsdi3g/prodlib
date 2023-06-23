@@ -1,5 +1,11 @@
 # All ProdLib projects upgrades
 
+## 17.1.0
+
+Bug fix and evolution: add a timeout for DataExchange (TransfertFiles), set default timeout for AbstractFSURL (30 sec) #141
+
+Set spring-boot-starter-parent version from 3.1.0 to 3.1.1
+
 ## 17.0.1
 
 Bug fix: correct old Watchfolders notification messages #138
