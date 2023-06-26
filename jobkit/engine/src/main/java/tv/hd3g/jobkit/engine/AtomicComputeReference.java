@@ -19,6 +19,7 @@ package tv.hd3g.jobkit.engine;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 public class AtomicComputeReference<T> {
 	private T t;
@@ -36,8 +37,10 @@ public class AtomicComputeReference<T> {
 		process.accept(t);
 	}
 
-	public synchronized void reset() {
+	public synchronized T reset() {
+		final var old = t;
 		t = null;
+		return old;
 	}
 
 	public synchronized boolean isSet() {
@@ -57,4 +60,9 @@ public class AtomicComputeReference<T> {
 		}
 		return process.test(t);
 	}
+
+	public synchronized void replace(final UnaryOperator<T> process) {
+		t = process.apply(t);
+	}
+
 }

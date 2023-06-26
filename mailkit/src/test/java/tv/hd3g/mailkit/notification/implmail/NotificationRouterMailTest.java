@@ -49,7 +49,7 @@ import tv.hd3g.commons.mailkit.SendMailDto.MessageGrade;
 import tv.hd3g.jobkit.engine.SupervisableContextExtractor;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
 import tv.hd3g.jobkit.engine.SupervisableEventMark;
-import tv.hd3g.jobkit.engine.SupervisableManager;
+import tv.hd3g.jobkit.engine.SupervisableEventRegister;
 import tv.hd3g.mailkit.mod.service.AppNotificationService;
 import tv.hd3g.mailkit.notification.NotificationGroup;
 import tv.hd3g.mailkit.notification.SupervisableUtility;
@@ -84,7 +84,7 @@ class NotificationRouterMailTest {
 	@Mock
 	NotificationMailMessageProducer engineDebugTemplate;
 	@Mock
-	SupervisableManager supervisableManager;
+	SupervisableEventRegister supervisableManager;
 	@Mock
 	AppNotificationService appNotificationService;
 	@Mock

@@ -11,23 +11,23 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
- * Copyright (C) hdsdi3g for hd3g.tv 2022
+ * Copyright (C) hdsdi3g for hd3g.tv 2023
  *
  */
-package tv.hd3g.jobkit.engine;
+package tv.hd3g.jobkit.engine.watchdog;
 
+import java.time.Duration;
+import java.util.Date;
 import java.util.Optional;
 
-import tv.hd3g.jobkit.engine.watchdog.JobWatchdogSpoolReport;
+public record WatchableSpoolJobState(Date createdDate,
+									 String commandName,
+									 long createdIndex,
+									 Optional<StackTraceElement> creator,
+									 Optional<Long> startedDate) {
 
-public interface SupervisableEvents extends SupervisableSerializer {
-
-	default void onEnd(final Supervisable supervisable, final Optional<Exception> oError) {
+	public Optional<Duration> getRunTime() {
+		return startedDate.map(s -> System.currentTimeMillis() - s).map(Duration::ofMillis);
 	}
 
-	default void onJobWatchdogSpoolReport(final JobWatchdogSpoolReport report) {
-	}
-
-	default void onJobWatchdogSpoolReleaseReport(final JobWatchdogSpoolReport oldReport) {
-	}
 }

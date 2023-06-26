@@ -22,6 +22,7 @@ public class BackgroundService {
 	private final BackgroundServiceEvent event;
 	private final RunnableWithException task;
 	private final RunnableWithException disableTask;
+	private final JobKitWatchdog jobKitWatchdog;
 
 	private boolean enabled;
 	private ScheduledFuture<?> nextRunReference;
@@ -36,6 +37,7 @@ public class BackgroundService {
 							 final Spooler spooler,
 							 final ScheduledExecutorService scheduledExecutor,
 							 final BackgroundServiceEvent event,
+							 final JobKitWatchdog jobKitWatchdog,
 							 final RunnableWithException task,
 							 final RunnableWithException disableTask) {
 		this.name = name;
@@ -43,6 +45,7 @@ public class BackgroundService {
 		this.spooler = spooler;
 		this.scheduledExecutor = scheduledExecutor;
 		this.event = event;
+		this.jobKitWatchdog = jobKitWatchdog;
 		this.task = task;
 		this.disableTask = disableTask;
 		hasFirstStarted = false;
@@ -68,7 +71,7 @@ public class BackgroundService {
 	private synchronized void planNextExec(final long interval) {
 		ifNextRunReferenceScheduled(() -> {
 			throw new IllegalStateException("Beware, the nextRunReference for \"" + name + "\" is still active (in "
-											+ nextRunReference.getDelay(TimeUnit.MILLISECONDS) + ")");
+											+ nextRunReference.getDelay(MILLISECONDS) + ")");
 		});
 		if (enabled == false) {
 			throw new IllegalStateException("Beware, this service is not enabled (" + name + ")");
@@ -96,7 +99,7 @@ public class BackgroundService {
 						new Date(System.currentTimeMillis() + nextInterval));
 				event.planNextExec(name, spoolName, nextInterval);
 			});
-		}, interval, TimeUnit.MILLISECONDS);
+		}, interval, MILLISECONDS);
 	}
 
 	private synchronized void refreshInternalState(final boolean newEnabled, final long newTimedInterval) {
@@ -108,6 +111,7 @@ public class BackgroundService {
 		} else {
 			refreshToDisabledMode(newTimedInterval);
 		}
+		jobKitWatchdog.refreshBackgroundService(name, spoolName, enabled, timedInterval);
 	}
 
 	private void refreshToEnabledMode(final long newTimedInterval) {
@@ -119,7 +123,7 @@ public class BackgroundService {
 				log.info("Change Service interval time \"{}\", from {} to {}", name, timedInterval,
 						newTimedInterval);
 				ifNextRunReferenceScheduled(() -> {
-					final var eta = timedInterval - nextRunReference.getDelay(TimeUnit.MILLISECONDS);
+					final var eta = timedInterval - nextRunReference.getDelay(MILLISECONDS);
 					if (newTimedInterval > eta) {
 						/**
 						 * Extend interval: replan next time newTimedInterval-eta

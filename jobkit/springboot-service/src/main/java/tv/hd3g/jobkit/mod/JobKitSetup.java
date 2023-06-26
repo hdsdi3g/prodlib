@@ -69,8 +69,15 @@ public class JobKitSetup {
 	JobKitEngine getJobKitEngine(final ScheduledExecutorService scheduledExecutor,
 								 final ExecutionEvent executionEvent,
 								 final BackgroundServiceEvent backgroundServiceEvent,
-								 final SupervisableManager supervisableManager) {
-		return new JobKitEngine(scheduledExecutor, executionEvent, backgroundServiceEvent, supervisableManager);
+								 final SupervisableManager supervisableManager,
+								 final JobKitWatchdogConfig watchdogConfig) {
+		final var jobKit = new JobKitEngine(scheduledExecutor, executionEvent, backgroundServiceEvent,
+				supervisableManager);
+		final var watchdog = jobKit.getJobKitWatchdog();
+		watchdogConfig.getMaxSpoolQueueSize().forEach(watchdog::addPolicies);
+		watchdogConfig.getLimitedExecTime().forEach(watchdog::addPolicies);
+		watchdogConfig.getLimitedServiceExecTime().forEach(watchdog::addPolicies);
+		return jobKit;
 	}
 
 }

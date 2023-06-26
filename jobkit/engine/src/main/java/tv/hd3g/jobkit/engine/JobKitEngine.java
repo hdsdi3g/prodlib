@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -26,6 +27,8 @@ public class JobKitEngine implements JobTrait {
 	private final SupervisableManager supervisableManager;
 	private final AtomicBoolean shutdown;
 	private final Set<String> spoolsNamesToKeepRunningToTheEnd;
+	@Getter
+	private final JobKitWatchdog jobKitWatchdog;
 
 	public JobKitEngine(final ScheduledExecutorService scheduledExecutor,
 						final ExecutionEvent executionEvent,
@@ -37,11 +40,12 @@ public class JobKitEngine implements JobTrait {
 		spoolsNamesToKeepRunningToTheEnd = Collections.synchronizedSet(new HashSet<>());
 		this.supervisableManager = supervisableManager;
 		shutdown = new AtomicBoolean(false);
+		jobKitWatchdog = new JobKitWatchdog(supervisableManager, scheduledExecutor);
 
 		if (supervisableManager == null) {
-			spooler = new Spooler(executionEvent, SupervisableManager.voidSupervisableEvents());
+			spooler = new Spooler(executionEvent, SupervisableManager.voidSupervisableEvents(), jobKitWatchdog);
 		} else {
-			spooler = new Spooler(executionEvent, supervisableManager);
+			spooler = new Spooler(executionEvent, supervisableManager, jobKitWatchdog);
 		}
 
 		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
@@ -57,6 +61,7 @@ public class JobKitEngine implements JobTrait {
 		scheduledExecutor = null;
 		backgroundServiceEvent = null;
 		spooler = null;
+		jobKitWatchdog = null;
 		backgroundServices = null;
 		supervisableManager = null;
 		shutdown = new AtomicBoolean(false);
@@ -92,6 +97,7 @@ public class JobKitEngine implements JobTrait {
 				spooler,
 				scheduledExecutor,
 				backgroundServiceEvent,
+				jobKitWatchdog,
 				serviceTask,
 				onServiceDisableTask);
 		backgroundServices.add(service);
@@ -145,7 +151,6 @@ public class JobKitEngine implements JobTrait {
 		log.warn("App want to close: shutdown jobKitEngine...");
 		shutdown.set(true);
 		backgroundServices.forEach(BackgroundService::disable);
-		scheduledExecutor.shutdown();
 		spooler.shutdown(spoolsNamesToKeepRunningToTheEnd);
 		Optional.ofNullable(supervisableManager).ifPresent(SupervisableManager::close);
 	}

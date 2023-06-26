@@ -29,7 +29,7 @@ class FlatBackgroundService extends BackgroundService {
 						  final String spoolName,
 						  final Runnable task,
 						  final RunnableWithException disableTask) {
-		super(null, spoolName, null, scheduledExecutor, null, null, null);
+		super(null, spoolName, null, scheduledExecutor, null, null, null, null);
 		runReference = new FlatScheduledFuture(task);
 		this.disableTask = disableTask;
 		this.scheduledExecutor = scheduledExecutor;

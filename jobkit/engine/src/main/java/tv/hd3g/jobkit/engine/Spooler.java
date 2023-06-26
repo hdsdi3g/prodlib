@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -17,13 +18,18 @@ public class Spooler {
 	private final AtomicLong threadCount;
 	private final AtomicBoolean shutdown;
 	private final SupervisableEvents supervisableEvents;
+	@Getter
+	private final JobKitWatchdog jobKitWatchdog;
 
-	public Spooler(final ExecutionEvent event, final SupervisableEvents supervisableEvents) {
+	public Spooler(final ExecutionEvent event,
+				   final SupervisableEvents supervisableEvents,
+				   final JobKitWatchdog jobKitWatchdog) {
 		this.event = event;
 		spoolExecutors = new ConcurrentHashMap<>();
 		threadCount = new AtomicLong(0);
 		shutdown = new AtomicBoolean(false);
 		this.supervisableEvents = supervisableEvents;
+		this.jobKitWatchdog = jobKitWatchdog;
 	}
 
 	private Stream<SpoolExecutor> getSpoolExecutorStream() {
@@ -39,7 +45,7 @@ public class Spooler {
 			return spoolExecutors.get(name);
 		}
 		return spoolExecutors.computeIfAbsent(name,
-				n -> new SpoolExecutor(n, event, threadCount, supervisableEvents));
+				n -> new SpoolExecutor(n, event, threadCount, supervisableEvents, jobKitWatchdog));
 	}
 
 	public int getAllQueuesSize() {
@@ -57,6 +63,7 @@ public class Spooler {
 		if (shutdown.get()) {
 			return;
 		}
+		jobKitWatchdog.shutdown();
 		shutdown.set(true);
 
 		final var count = getRunningQueuesCount();

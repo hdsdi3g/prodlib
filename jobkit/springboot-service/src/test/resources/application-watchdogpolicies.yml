@@ -1,0 +1,17 @@
+spring:
+    main:
+        banner-mode: "off"
+        log-startup-info: false
+        web-application-type: none
+
+jobkit:
+    watchdogpolicies:
+        maxSpoolQueueSize:
+            - maxSize: 10
+              onlySpools: ["AA"]
+        limitedExecTime:
+            - maxExecTime: 10s
+              onlySpools: ["BB"]
+        limitedServiceExecTime:
+            - waitFactor: 5
+              onlySpools: ["CC"]

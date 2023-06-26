@@ -18,11 +18,11 @@ package tv.hd3g.mailkit.notification.implmail;
 
 import org.springframework.mail.javamail.JavaMailSender;
 
-import tv.hd3g.jobkit.engine.SupervisableManager;
+import tv.hd3g.jobkit.engine.SupervisableEventRegister;
 import tv.hd3g.mailkit.mod.service.AppNotificationService;
 import tv.hd3g.mailkit.notification.NotificationGroup;
 
-public record NotificationEngineMailSetup(SupervisableManager supervisableManager,
+public record NotificationEngineMailSetup(SupervisableEventRegister supervisableManager,
 										  AppNotificationService appNotificationService,
 										  JavaMailSender mailSender,
 										  String senderAddr,

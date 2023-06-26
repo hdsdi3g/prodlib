@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -103,37 +104,42 @@ class FlatScheduledExecutorService implements ScheduledExecutorService {
 
 	@Override
 	public List<Runnable> shutdownNow() {
-		throw new UnsupportedOperationException();
+		return List.of();
 	}
 
 	@Override
 	public boolean isShutdown() {
-		throw new UnsupportedOperationException();
+		return false;
 	}
 
 	@Override
 	public boolean isTerminated() {
-		throw new UnsupportedOperationException();
+		return false;
 	}
 
 	@Override
 	public boolean awaitTermination(final long timeout, final TimeUnit unit) throws InterruptedException {
-		throw new UnsupportedOperationException();
+		return true;
 	}
 
 	@Override
 	public <T> Future<T> submit(final Callable<T> task) {
-		throw new UnsupportedOperationException();
+		try {
+			return CompletableFuture.completedFuture(task.call());
+		} catch (final Exception e) {
+			return CompletableFuture.failedFuture(e);
+		}
 	}
 
 	@Override
 	public <T> Future<T> submit(final Runnable task, final T result) {
-		throw new UnsupportedOperationException();
+		task.run();
+		return CompletableFuture.completedFuture(result);
 	}
 
 	@Override
 	public Future<?> submit(final Runnable task) {
-		throw new UnsupportedOperationException();
+		return submit(task, null);
 	}
 
 	@Override
@@ -162,7 +168,7 @@ class FlatScheduledExecutorService implements ScheduledExecutorService {
 
 	@Override
 	public void execute(final Runnable command) {
-		throw new UnsupportedOperationException();
+		command.run();
 	}
 
 }

@@ -18,18 +18,29 @@ package tv.hd3g.jobkit.engine;
 
 import static java.util.Optional.ofNullable;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.openMocks;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
+import static tv.hd3g.jobkit.engine.SupervisableResultState.WORKS_DONE;
 
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -39,6 +50,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.datafaker.Faker;
+import tv.hd3g.jobkit.engine.watchdog.JobWatchdogPolicy;
+import tv.hd3g.jobkit.engine.watchdog.JobWatchdogPolicyWarning;
+import tv.hd3g.jobkit.engine.watchdog.JobWatchdogSpoolReport;
+import tv.hd3g.jobkit.engine.watchdog.WatchableBackgroundService;
+import tv.hd3g.jobkit.engine.watchdog.WatchableSpoolJobState;
 
 class SupervisableManagerTest {
 	static Faker faker = Faker.instance();
@@ -112,7 +128,7 @@ class SupervisableManagerTest {
 	void testGetLifeCycle_onEnd() {
 		when(supervisable.getEndEvent(oError, name)).thenReturn(ofNullable(supervisableEndEvent));
 		s.registerOnEndEventConsumer(eventConsumer);
-		
+
 		s.onEnd(supervisable, oError);
 
 		verify(eventConsumer, times(1)).afterProcess(supervisableEndEvent);
@@ -195,4 +211,169 @@ class SupervisableManagerTest {
 		verify(eventConsumer2, times(iterations)).afterProcess(supervisableEndEvent);
 	}
 
+	private static class Policy implements JobWatchdogPolicy {
+		@Override
+		public void isStatusOk(final String spoolName,
+							   final WatchableSpoolJobState activeJob,
+							   final Set<WatchableSpoolJobState> queuedJobs,
+							   final Set<WatchableBackgroundService> relativeBackgroundServices) throws JobWatchdogPolicyWarning {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Optional<Duration> isStatusOk(final String spoolName,
+											 final WatchableSpoolJobState activeJob,
+											 final Set<WatchableSpoolJobState> queuedJobs) throws JobWatchdogPolicyWarning {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String getDescription() {
+			return faker.numerify("policyDescription###");
+		}
+	}
+
+	@Nested
+	class Report {
+
+		JobWatchdogSpoolReport report;
+
+		String spoolName;
+		WatchableSpoolJobState activeJob;
+		Date createdDate;
+		Set<WatchableSpoolJobState> queuedJobs;
+		JobWatchdogPolicyWarning warning;
+		Set<WatchableBackgroundService> relativeBackgroundServices;
+		JobWatchdogPolicy policy;
+		SupervisableEndEvent endEvent;
+
+		WatchableSpoolJobState queuedJob0;
+		WatchableSpoolJobState queuedJob1;
+		WatchableBackgroundService service;
+
+		@Captor
+		ArgumentCaptor<SupervisableEndEvent> supervisableEndEventCaptor;
+
+		@BeforeEach
+		void init() throws Exception {
+			openMocks(this).close();
+			s.registerOnEndEventConsumer(eventConsumer);
+
+			spoolName = faker.numerify("spoolName###");
+			createdDate = new Date();
+			activeJob = new WatchableSpoolJobState(
+					createdDate, faker.numerify("commandName###"), -1, Optional.empty(), Optional.empty());
+			warning = new JobWatchdogPolicyWarning(faker.numerify("warning###"));
+			queuedJobs = Set.of();
+			relativeBackgroundServices = Set.of();
+			policy = new Policy();
+
+			queuedJob0 = new WatchableSpoolJobState(
+					createdDate, faker.numerify("commandName###"), -1, Optional.empty(), Optional.empty());
+			queuedJob1 = new WatchableSpoolJobState(
+					createdDate, faker.numerify("commandName###"), -1, Optional.empty(), Optional.empty());
+			service = new WatchableBackgroundService(faker.numerify("serviceName###"),
+					spoolName, faker.random().nextLong(10, 10000));
+		}
+
+		@AfterEach
+		void end() {
+			assertTrue(endEvent.creationDate().getTime() > 0);
+			assertTrue(new Date().compareTo(endEvent.creationDate()) >= 0);
+			assertTrue(endEvent.startDate().compareTo(endEvent.creationDate()) >= 0);
+			assertTrue(endEvent.endDate().compareTo(endEvent.startDate()) >= 0);
+
+			assertEquals(context, endEvent.context());
+			assertTrue(endEvent.isInternalStateChangeMarked());
+			assertTrue(endEvent.isNotTrivialMarked());
+			assertFalse(endEvent.isSecurityMarked());
+			assertTrue(endEvent.isTypeName(JobWatchdogSpoolReport.class.getName()));
+			assertTrue(endEvent.isUrgentMarked());
+			assertEquals(WORKS_DONE, endEvent.result().state());
+			assertFalse(endEvent.result().message().code().isEmpty());
+			assertFalse(endEvent.result().message().defaultResult().isEmpty());
+			assertFalse(Arrays.asList(endEvent.result().message().getVarsArray()).isEmpty());
+			assertEquals(spoolName, endEvent.spoolName());
+			assertEquals(activeJob.commandName(), endEvent.jobName());
+		}
+
+		@Test
+		void testWarnReport() {
+			report = new JobWatchdogSpoolReport(
+					createdDate, spoolName, activeJob, queuedJobs, policy, warning, relativeBackgroundServices);
+			when(objectMapper.valueToTree(report)).thenReturn(context);
+
+			s.onJobWatchdogSpoolReport(report);
+
+			verify(objectMapper, times(1)).valueToTree(report);
+			verify(eventConsumer, times(1)).afterProcess(supervisableEndEventCaptor.capture());
+			endEvent = supervisableEndEventCaptor.getValue();
+
+			assertEquals(2, endEvent.steps().size());
+		}
+
+		@Test
+		void testWarnReportQueuedJob() {
+			queuedJobs = Set.of(queuedJob0);
+			report = new JobWatchdogSpoolReport(
+					createdDate, spoolName, activeJob, queuedJobs, policy, warning, relativeBackgroundServices);
+			when(objectMapper.valueToTree(report)).thenReturn(context);
+
+			s.onJobWatchdogSpoolReport(report);
+
+			verify(objectMapper, times(1)).valueToTree(report);
+			verify(eventConsumer, times(1)).afterProcess(supervisableEndEventCaptor.capture());
+			endEvent = supervisableEndEventCaptor.getValue();
+
+			assertEquals(3, endEvent.steps().size());
+		}
+
+		@Test
+		void testWarnReportQueuedJobs() {
+			queuedJobs = Set.of(queuedJob0, queuedJob1);
+			report = new JobWatchdogSpoolReport(
+					createdDate, spoolName, activeJob, queuedJobs, policy, warning, relativeBackgroundServices);
+			when(objectMapper.valueToTree(report)).thenReturn(context);
+
+			s.onJobWatchdogSpoolReport(report);
+
+			verify(objectMapper, times(1)).valueToTree(report);
+			verify(eventConsumer, times(1)).afterProcess(supervisableEndEventCaptor.capture());
+			endEvent = supervisableEndEventCaptor.getValue();
+
+			assertEquals(4, endEvent.steps().size());
+		}
+
+		@Test
+		void testWarnReportServices() {
+			relativeBackgroundServices = Set.of(service);
+			report = new JobWatchdogSpoolReport(
+					createdDate, spoolName, activeJob, queuedJobs, policy, warning, relativeBackgroundServices);
+			when(objectMapper.valueToTree(report)).thenReturn(context);
+
+			s.onJobWatchdogSpoolReport(report);
+
+			verify(objectMapper, times(1)).valueToTree(report);
+			verify(eventConsumer, times(1)).afterProcess(supervisableEndEventCaptor.capture());
+			endEvent = supervisableEndEventCaptor.getValue();
+
+			assertEquals(4, endEvent.steps().size());
+		}
+
+		@Test
+		void testReleaseReport() {
+			report = new JobWatchdogSpoolReport(
+					createdDate, spoolName, activeJob, queuedJobs, policy, warning, relativeBackgroundServices);
+			when(objectMapper.valueToTree(report)).thenReturn(context);
+
+			s.onJobWatchdogSpoolReleaseReport(report);
+
+			verify(objectMapper, times(1)).valueToTree(report);
+			verify(eventConsumer, times(1)).afterProcess(supervisableEndEventCaptor.capture());
+			endEvent = supervisableEndEventCaptor.getValue();
+
+			assertEquals(1, endEvent.steps().size());
+		}
+
+	}
 }

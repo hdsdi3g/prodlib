@@ -6,9 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.longThat;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -34,6 +36,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.verification.VerificationMode;
 
 import net.datafaker.Faker;
 
@@ -45,6 +48,8 @@ class SpoolExecutorTest {
 	ExecutionEvent event;
 	@Mock
 	SupervisableEvents sEvent;
+	@Mock
+	JobKitWatchdog jobKitWatchdog;
 	@Captor
 	ArgumentCaptor<Optional<Exception>> oExceptionCaptor;
 
@@ -64,12 +69,12 @@ class SpoolExecutorTest {
 		spoolExecutorName = "Internal test Spool executor";
 		threadName = "SpoolExecutor #0";
 		threadCount = new AtomicLong();
-		spoolExecutor = new SpoolExecutor(spoolExecutorName, event, threadCount, sEvent);
+		spoolExecutor = new SpoolExecutor(spoolExecutorName, event, threadCount, sEvent, jobKitWatchdog);
 	}
 
 	@AfterEach
 	void ends() {
-		verifyNoMoreInteractions(sEvent);
+		verifyNoMoreInteractions(sEvent, jobKitWatchdog);
 
 		for (var pos = 0; pos < runnedTasks.size(); pos++) {
 			assertEquals(pos, runnedTasks.get(pos));
@@ -119,6 +124,8 @@ class SpoolExecutorTest {
 		verify(event, times(0)).shutdownSpooler(any(Supervisable.class));
 
 		checkSupervisableEventOnEnd(3, true);
+
+		checkWatchdog(1);
 	}
 
 	@Test
@@ -156,6 +163,8 @@ class SpoolExecutorTest {
 
 		verify(event, times(0)).shutdownSpooler(any(Supervisable.class));
 		verify(sEvent, times(total * 4)).onEnd(any(), any());
+
+		checkWatchdog(total);
 	}
 
 	@Test
@@ -178,6 +187,8 @@ class SpoolExecutorTest {
 		assertEquals(total, count.get());
 
 		checkSupervisableEventOnEnd(total * 3, true);
+
+		checkWatchdog(total);
 	}
 
 	@Test
@@ -199,6 +210,8 @@ class SpoolExecutorTest {
 		assertEquals(total, count.get());
 
 		checkSupervisableEventOnEnd(total * 3, true);
+
+		checkWatchdog(total);
 	}
 
 	@Test
@@ -221,6 +234,8 @@ class SpoolExecutorTest {
 		assertTrue(smCmd1.await(10, SECONDS));
 
 		verify(sEvent, atLeast(7)).onEnd(any(), any());
+
+		checkWatchdog(2);
 	}
 
 	@Test
@@ -251,6 +266,8 @@ class SpoolExecutorTest {
 		verify(event, times(0)).shutdownSpooler(any(Supervisable.class));
 
 		checkSupervisableEventOnEnd(7, true);
+
+		checkWatchdog(2);
 	}
 
 	@Test
@@ -274,6 +291,8 @@ class SpoolExecutorTest {
 		assertFalse(spoolExecutor.isRunning());
 
 		checkSupervisableEventOnEnd(3, true);
+
+		checkWatchdog(1);
 	}
 
 	@Test
@@ -307,6 +326,8 @@ class SpoolExecutorTest {
 		spoolExecutor.clean(true);
 		assertTrue(count.get() / 2 < total);
 		verify(sEvent, atLeast(1)).onEnd(any(), any());
+
+		checkWatchdog(atMost(1000));
 	}
 
 	@Test
@@ -339,6 +360,10 @@ class SpoolExecutorTest {
 
 		assertTrue(smCmd.await(total * 10, SECONDS));
 		checkSupervisableEventOnEnd(total * 4, true);
+
+		verify(jobKitWatchdog, times(total)).addJob(any(WatchableSpoolJob.class));
+		verify(jobKitWatchdog, times(total)).startJob(any(WatchableSpoolJob.class), anyLong());
+		verify(jobKitWatchdog, times(total)).endJob(any(WatchableSpoolJob.class));
 	}
 
 	@Test
@@ -394,6 +419,10 @@ class SpoolExecutorTest {
 		assertEquals(prioSort, dateSort);
 
 		checkSupervisableEventOnEnd(count * 3, true);
+
+		verify(jobKitWatchdog, times(count)).addJob(any(WatchableSpoolJob.class));
+		verify(jobKitWatchdog, times(count)).startJob(any(WatchableSpoolJob.class), anyLong());
+		verify(jobKitWatchdog, atMost(count)).endJob(any(WatchableSpoolJob.class));
 	}
 
 	private void checkSupervisableEventOnEnd(final int count, final boolean normalyDone) {
@@ -444,6 +473,8 @@ class SpoolExecutorTest {
 		assertEquals(error, results.get(0).get());
 		assertFalse(results.get(1).isPresent());
 		assertFalse(results.get(2).isPresent());
+
+		checkWatchdog(1);
 	}
 
 	@Test
@@ -467,6 +498,36 @@ class SpoolExecutorTest {
 		assertFalse(results.get(0).isPresent());
 		assertFalse(results.get(1).isPresent());
 		assertEquals(error, results.get(2).get());
+		checkWatchdog(atMost(1));
+	}
+
+	private void checkWatchdog(final VerificationMode mode) {
+		final var addCaptor = ArgumentCaptor.forClass(WatchableSpoolJob.class);
+		verify(jobKitWatchdog, mode).addJob(addCaptor.capture());
+
+		final var startCaptor = ArgumentCaptor.forClass(WatchableSpoolJob.class);
+		final var startTimeCaptor = ArgumentCaptor.forClass(Long.class);
+		verify(jobKitWatchdog, mode).startJob(startCaptor.capture(), startTimeCaptor.capture());
+
+		final var endCaptor = ArgumentCaptor.forClass(WatchableSpoolJob.class);
+		verify(jobKitWatchdog, mode).endJob(endCaptor.capture());
+
+		final var addCaptorValues = addCaptor.getAllValues();
+		final var startCaptorValues = startCaptor.getAllValues();
+		final var endCaptorValues = endCaptor.getAllValues();
+
+		final var max = Math.min(addCaptorValues.size(), Math.min(startCaptorValues.size(), endCaptorValues.size()));
+		for (var pos = 0; pos < max; pos++) {
+			assertEquals(addCaptorValues.get(pos), startCaptorValues.get(pos));
+			assertEquals(endCaptorValues.get(pos), addCaptorValues.get(pos));
+			final var startTime = startTimeCaptor.getAllValues().get(pos);
+			assertTrue(startTime > 0l);
+		}
+
+	}
+
+	private void checkWatchdog(final int total) {
+		checkWatchdog(atLeast(total - 1));
 	}
 
 }

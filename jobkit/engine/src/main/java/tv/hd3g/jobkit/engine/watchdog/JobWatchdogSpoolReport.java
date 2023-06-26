@@ -1,5 +1,5 @@
 /*
- * This file is part of JobKit.
+ * This file is part of jobkit-engine.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -11,15 +11,20 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
- * Copyright (C) hdsdi3g for hd3g.tv 2020
+ * Copyright (C) hdsdi3g for hd3g.tv 2023
  *
  */
-package tv.hd3g.jobkit;
+package tv.hd3g.jobkit.engine.watchdog;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import java.util.Date;
+import java.util.Set;
 
-@Configuration
-@ComponentScan(basePackages = { "tv.hd3g.jobkit" })
-public class Setup {
+public record JobWatchdogSpoolReport(Date created,
+									 String spoolName,
+									 WatchableSpoolJobState activeJob,
+									 Set<WatchableSpoolJobState> queuedJobs,
+									 JobWatchdogPolicy policy,
+									 JobWatchdogPolicyWarning warning,
+									 Set<WatchableBackgroundService> relativeBackgroundServices) {
+
 }

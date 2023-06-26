@@ -32,6 +32,7 @@
     </appender>
 
     <logger name="tv.hd3g" level="error" />
+    <!-- logger name="tv.hd3g.jobkit.engine.JobKitWatchdog" level="trace" /-->
 
     <root level="error">
         <appender-ref ref="Console OUT" />

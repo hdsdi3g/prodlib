@@ -21,10 +21,16 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
+import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -33,19 +39,26 @@ import org.mockito.MockitoAnnotations;
 
 class FlatScheduledExecutorServiceTest {
 
-	final Callable<Void> callable = null;
+	FlatScheduledExecutorService service;
+
+	@Mock
+	Callable<Object> callable;
 	@Mock
 	FlatScheduledFuture runReference;
-
-	FlatScheduledExecutorService service;
+	@Mock
 	Runnable task;
+	@Mock
+	Object object;
 
 	@BeforeEach
 	void init() throws Exception {
 		MockitoAnnotations.openMocks(this).close();
 		service = new FlatScheduledExecutorService();
-		task = () -> {
-		};
+	}
+
+	@AfterEach
+	void end() {
+		verifyNoMoreInteractions(callable, runReference, task, object);
 	}
 
 	@Test
@@ -110,37 +123,41 @@ class FlatScheduledExecutorServiceTest {
 
 	@Test
 	void testShutdownNow() {
-		assertThrows(UnsupportedOperationException.class, () -> service.shutdownNow());
+		assertEquals(List.of(), service.shutdownNow());
 	}
 
 	@Test
 	void testIsShutdown() {
-		assertThrows(UnsupportedOperationException.class, () -> service.isShutdown());
+		assertFalse(service.isShutdown());
 	}
 
 	@Test
 	void testIsTerminated() {
-		assertThrows(UnsupportedOperationException.class, () -> service.isTerminated());
+		assertFalse(service.isShutdown());
 	}
 
 	@Test
-	void testAwaitTermination() {
-		assertThrows(UnsupportedOperationException.class, () -> service.awaitTermination(0, TimeUnit.DAYS));
+	void testAwaitTermination() throws InterruptedException {
+		assertTrue(service.awaitTermination(0, TimeUnit.DAYS));
 	}
 
 	@Test
-	void testSubmitCallableOfT() {
-		assertThrows(UnsupportedOperationException.class, () -> service.submit(callable));
+	void testSubmitCallableOfT() throws Exception {
+		when(callable.call()).thenReturn(object);
+		assertEquals(object, service.submit(callable).get());
+		verify(callable, times(1)).call();
 	}
 
 	@Test
-	void testSubmitRunnableT() {
-		assertThrows(UnsupportedOperationException.class, () -> service.submit(task, null));
+	void testSubmitRunnableT() throws InterruptedException, ExecutionException {
+		assertEquals(object, service.submit(task, object).get());
+		verify(task, times(1)).run();
 	}
 
 	@Test
 	void testSubmitRunnable() {
-		assertThrows(UnsupportedOperationException.class, () -> service.submit(task));
+		service.submit(task);
+		verify(task, times(1)).run();
 	}
 
 	@Test
@@ -165,6 +182,7 @@ class FlatScheduledExecutorServiceTest {
 
 	@Test
 	void testExecute() {
-		assertThrows(UnsupportedOperationException.class, () -> service.execute(task));
+		service.execute(task);
+		verify(task, times(1)).run();
 	}
 }

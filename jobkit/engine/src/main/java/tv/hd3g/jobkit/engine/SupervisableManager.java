@@ -16,8 +16,10 @@
  */
 package tv.hd3g.jobkit.engine;
 
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,9 +31,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
+import tv.hd3g.jobkit.engine.watchdog.JobWatchdogSpoolReport;
 
 @Slf4j
-public class SupervisableManager implements SupervisableEvents {
+public class SupervisableManager implements SupervisableEvents, SupervisableEventRegister {
+
+	private static final String JOBKIT_WATCHDOGSPOOL_WARNING_MESSAGE = "jobkit.watchdogspool.warning.message";
+	private static final String JOBKIT_WATCHDOGSPOOL_RELEASE_MESSAGE = "jobkit.watchdogspool.warning.releasemessage";
 
 	private final String name;
 	private final ObjectMapper objectMapper;
@@ -53,6 +59,7 @@ public class SupervisableManager implements SupervisableEvents {
 		this(name, new ObjectMapper(), 10);
 	}
 
+	@Override
 	public SupervisableContextExtractor createContextExtractor(final SupervisableEndEvent event) {
 		return new SupervisableContextExtractor(this, event);
 	}
@@ -71,6 +78,7 @@ public class SupervisableManager implements SupervisableEvents {
 		}
 	}
 
+	@Override
 	public void registerOnEndEventConsumer(final SupervisableOnEndEventConsumer onEndEventConsumer) {
 		Objects.requireNonNull(onEndEventConsumer, "\"onEndEventConsumer\" can't to be null");
 		onEndEventConsumers.add(onEndEventConsumer);
@@ -107,6 +115,91 @@ public class SupervisableManager implements SupervisableEvents {
 		} catch (final Exception e) {
 			log.error("Can't queue end event", e);
 		}
+	}
+
+	@Override
+	public void onJobWatchdogSpoolReport(final JobWatchdogSpoolReport report) {
+		final var s = new Supervisable(report.spoolName(), report.activeJob().commandName(), this);
+
+		s.start();
+		s.markAsUrgent();
+		s.markAsInternalStateChange();
+
+		var i = 0;
+		s.onMessage(
+				JOBKIT_WATCHDOGSPOOL_WARNING_MESSAGE + i++,
+				"For information, a current job execution spooler (\"{0}\") seams to be have some troubles, maybe the current running task is blocked, with {1} waiting task(s). The warning report say: \"{2}\"",
+				report.spoolName(),
+				report.queuedJobs().size(),
+				report.warning().getMessage());
+
+		s.onMessage(
+				JOBKIT_WATCHDOGSPOOL_WARNING_MESSAGE + i++,
+				"The current running job \"{0}\" was created the {1}, started the {2}, by \"{3}\".",
+				report.activeJob().commandName(),
+				report.activeJob().createdDate(),
+				report.activeJob().startedDate().map(Date::new).orElse(null),
+				report.activeJob().creator().map(StackTraceElement::toString).orElse("(source unknown)"));
+
+		final var queuedJobs = report.queuedJobs().stream()
+				.sorted((l, r) -> Long.compare(l.createdIndex(), r.createdIndex())).toList();
+		if (queuedJobs.isEmpty() == false) {
+			s.onMessage(
+					JOBKIT_WATCHDOGSPOOL_WARNING_MESSAGE + i++,
+					"The older queued (waiting) job in this spooler was created the {0}.",
+					queuedJobs.get(0).createdDate());
+		}
+		if (queuedJobs.size() > 1) {
+			s.onMessage(
+					JOBKIT_WATCHDOGSPOOL_WARNING_MESSAGE + i++, // NOSONAR S1854
+					"The most recent queued (waiting) job in this spooler was created the {0}.",
+					queuedJobs.get(queuedJobs.size() - 1).createdDate());
+		}
+
+		if (report.relativeBackgroundServices().isEmpty() == false) {
+			s.onMessage(
+					JOBKIT_WATCHDOGSPOOL_WARNING_MESSAGE + i++, // NOSONAR S1854
+					"Some jobs (or the totality) was created by one of those application internal service:");
+
+			report.relativeBackgroundServices()
+					.forEach(b -> s.onMessage(
+							JOBKIT_WATCHDOGSPOOL_WARNING_MESSAGE + ".bckservice", // NOSONAR S1854
+							"{0}, runned every {1} after the last runned job",
+							b.serviceName(), Duration.ofMillis(b.timedInterval()))
+
+					);
+		}
+
+		s.resultDone(
+				"jobkit.watchdogspool.warning.policy." + report.policy().getClass().getSimpleName().toLowerCase(),
+				"[Execution spool warning] {0} on \"{1}\"",
+				report.policy().getDescription(),
+				report.spoolName());
+		s.setContext(JobWatchdogSpoolReport.class.getName(), report);
+		s.end();
+	}
+
+	@Override
+	public void onJobWatchdogSpoolReleaseReport(final JobWatchdogSpoolReport report) {
+		final var s = new Supervisable(report.spoolName(), report.activeJob().commandName(), this);
+
+		s.start();
+		s.markAsUrgent();
+		s.markAsInternalStateChange();
+
+		s.onMessage(
+				JOBKIT_WATCHDOGSPOOL_RELEASE_MESSAGE,
+				"For information, a job execution spooler (\"{0}\") was triggered an alert. This alert is now closed, the queue resumed a normal activity. The warning report was said: \"{1}\"",
+				report.spoolName(),
+				report.warning().getMessage());
+
+		s.resultDone(
+				"jobkit.watchdogspool.warning.policy." + report.policy().getClass().getSimpleName().toLowerCase(),
+				"[Problem closed] {0} on \"{1}\"",
+				report.policy().getDescription(),
+				report.spoolName());
+		s.setContext(JobWatchdogSpoolReport.class.getName(), report);
+		s.end();
 	}
 
 	@Override

@@ -32,7 +32,7 @@ import org.mockito.Mock;
 
 import net.datafaker.Faker;
 import tv.hd3g.jobkit.engine.SupervisableEndEvent;
-import tv.hd3g.jobkit.engine.SupervisableManager;
+import tv.hd3g.jobkit.engine.SupervisableEventRegister;
 import tv.hd3g.jobkit.engine.SupervisableOnEndEventConsumer;
 
 class NotificationManagerTest {
@@ -42,7 +42,7 @@ class NotificationManagerTest {
 	NotificationManager n;
 
 	@Mock
-	SupervisableManager supervisable;
+	SupervisableEventRegister supervisable;
 	@Mock
 	SupervisableEndEvent event;
 	@Mock

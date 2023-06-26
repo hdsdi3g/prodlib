@@ -32,7 +32,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
 import tv.hd3g.commons.version.EnvironmentVersion;
-import tv.hd3g.jobkit.engine.SupervisableManager;
+import tv.hd3g.jobkit.engine.SupervisableEventRegister;
 import tv.hd3g.mailkit.mod.component.Translate;
 import tv.hd3g.mailkit.mod.service.AppNotificationService;
 import tv.hd3g.mailkit.notification.NotificationManager;
@@ -95,14 +95,14 @@ public class MailKitSetup {
 											   final MailKitConfig config,
 											   final JavaMailSender mailSender,
 											   final Translate translate,
-											   final SupervisableManager supervisableManager,
+											   final SupervisableEventRegister supervisableEventRegister,
 											   final EnvironmentVersion environmentVersion) {
 		Optional.ofNullable(appNotificationService.getMessageSourceBasename())
 				.ifPresent(rbms::addBasenames);
 		final var toolkit = new NotificationMailTemplateToolkit(translate, config.getEnv(), environmentVersion);
 
 		final var setupEngine = new NotificationEngineMailSetup(
-				supervisableManager,
+				supervisableEventRegister,
 				appNotificationService,
 				mailSender,
 				config.getSenderAddr(),
@@ -117,7 +117,7 @@ public class MailKitSetup {
 				new NotificationEngineMailTemplateDebug(toolkit),
 				setupEngine);
 
-		return new NotificationManager().register(router).register(supervisableManager);
+		return new NotificationManager().register(router).register(supervisableEventRegister);
 	}
 
 }

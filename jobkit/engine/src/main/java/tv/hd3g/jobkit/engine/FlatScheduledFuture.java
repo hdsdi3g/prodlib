@@ -16,13 +16,15 @@
  */
 package tv.hd3g.jobkit.engine;
 
-import java.util.Objects;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode
 class FlatScheduledFuture implements ScheduledFuture<Void> {
 	private final Runnable run;
 
@@ -32,26 +34,6 @@ class FlatScheduledFuture implements ScheduledFuture<Void> {
 
 	void run() {
 		run.run();
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(run);
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final var other = (FlatScheduledFuture) obj;
-		return Objects.equals(run, other.run);
 	}
 
 	@Override
@@ -86,7 +68,7 @@ class FlatScheduledFuture implements ScheduledFuture<Void> {
 
 	@Override
 	public Void get(final long timeout,
-	                final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+					final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		throw new UnsupportedOperationException();
 	}
 

@@ -1,5 +1,7 @@
 package tv.hd3g.jobkit.engine;
 
+import static java.util.function.Predicate.not;
+
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -7,12 +9,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 class SpoolExecutor {
 
+	@Getter
 	private final String name;
 	private final ExecutionEvent event;
 	private final AtomicLong threadCount;
@@ -22,16 +27,19 @@ class SpoolExecutor {
 	private final PriorityBlockingQueue<SpoolJob> queue;
 	private final AtomicBoolean shutdown;
 	private final SupervisableEvents supervisableEvents;
+	private final JobKitWatchdog jobKitWatchdog;
 
 	SpoolExecutor(final String name,
 				  final ExecutionEvent event,
 				  final AtomicLong threadCount,
-				  final SupervisableEvents supervisableEvents) {
+				  final SupervisableEvents supervisableEvents,
+				  final JobKitWatchdog jobKitWatchdog) {
 		this.name = name;
 		this.event = event;
 		this.threadCount = threadCount;
+		this.jobKitWatchdog = jobKitWatchdog;
 		queueComparator = (l, r) -> {
-			final var compared = Integer.compare(r.priority, l.priority);
+			final var compared = Integer.compare(r.jobPriority, l.jobPriority);
 			if (compared == 0) {
 				return Long.compare(l.createdIndex, r.createdIndex);
 			}
@@ -51,7 +59,9 @@ class SpoolExecutor {
 			log.error("Can't add to queue new command \"{}\" by \"{}\": the spool is shutdown", name, this.name);
 			return false;
 		}
-		queue.add(new SpoolJob(command, name, priority, afterRunCommand, this));
+		final var newJob = new SpoolJob(command, name, priority, afterRunCommand, this);
+		queue.add(newJob);
+		jobKitWatchdog.addJob(newJob);
 		log.debug("Add new command \"{}\" by \"{}\" with P{}", name, this.name, priority);
 		runNext();
 		return true;
@@ -123,19 +133,31 @@ class SpoolExecutor {
 		log.debug("Spool {} is now empty, without running tasks", name);
 	}
 
-	private class SpoolJob extends Thread implements SupervisableSupplier {
+	private static Optional<StackTraceElement> getCaller() {
+		return Stream.of(new Throwable().getStackTrace())
+				.filter(not(StackTraceElement::isNativeMethod))
+				.filter(not(t -> t.getClassName().startsWith(SpoolExecutor.class.getPackageName())))
+				.findFirst();
+	}
+
+	private class SpoolJob extends Thread implements SupervisableSupplier, WatchableSpoolJob {
 
 		final RunnableWithException command;
+		@Getter
 		final String commandName;
-		final int priority;
+		final int jobPriority;
 		final Consumer<Exception> afterRunCommand;
+		@Getter
 		final SpoolExecutor executorReferer;
 		final AtomicReference<Supervisable> supervisableReference;
+		@Getter
 		final long createdIndex;
+		@Getter
+		final Optional<StackTraceElement> creator;
 
 		SpoolJob(final RunnableWithException command,
 				 final String commandName,
-				 final int priority,
+				 final int jobPriority,
 				 final Consumer<Exception> afterRunCommand,
 				 final SpoolExecutor executorReferer) {
 			super();
@@ -146,10 +168,11 @@ class SpoolExecutor {
 
 			this.command = command;
 			this.commandName = commandName;
-			this.priority = priority;
+			this.jobPriority = jobPriority;
 			this.afterRunCommand = afterRunCommand;
 			this.executorReferer = executorReferer;
 			supervisableReference = new AtomicReference<>();
+			creator = getCaller();
 		}
 
 		private Supervisable createSupervisable(final String jobName) {
@@ -160,6 +183,9 @@ class SpoolExecutor {
 
 		@Override
 		public void run() {
+			final var startTime = System.currentTimeMillis();
+			jobKitWatchdog.startJob(this, startTime);
+
 			var currentSupervisable = createSupervisable(commandName + " beforeRunJob");
 			try {
 				supervisableReference.set(currentSupervisable);
@@ -172,7 +198,6 @@ class SpoolExecutor {
 			}
 
 			currentSupervisable = createSupervisable(commandName);
-			final var startTime = System.currentTimeMillis();
 			Exception error = null;
 			try {
 				log.debug("Start new command \"{}\" by \"{}\"", commandName, name);
@@ -218,6 +243,8 @@ class SpoolExecutor {
 			}
 
 			supervisableReference.set(null);
+
+			jobKitWatchdog.endJob(this);
 
 			synchronized (queue) {
 				currentOperation.reset();

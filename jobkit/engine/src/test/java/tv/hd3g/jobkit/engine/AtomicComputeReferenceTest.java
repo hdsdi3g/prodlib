@@ -20,10 +20,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,11 +49,13 @@ class AtomicComputeReferenceTest {
 	@Mock
 	Item item;
 	@Mock
-	Object item2;
+	Item item2;
 	@Mock
 	Function<Item, Object> process;
 	@Mock
 	Predicate<Item> predicate;
+	@Mock
+	UnaryOperator<Item> replace;
 
 	@BeforeEach
 	void init() throws Exception {
@@ -59,7 +65,7 @@ class AtomicComputeReferenceTest {
 
 	@AfterEach
 	void end() {
-		Mockito.verifyNoMoreInteractions(item, item2, process, predicate);
+		Mockito.verifyNoMoreInteractions(item, item2, process, predicate, replace);
 	}
 
 	@Test
@@ -86,16 +92,16 @@ class AtomicComputeReferenceTest {
 	}
 
 	@Test
-	void testReset() {
+	void testIsSet() {
 		assertFalse(acr.isSet());
 		acr.set(item);
 		assertTrue(acr.isSet());
 	}
 
 	@Test
-	void testIsSet() {
+	void testReset() {
 		acr.set(item);
-		acr.reset();
+		assertEquals(item, acr.reset());
 		assertNull(acr.get());
 	}
 
@@ -132,4 +138,14 @@ class AtomicComputeReferenceTest {
 		}));
 		assertEquals(item, ref.get());
 	}
+
+	@Test
+	void testReplace() {
+		acr.set(item);
+		when(replace.apply(item)).thenReturn(item2);
+		acr.replace(replace);
+		verify(replace, times(1)).apply(item);
+		assertEquals(item2, acr.get());
+	}
+
 }

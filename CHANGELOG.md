@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 18.0.0
+
+Create JobKitWatchdog in JobKit to warn if the queue (Spooler) as some toubles, like a Job who block the queue, or a very big queue size. Add Supervisable for it and add Spring Boot conf. Do some clean code on JobJit/test and Mailkit #140
+
 ## 17.1.0
 
 Bug fix and evolution: add a timeout for DataExchange (TransfertFiles), set default timeout for AbstractFSURL (30 sec) #141

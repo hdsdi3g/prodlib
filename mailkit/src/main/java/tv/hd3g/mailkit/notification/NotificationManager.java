@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
-import tv.hd3g.jobkit.engine.SupervisableManager;
+import tv.hd3g.jobkit.engine.SupervisableEventRegister;
 
 @Slf4j
 public class NotificationManager {
@@ -32,7 +32,7 @@ public class NotificationManager {
 		routers = Collections.synchronizedList(new ArrayList<>());
 	}
 
-	public NotificationManager register(final SupervisableManager supervisable) {
+	public NotificationManager register(final SupervisableEventRegister supervisable) {
 		Objects.requireNonNull(supervisable, "\"supervisable\" can't to be null");
 		if (routers.isEmpty()) {
 			throw new IllegalStateException("Can't register SupervisableManager: no Router is registed.");
