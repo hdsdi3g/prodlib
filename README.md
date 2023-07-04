@@ -1,8 +1,14 @@
-# ProdLib: all libs and parent projects for production
+# ProdLib
 
-Please use Maven and Java 17 for build and test.
+Some utilities libs and tools, and parent (pom) projects for small java projects.
 
-All is tested on Windows 10 and Linux. Should be ok on macOS.
+All these projects are consistent with each other. Some use Spring Boot when necessary.
+
+Please use Maven and Java 17 for build, test and run.
+
+All is tested on Windows 10, Linux and GitHub Actions (Ubuntu). Should be ok on macOS.
+
+Relases are sent to [Maven central](https://mvnrepository.com/artifact/tv.hd3g).
 
 [![Java CI with Maven](https://github.com/hdsdi3g/prodlib/actions/workflows/maven-package.yml/badge.svg)](https://github.com/hdsdi3g/prodlib/actions/workflows/maven-package.yml)
 
@@ -10,90 +16,93 @@ All is tested on Windows 10 and Linux. Should be ok on macOS.
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=hdsdi3g_prodlib&metric=alert_status)](https://sonarcloud.io/dashboard?id=hdsdi3g_prodlib)
 
-## Commons
+## Projects / modules
 
-Maven SpringBoot projects for bootstrap App, Web app and libs.
+### Starter
 
-<details>
-<summary>See more</summary>
+Commons Maven starter project for bootstrap App, Web app and libs. Pom project, Spring Boot optional, stable.
 
-`tv.hd3g.commons.starter` for base projects SpringBoot reference.
+### Parent
 
-`tv.hd3g.commons.parent` for complete SpringBoot projects lib.
+Base project for lib. [Pom project](https://github.com/hdsdi3g/prodlib/blob/master/parent/pom.xml), Spring Boot, stable.
 
-`tv.hd3g.commons.parent-web` for complete SpringBoot projects lib with a web server (based on parent).
+### Parent-web
 
-`tv.hd3g.commons.app` for complete a SpringBoot application projects (based on parent).
+Base project for **web** lib. [Pom project](https://github.com/hdsdi3g/prodlib/blob/master/parent-web/pom.xml), Spring Boot, stable.
 
-`tv.hd3g.commons.app-web` for complete a SpringBoot application projects (based on parent-web).
+### App
 
-`tv.hd3g.commons.interfaces` for some shared cross-projects objects and definitions.
+Base project for standalone application. [Pom project](https://github.com/hdsdi3g/prodlib/blob/master/app/pom.xml), Spring Boot, stable.
 
-</details>
+### App-web
 
-## JobKit
+Base project for standalone **web** application. [Pom project](https://github.com/hdsdi3g/prodlib/blob/master/app-web/pom.xml), Spring Boot, stable.
 
-Execute onetime and scheduled Java jobs with dynamic queues and events.
+### Interfaces
 
-<details>
-<summary>See more</summary>
+Java Interfaces and DTOs for connect projects without direct dependencies, for some shared cross-projects objects and definitions.
 
-It's a standalone lib splitted in 3 related Maven projects
+[Java lib](https://github.com/hdsdi3g/prodlib/blob/master/interfaces/pom.xml), Spring Boot, stable.
 
-- `jobkit-starter` the base project
-- `engine`: the internal engine
-- `service`: a Spring Boot module for enable `@async` with JobKit.
+### Transfertfiles
 
-It's stable.
+Manipulate files across protocols: a Java library for upload and download files, with protocol abstraction (local File, FTP/FTPS/FTPES, SFTP), and transfer progression events.
+
+[Java lib](https://github.com/hdsdi3g/prodlib/blob/master/transfertfiles/pom.xml), standalone, stable.
+
+### Jobkit
+
+Base project for all jobkit modules. [Pom project](https://github.com/hdsdi3g/prodlib/blob/master/jobkit/pom.xml), Spring Boot optional, stable.
+
+### Jobkit/engine
+
+Execute onetime and scheduled jobs with dynamic queues and events.
 
 Engine embed a `Supervisable` tool, used in conjonction with JobKitEngine to track, and collect events during the task execution. 
 
-</details>
+[Java lib](https://github.com/hdsdi3g/prodlib/blob/master/jobkit/engine/pom.xml), standalone, stable.
 
-## Watchfolder
+### Jobkit/springboot-service
+
+Execute as SpringBoot module the JobKit lib. [Java lib](https://github.com/hdsdi3g/prodlib/blob/master/jobkit/springboot-service/pom.xml), Spring Boot, stable.
+
+### Jobkit/watchfolder
+
+Regulary scan folders (local or distant) and throws events on activity.
 
 It can found recently added files and directories in local filesystem, and start events (run Java code) on it.
 
-Related to `JobKit` project and `TransfertFiles`.
+[Java lib](https://github.com/hdsdi3g/prodlib/blob/master/jobkit/watchfolder/pom.xml), standalone, stable.
 
-## MailKit
+### Jobkit/watchfolder-jpa
 
-Mail engine as notification abstraction for Spring Boot
+Watchfolder lib with persistence. [Java lib](https://github.com/hdsdi3g/prodlib/blob/master/jobkit/watchfolder-jpa/pom.xml), Spring Boot, stable.
 
-<details>
-<summary>See more</summary>
+### Mailkit
+
+Mail engine as notification abstraction.
 
 MailKit can manage Supervisable produced by JobKit, and can transform it in mail: `Notification`.
 
-It's stable.
+[Java lib](https://github.com/hdsdi3g/prodlib/blob/master/mailkit/pom.xml), Spring Boot, stable.
 
-</details>
+### Env-version
 
-## Transfertfiles
+Tools for provide project and deps version. [Java lib](https://github.com/hdsdi3g/prodlib/blob/master/env-version/pom.xml), Spring Boot, stable.
 
-A Java library for upload and download files, with protocol abstraction, and transfer progression events.
+### Jsconfig
 
-<details>
-<summary>See more</summary>
+Let setup JS files as configuration and expose it as a Spring Boot service. [Java lib](https://github.com/hdsdi3g/prodlib/blob/master/jsconfig/pom.xml), Spring Boot, _Alpha_.
 
-It currently manage some protocols:
+### Csvkit
 
-- Local File
-- FTP/FTPS/FTPES
-- SFTP
+CSV utility for import CSV file as simple data content. [Java lib](https://github.com/hdsdi3g/prodlib/blob/master/csvkit/pom.xml), Spring Boot, stable.
 
-It's stable.
-</details>
+### Authkit
 
-## AuthKit
-
-Authentication and RBAC module for Spring Boot 2 (Java 11).
+Authentication and RBAC module. [Java lib](https://github.com/hdsdi3g/prodlib/blob/master/authkit/pom.xml), Spring Boot, _Alpha_.
 
 <details>
-<summary>See more</summary>
-
-It's still in alpha.
-
 AuthKit provide a backend API & logon front with:
 
 - User/Group/Role/Right (access to a controller)/Right Context (access context limitation for a controller) as RBAC objects
@@ -112,31 +121,15 @@ AuthKit don't use Spring Security functions: it can be setup in addition for Spr
 It's use Liquibase for setup/upgrade MySQL database via [setupdb](https://github.com/hdsdi3g/setupdb-maven-plugin), only if you don't want to use Hibernate to do it.
 
 See more on `authkit` dir.
-
 </details>
 
-## SelfAutoRestDoc
+### Selfautorestdoc
 
 Create an automatic SpringBoot REST documentation to markdown with [Spoon](http://spoon.gforge.inria.fr/).
 
-<details>
-<summary>See more</summary>
+Start (or copy and start) from your Spring Boot project `scripts/make-rest-doc.sh`. You will needs maven to run it.
 
-It's still in alpha.
-
-For setup, add in your pom file:
-
-```
-<dependency>
-    <groupId>tv.hd3g.commons</groupId>
-    <artifactId>selfautorestdoc</artifactId>
-    <version>(last current version)</version>
-</dependency>
-```
-
-And start (or copy and start) from your Spring Boot project `scripts/make-rest-doc.sh`. You will needs maven to run it.
-
-</details>
+[Java lib](https://github.com/hdsdi3g/prodlib/blob/master/selfautorestdoc/pom.xml), Spring Boot, _Alpha_.
 
 ## Contributing / debugging
 
