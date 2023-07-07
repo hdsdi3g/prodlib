@@ -118,7 +118,7 @@ AuthKit provide a backend API & logon front with:
 
 AuthKit don't use Spring Security functions: it can be setup in addition for Spring Security.
 
-It's use Liquibase for setup/upgrade MySQL database via [setupdb](https://github.com/hdsdi3g/setupdb-maven-plugin), only if you don't want to use Hibernate to do it.
+It use Liquibase for setup/upgrade MySQL database, only if you don't want to use Hibernate to do it.
 
 See more on `authkit` dir.
 </details>

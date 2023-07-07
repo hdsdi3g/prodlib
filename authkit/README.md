@@ -141,7 +141,7 @@ Replace VERSION by [the last published version](https://mvnrepository.com/artifa
 
 #### AuthKit development
 
-Please setup an `application.yml` and `log4j2.xml` in `/config`. You can use samples in `src/test/resources`, or just ignore `/config` and keep the ones in `resources` (`/config` is outside git control).
+Please setup an `application.yml` and `logback.xml` in `/config`. You can use samples in `src/test/resources`, or just ignore `/config` and keep the ones in `resources` (`/config` is outside git control).
 
 In case if you want use an external MySQL database, after configure the Spring application, like:
 
@@ -162,19 +162,7 @@ spring:
         open-in-view: false
 ```
 
-Run:
-
-```shell
-mvn setupdb:deploy
-```
-
-for deploy manually the database configuration, and use:
-
-```shell
-mvn setupdb:dropall
-```
-
-For a full reverse setup. More information on setupdb in [setupdb's README](https://github.com/hdsdi3g/setupdb-maven-plugin/blob/master/README.md).
+You can use Liquibase to deploy manually the database configuration.
 
 _For maven calls, you can stop internal tests and gpg jar sign with:_
 
@@ -190,13 +178,7 @@ scripts/make-rest-doc.sh
 
 #### AuthKit as library or in production
 
-If you want use Liquibase outside maven, please generate a `/target/database-full-archive-changelog.xml` with:
-
-```shell
-mvn setupdb:archive
-```
-
-And you will be able to use, with a valid setup, **Liquibase v3.x** with the MySQL JDBC connector **mysql-connector-java-8.x.jar** putted in the liquibase setup **lib** directory.
+You will be able to use, with a valid setup, **Liquibase v3.x** with the MySQL JDBC connector **mysql-connector-java-8.x.jar** putted in the liquibase setup **lib** directory.
 
 More information on [Liquibase doc site](https://docs.liquibase.com/).
 

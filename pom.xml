@@ -78,7 +78,6 @@
         <sonar.version>3.9.1.2184</sonar.version>
 
         <codepolicyvalidation.version>3.0.0</codepolicyvalidation.version>
-        <setupdb.version>2.0.2</setupdb.version>
         <processlauncher.version>6.0.5</processlauncher.version>
     </properties>
 

@@ -97,14 +97,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>tv.hd3g.mvnplugin</groupId>
-                <artifactId>setupdb</artifactId>
-                <version>${setupdb.version}</version>
-            </plugin>
-        </plugins>
-    </build>
 </project>
