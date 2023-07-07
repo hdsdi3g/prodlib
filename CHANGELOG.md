@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 18.0.1
+
+No code change: remove deprecated Setupdb maven plugin in Authkit for Liquibase updates #144
+
 ## 18.0.0
 
 Create JobKitWatchdog in JobKit to warn if the queue (Spooler) as some toubles, like a Job who block the queue, or a very big queue size. Add Supervisable for it and add Spring Boot conf. Do some clean code on JobJit/test and Mailkit #140
