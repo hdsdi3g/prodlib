@@ -1,5 +1,5 @@
 
-Lists of 137 third-party dependencies.
+Lists of 136 third-party dependencies.
      (Eclipse Public License - v 1.0) (GNU Lesser General Public License) Logback Classic Module (ch.qos.logback:logback-classic:1.4.8 - http://logback.qos.ch/logback-classic)
      (Eclipse Public License - v 1.0) (GNU Lesser General Public License) Logback Core Module (ch.qos.logback:logback-core:1.4.8 - http://logback.qos.ch/logback-core)
      (Apache License, Version 2.0) ClassMate (com.fasterxml:classmate:1.5.1 - https://github.com/FasterXML/java-classmate)
@@ -21,7 +21,6 @@ Lists of 137 third-party dependencies.
      (The Apache Software License, Version 2.0) HikariCP (com.zaxxer:HikariCP:5.0.1 - https://github.com/brettwooldridge/HikariCP)
      (Apache License, Version 2.0) Apache Commons Codec (commons-codec:commons-codec:1.15 - https://commons.apache.org/proper/commons-codec/)
      (Apache License, Version 2.0) Apache Commons IO (commons-io:commons-io:2.11.0 - https://commons.apache.org/proper/commons-io/)
-     (The Apache Software License, Version 2.0) Apache Commons Logging (commons-logging:commons-logging:1.2 - http://commons.apache.org/proper/commons-logging/)
      (Apache License, Version 2.0) Apache Commons Net (commons-net:commons-net:3.9.0 - https://commons.apache.org/proper/commons-net/)
      (BSD) Automaton (dk.brics.automaton:automaton:1.11-8 - http://www.brics.dk/automaton/)
      (CeCILL-C) (MIT) Spoon Core (fr.inria.gforge.spoon:spoon-core:10.3.0 - http://spoon.gforge.inria.fr/)
@@ -131,9 +130,9 @@ Lists of 137 third-party dependencies.
      (Public Domain) XZ for Java (org.tukaani:xz:1.8 - https://tukaani.org/xz/java.html)
      (The Apache Software License, Version 2.0) org.xmlunit:xmlunit-core (org.xmlunit:xmlunit-core:2.9.1 - https://www.xmlunit.org/)
      (Apache License, Version 2.0) SnakeYAML (org.yaml:snakeyaml:1.33 - https://bitbucket.org/snakeyaml/snakeyaml)
-     (GNU Lesser General Public License, Version 3) Jobkit SpringBoot module (tv.hd3g:jobkit:18.0.1 - https://github.com/hdsdi3g/prodlib)
-     (GNU Lesser General Public License, Version 3) JobKit Engine (tv.hd3g:jobkit-engine:18.0.1 - https://github.com/hdsdi3g/prodlib)
-     (GNU Lesser General Public License, Version 3) JobKit Watchfolder (tv.hd3g:jobkit-watchfolder:18.0.1 - https://github.com/hdsdi3g/prodlib)
-     (GNU Lesser General Public License, Version 3) TransfertFiles (tv.hd3g:transfertfiles:18.0.1 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) Jobkit SpringBoot module (tv.hd3g:jobkit:18.0.2 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) JobKit Engine (tv.hd3g:jobkit-engine:18.0.2 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) JobKit Watchfolder (tv.hd3g:jobkit-watchfolder:18.0.2 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) TransfertFiles (tv.hd3g:transfertfiles:18.0.2 - https://github.com/hdsdi3g/prodlib)
      (GNU Lesser General Public License, Version 3) CodePolicyValidation (tv.hd3g.commons:codepolicyvalidation:3.0.0 - https://github.com/hdsdi3g/codepolicyvalidation)
-     (GNU Lesser General Public License, Version 3) Commons Interfaces (tv.hd3g.commons:interfaces:18.0.1 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) Commons Interfaces (tv.hd3g.commons:interfaces:18.0.2 - https://github.com/hdsdi3g/prodlib)
