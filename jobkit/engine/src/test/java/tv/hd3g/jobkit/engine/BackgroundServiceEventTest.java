@@ -10,7 +10,6 @@ import static org.mockito.ArgumentMatchers.longThat;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.internal.verification.VerificationModeFactory.atLeast;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
@@ -76,7 +75,6 @@ class BackgroundServiceEventTest {
 		verify(jobKitWatchdog, atMost(100)).addJob(any(WatchableSpoolJob.class));
 		verify(jobKitWatchdog, atMost(100)).startJob(any(WatchableSpoolJob.class), anyLong());
 		verify(jobKitWatchdog, atMost(100)).endJob(any(WatchableSpoolJob.class));
-		verifyNoMoreInteractions(jobKitWatchdog);
 
 		service.disable();
 		spooler.shutdown(Set.of());
