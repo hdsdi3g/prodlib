@@ -2,7 +2,11 @@
 
 ## 18.0.2
 
-Fix spring-hateoas security dependency.
+### Code and project maintenance
+
+Fix spring-hateoas security dependency #150
+
+Correct bad dependency shipped with httpcomponents: remove commons-logging #147
 
 ## 18.0.1
 
