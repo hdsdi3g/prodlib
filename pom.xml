@@ -65,6 +65,7 @@
         <spoon.version>10.1.1</spoon.version>
         <j2html.version>1.6.0</j2html.version>
         <esapi.version>2.5.2.0</esapi.version>
+        <spring-hateoas.version>2.1.1</spring-hateoas.version>
         <graalvm.version>22.3.1</graalvm.version>
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
@@ -190,6 +191,11 @@
                 <groupId>org.owasp.esapi</groupId>
                 <artifactId>esapi</artifactId>
                 <version>${esapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.hateoas</groupId>
+                <artifactId>spring-hateoas</artifactId>
+                <version>${spring-hateoas.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

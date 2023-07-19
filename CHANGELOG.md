@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 18.0.2
+
+Fix spring-hateoas security dependency.
+
 ## 18.0.1
 
 No code change: remove deprecated Setupdb maven plugin in Authkit for Liquibase updates #144
