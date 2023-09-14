@@ -491,6 +491,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 
 	private class LocalDestFileImpl extends TransferListenerImpl implements LocalDestFile {
 
+		private static final String NOT_AVALIABLE = "Not avaliable";
 		private final OutputStream outputStream;
 
 		LocalDestFileImpl(final OutputStream outputStream,
@@ -505,8 +506,21 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 		}
 
 		@Override
+		public long getLength() {
+			throw new UnsupportedOperationException(NOT_AVALIABLE);
+		}
+
+		@Override
+		public OutputStream getOutputStream(final boolean append) throws IOException {
+			if (append) {
+				throw new UnsupportedOperationException("Append not avaliable");
+			}
+			return outputStream;
+		}
+
+		@Override
 		public LocalDestFile getChild(final String name) {
-			throw new UnsupportedOperationException("Not avaliable");
+			throw new UnsupportedOperationException(NOT_AVALIABLE);
 		}
 
 		@Override
@@ -516,7 +530,7 @@ public class SFTPFile extends CommonAbstractFile<SFTPFileSystem> { // NOSONAR S2
 
 		@Override
 		public LocalDestFile getTargetDirectory(final String dirname) throws IOException {
-			throw new UnsupportedOperationException("Not avaliable");
+			throw new UnsupportedOperationException(NOT_AVALIABLE);
 		}
 
 		@Override
