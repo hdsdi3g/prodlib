@@ -15,7 +15,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.1.1</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <modules>
@@ -62,7 +62,7 @@
         <argon2.version>2.7</argon2.version>
         <zxing.version>3.5.0</zxing.version>
         <opencsv.version>5.6</opencsv.version>
-        <spoon.version>10.1.1</spoon.version>
+        <spoon.version>10.4.2</spoon.version>
         <j2html.version>1.6.0</j2html.version>
         <esapi.version>2.5.2.0</esapi.version>
         <spring-hateoas.version>2.1.1</spring-hateoas.version>
