@@ -15,7 +15,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.1.1</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <modules>
@@ -65,7 +65,7 @@
         <spoon.version>10.1.1</spoon.version>
         <j2html.version>1.6.0</j2html.version>
         <esapi.version>2.5.2.0</esapi.version>
-        <spring-hateoas.version>2.1.1</spring-hateoas.version>
+        <spring-hateoas.version>2.1.3</spring-hateoas.version>
         <graalvm.version>22.3.1</graalvm.version>
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
