@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 19.0.0
+
+Project maintenance: Update Spring Boot parent from 3.1.1 to 3.2.1, and correct deps warns from dependabot and snyk.
+
 ## 18.0.2
 
 ### Code and project maintenance
