@@ -102,8 +102,8 @@ class FTPFileSystemTest {
 
 	@Test
 	void testFTPFileSystem_noUserName() {
-		assertThrows(IllegalArgumentException.class, () -> {
-			new FTPFileSystem(host, port, "", goodPassword, true, "");
+		assertThrows(IllegalArgumentException.class, () -> {// NOSONAR S5778
+			new FTPFileSystem(host, port, "", goodPassword, true, "").close();
 		});
 		fs = new FTPFileSystem(host, port, username, noPassword, true, "");
 		fs = new FTPFileSystem(host, port, username, null, true, "");

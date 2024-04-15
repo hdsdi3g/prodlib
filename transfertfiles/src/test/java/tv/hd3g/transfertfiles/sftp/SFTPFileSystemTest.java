@@ -190,8 +190,8 @@ class SFTPFileSystemTest {
 
 	@Test
 	void testSFTPFileSystem_noUsername() throws IOException {
-		assertThrows(IllegalArgumentException.class, () -> {
-			new SFTPFileSystem(host, port, "", "");
+		assertThrows(IllegalArgumentException.class, () -> { // NOSONAR S5778
+			new SFTPFileSystem(host, port, "", "").close();
 		});
 	}
 
