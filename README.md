@@ -94,41 +94,6 @@ Tools for provide project and deps version. [Java lib](https://github.com/hdsdi3
 
 Let setup JS files as configuration and expose it as a Spring Boot service. [Java lib](https://github.com/hdsdi3g/prodlib/blob/master/jsconfig/pom.xml), Spring Boot, _Alpha_.
 
-### Csvkit
-
-CSV utility for import CSV file as simple data content. [Java lib](https://github.com/hdsdi3g/prodlib/blob/master/csvkit/pom.xml), Spring Boot, stable.
-
-### Authkit
-
-Authentication and RBAC module. [Java lib](https://github.com/hdsdi3g/prodlib/blob/master/authkit/pom.xml), Spring Boot, _Alpha_.
-
-<details>
-AuthKit provide a backend API & logon front with:
-
-- User/Group/Role/Right (access to a controller)/Right Context (access context limitation for a controller) as RBAC objects
-- Cookie-less and persistence-less session based on JSON web tokens via an HTTP bearer.
-- Cookie stateless/session less (same JWT from bearer) for non-REST purpose.
-- Optional 2 factors auth (TOTP)
-- Optional login by Active Directory via an LDAP auth
-- A Role can required a specific IP address before it enable during a request
-- Data persistance with the help of an Hibernate database compatible, like MySQL and H2.
-- Strongly tested by integration tests (see SonarQube reports)
-- An internal and systematic audit system on database, for trace any security/logon actions.
-- A ciphered and isolated table for storing personal information (privacy). An user is only referenced by its auto-generated UUID. The username (login name) is only manipulated during logon operations.
-
-AuthKit don't use Spring Security functions: it can be setup in addition for Spring Security.
-
-It use Liquibase for setup/upgrade MySQL database, only if you don't want to use Hibernate to do it.
-
-See more on `authkit` dir.
-</details>
-
-### Selfautorestdoc
-
-Create an automatic SpringBoot REST documentation to markdown with [Spoon](http://spoon.gforge.inria.fr/).
-
-Start (or copy and start) from your Spring Boot project `scripts/make-rest-doc.sh`. You will needs maven to run it.
-
 [Java lib](https://github.com/hdsdi3g/prodlib/blob/master/selfautorestdoc/pom.xml), Spring Boot, _Alpha_.
 
 ## Contributing / debugging
