@@ -1,5 +1,15 @@
 # All ProdLib projects upgrades
 
+## 20.0.0
+
+Big deps update: correct Snyk vulnerabilities, update Spring-boot-starter-parent, update all internal deps in Starter #170
+
+Move Authkit, Selfautorestdoc and CSVKit to deprecated-attic #170
+
+Correct code warns after updates (transfertfiles/test) #170
+
+Remove non-used starter pom deps, update Code policy validation #170
+
 ## 19.0.0
 
 Project maintenance: Update Spring Boot parent from 3.1.1 to 3.2.1, and correct deps warns from dependabot and snyk.
