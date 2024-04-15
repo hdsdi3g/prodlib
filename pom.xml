@@ -26,12 +26,9 @@
         <module>jsconfig</module>
         <module>app</module>
         <module>app-web</module>
-        <module>selfautorestdoc</module>
-        <module>authkit</module>
         <module>mailkit</module>
         <module>jobkit</module>
         <module>transfertfiles</module>
-        <module>csvkit</module>
     </modules>
 
     <properties>
