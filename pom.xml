@@ -55,15 +55,7 @@
         <ftpserver.version>1.1.2</ftpserver.version>
         <sshd.version>2.8.0</sshd.version>
         <jsch.version>0.1.55</jsch.version>
-        <jsonwebtoken.version>0.11.2</jsonwebtoken.version>
-        <argon2.version>2.7</argon2.version>
-        <zxing.version>3.5.0</zxing.version>
-        <opencsv.version>5.6</opencsv.version>
-        <spoon.version>11.0.0</spoon.version>
         <j2html.version>1.6.0</j2html.version>
-        <esapi.version>2.5.3.0</esapi.version>
-        <spring-hateoas.version>2.2.2</spring-hateoas.version>
-        <mysql.version>8.2.0</mysql.version>
         <graalvm.version>22.3.1</graalvm.version>
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
@@ -76,7 +68,7 @@
         <maven.jacoco.version>0.8.8</maven.jacoco.version>
         <sonar.version>3.9.1.2184</sonar.version>
 
-        <codepolicyvalidation.version>3.0.0</codepolicyvalidation.version>
+        <codepolicyvalidation.version>3.1.1</codepolicyvalidation.version>
         <processlauncher.version>6.0.5</processlauncher.version>
     </properties>
 
@@ -170,41 +162,6 @@
                 <groupId>com.j2html</groupId>
                 <artifactId>j2html</artifactId>
                 <version>${j2html.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt-api</artifactId>
-                <version>${jsonwebtoken.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt-impl</artifactId>
-                <version>${jsonwebtoken.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt-jackson</artifactId>
-                <version>${jsonwebtoken.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.mkammerer</groupId>
-                <artifactId>argon2-jvm</artifactId>
-                <version>${argon2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.zxing</groupId>
-                <artifactId>javase</artifactId>
-                <version>${zxing.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.owasp.esapi</groupId>
-                <artifactId>esapi</artifactId>
-                <version>${esapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.hateoas</groupId>
-                <artifactId>spring-hateoas</artifactId>
-                <version>${spring-hateoas.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
