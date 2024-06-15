@@ -23,6 +23,7 @@ import static javax.xml.xpath.XPathConstants.STRING;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -114,7 +115,13 @@ public class EnvVersionConfigurer {
 			log.debug("Run {}", mvnCmdLine);
 			Process r;
 			if (System.getProperty("os.name", "").toLowerCase().contains("windows")) {
-				r = Runtime.getRuntime().exec("cmd /c " + mvnCmdLine);
+				final var cmd = Stream.concat(
+						Stream.of("cmd", "/c"),
+						Arrays.asList(mvnCmdLine.split(" ")).stream())
+						.toList()
+						.toArray(new String[] {});
+
+				r = Runtime.getRuntime().exec(cmd);
 			} else {
 				r = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", mvnCmdLine });
 			}

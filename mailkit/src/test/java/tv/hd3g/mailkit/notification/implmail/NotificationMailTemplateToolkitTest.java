@@ -16,6 +16,8 @@
  */
 package tv.hd3g.mailkit.notification.implmail;
 
+import static java.util.TimeZone.getTimeZone;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,7 +33,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -66,6 +70,18 @@ class NotificationMailTemplateToolkitTest {
 	@Mock
 	Translate translate;
 
+	private static final TimeZone previous = TimeZone.getDefault();
+
+	@BeforeAll
+	static void load() {
+		TimeZone.setDefault(getTimeZone("GMT"));
+	}
+
+	@BeforeAll
+	static void free() {
+		TimeZone.setDefault(previous);
+	}
+
 	@BeforeEach
 	void init() throws Exception {
 		openMocks(this).close();
@@ -93,6 +109,8 @@ class NotificationMailTemplateToolkitTest {
 		when(translate.i18n(eq(lang), eq(event), any(), any(), any()))
 				.thenReturn(faker.numerify("translate###"));
 		when(translate.i18n(eq(lang), eq(event.typeName()), any(), any(), any()))
+				.thenReturn(faker.numerify("translate###"));
+		when(translate.i18n(eq(lang), eq(event), any(), any(), any(), any()))
 				.thenReturn(faker.numerify("translate###"));
 	}
 
@@ -131,19 +149,19 @@ class NotificationMailTemplateToolkitTest {
 	@Test
 	void testFormatLongDate() {
 		final var result = t.formatLongDate(new Date(2_000_000_000_000l), Locale.ENGLISH);
-		assertTrue(result.startsWith("Wednesday, May 18, 2033, ") && result.endsWith(":33:20 AM"), result);
+		assertThat(result).isEqualTo("Wednesday, May 18, 2033, 3:33:20 AM");
 	}
 
 	@Test
 	void testFormatShortDate() {
 		final var result = t.formatShortDate(new Date(2_000_000_000_000l), Locale.ENGLISH);
-		assertTrue(result.startsWith("5/18/33, ") && result.endsWith(":33:20 AM"), result);
+		assertThat(result).isEqualTo("5/18/33, 3:33:20 AM");
 	}
 
 	@Test
 	void testFormatShortTime() {
 		final var result = t.formatShortTime(new Date(2_000_000_000_000l), Locale.ENGLISH);
-		assertTrue(result.endsWith(":33:20 AM"), result);
+		assertThat(result).isEqualTo("3:33:20 AM");
 	}
 
 	@Test
