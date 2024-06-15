@@ -1,5 +1,9 @@
 # All ProdLib projects upgrades
 
+## 21.0.0
+
+Switch to Java 21 (LTS) and update to Spring Boot 3.3.0 #168
+
 ## 20.0.0
 
 Big deps update: correct Snyk vulnerabilities, update Spring-boot-starter-parent, update all internal deps in Starter #170

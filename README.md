@@ -4,7 +4,7 @@ Some utilities libs and tools, and parent (pom) projects for small java projects
 
 All these projects are consistent with each other. Some use Spring Boot when necessary.
 
-Please use Maven and Java 17 for build, test and run.
+Please use Maven and Java 21 for build, test and run.
 
 All is tested on Windows 10, Linux and GitHub Actions (Ubuntu). Should be ok on macOS.
 
