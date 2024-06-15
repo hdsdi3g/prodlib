@@ -15,7 +15,7 @@
     <parent>
         <groupId>tv.hd3g</groupId>
         <artifactId>jobkit-starter</artifactId>
-        <version>20.0.0</version>
+        <version>21.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -23,12 +23,12 @@
         <dependency>
             <groupId>tv.hd3g</groupId>
             <artifactId>jobkit</artifactId>
-            <version>20.0.0</version>
+            <version>21.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>tv.hd3g</groupId>
             <artifactId>jobkit-watchfolder</artifactId>
-            <version>20.0.0</version>
+            <version>21.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
