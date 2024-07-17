@@ -1,5 +1,13 @@
 # All ProdLib projects upgrades
 
+## 21.1.0
+
+Create testtools project #173
+
+Set Spring Boot starter parent version from 3.3.0 to 3.3.1
+
+Fix flacky SpoolExecutorTest (aggressive concurent calls)
+
 ## 21.0.0
 
 Switch to Java 21 (LTS) and update to Spring Boot 3.3.0 #168
