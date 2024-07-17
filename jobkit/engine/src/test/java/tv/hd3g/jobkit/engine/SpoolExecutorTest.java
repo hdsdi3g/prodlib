@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -171,6 +170,7 @@ class SpoolExecutorTest {
 	void testAddToQueue_multiple() throws InterruptedException {
 		final var total = 50;
 
+		final var smBefore = new CountDownLatch(total);
 		final var smAfter = new CountDownLatch(total);
 		final var count = new AtomicInteger(0);
 
@@ -179,12 +179,22 @@ class SpoolExecutorTest {
 			assertTrue(spoolExecutor.addToQueue(() -> {
 				count.incrementAndGet();
 				runnedTasks.add(val);
+				smBefore.countDown();
 			}, name, 0, e -> {
 				smAfter.countDown();
 			}));
 		}
-		assertTrue(smAfter.await(10, SECONDS));
+
+		assertTrue(spoolExecutor.isRunning());
+		assertTrue(smBefore.await(20, SECONDS));
+		assertTrue(smAfter.await(20, SECONDS));
 		assertEquals(total, count.get());
+		assertEquals(0, spoolExecutor.getQueueSize());
+		assertEquals(total, runnedTasks.size());
+
+		while (spoolExecutor.isRunning()) {
+			Thread.onSpinWait();
+		}
 
 		checkSupervisableEventOnEnd(total * 3, true);
 
@@ -206,6 +216,11 @@ class SpoolExecutorTest {
 				smAfter.countDown();
 			}));
 			assertTrue(smAfter.await(10, SECONDS));
+
+			assertEquals(0, spoolExecutor.getQueueSize());
+			while (spoolExecutor.isRunning()) {
+				Thread.onSpinWait();
+			}
 		}
 		assertEquals(total, count.get());
 
@@ -232,6 +247,11 @@ class SpoolExecutorTest {
 			smCmd1.countDown();
 		}));
 		assertTrue(smCmd1.await(10, SECONDS));
+
+		assertEquals(0, spoolExecutor.getQueueSize());
+		while (spoolExecutor.isRunning()) {
+			Thread.onSpinWait();
+		}
 
 		verify(sEvent, atLeast(7)).onEnd(any(), any());
 
@@ -359,6 +379,11 @@ class SpoolExecutorTest {
 		spoolExecutor.clean(false);
 
 		assertTrue(smCmd.await(total * 10, SECONDS));
+		assertEquals(0, spoolExecutor.getQueueSize());
+		while (spoolExecutor.isRunning()) {
+			Thread.onSpinWait();
+		}
+
 		checkSupervisableEventOnEnd(total * 4, true);
 
 		verify(jobKitWatchdog, times(total)).addJob(any(WatchableSpoolJob.class));
@@ -393,8 +418,7 @@ class SpoolExecutorTest {
 
 		final var allPjobs = IntStream.range(0, count)
 				.mapToObj(i -> new PJob())
-				.collect(Collectors
-						.toUnmodifiableList());
+				.toList();
 		allPjobs.forEach(j -> spoolExecutor.addToQueue(j.command, j.name, j.priority, j.afterRunCommand));
 
 		latchFeed.countDown();
@@ -408,13 +432,13 @@ class SpoolExecutorTest {
 				.skip(1)
 				.sorted((l, r) -> Long.compare(l.startTime, r.startTime))
 				.map(j -> j.name + "_t" + j.startTime + "_P" + j.priority)
-				.collect(Collectors.toUnmodifiableList());
+				.toList();
 
 		final var prioSort = allPjobs.stream()
 				.skip(1)
 				.sorted((l, r) -> Integer.compare(r.priority, l.priority))
 				.map(j -> j.name + "_t" + j.startTime + "_P" + j.priority)
-				.collect(Collectors.toUnmodifiableList());
+				.toList();
 
 		assertEquals(prioSort, dateSort);
 
@@ -465,6 +489,11 @@ class SpoolExecutorTest {
 			sm.countDown();
 		}));
 		assertTrue(sm.await(10, SECONDS));
+
+		assertEquals(0, spoolExecutor.getQueueSize());
+		while (spoolExecutor.isRunning()) {
+			Thread.onSpinWait();
+		}
 
 		verify(sEvent, atLeast(3)).onEnd(any(), oExceptionCaptor.capture());
 
