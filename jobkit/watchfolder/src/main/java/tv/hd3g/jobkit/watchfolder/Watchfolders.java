@@ -159,6 +159,10 @@ public class Watchfolders {
 				.setPriority(observedFolder.getJobsPriority());
 	}
 
+	public void doManualScan() {
+		// TODO
+	}
+
 	public synchronized void startScans() {
 		observedFoldersServices.forEach((oF, service) -> {
 			if (service.isEnabled()) {
