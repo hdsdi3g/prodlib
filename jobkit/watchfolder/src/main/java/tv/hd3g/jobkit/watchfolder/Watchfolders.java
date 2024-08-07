@@ -176,10 +176,6 @@ public class Watchfolders {
 						}
 					}, this::justLogAfterBadUserRun);
 		});
-
-		// if (oF.getMinFixedStateTime().isPositive() == false) {
-		// }
-
 	}
 
 	public synchronized void stopScans() {
