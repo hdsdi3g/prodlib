@@ -171,8 +171,15 @@ public class Watchfolders {
 					() -> {
 						folderActivity.onStartScan(oF);
 						service.enable();
+						if (service.isHasFirstStarted() == false) {
+							service.runFirstOnStartup();
+						}
 					}, this::justLogAfterBadUserRun);
 		});
+
+		// if (oF.getMinFixedStateTime().isPositive() == false) {
+		// }
+
 	}
 
 	public synchronized void stopScans() {
