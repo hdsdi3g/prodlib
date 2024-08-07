@@ -1,7 +1,6 @@
 package tv.hd3g.jobkit.engine;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.time.Duration;
 import java.util.Date;
@@ -268,9 +267,6 @@ public class BackgroundService {
 			return;
 		}
 		if (nextRunReference != null) {
-			if (nextRunReference.getDelay(SECONDS) < 2) {
-				return;
-			}
 			nextRunReference.cancel(false);
 			nextRunReference = null;
 		}

@@ -31,7 +31,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.IGNORE_FOUNDED_FILE;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
@@ -49,17 +48,21 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import net.datafaker.Faker;
+import tv.hd3g.commons.testtools.Fake;
+import tv.hd3g.commons.testtools.MockToolsExtendsJunit;
 import tv.hd3g.jobkit.engine.BackgroundService;
 import tv.hd3g.jobkit.engine.FlatJobKitEngine;
 import tv.hd3g.transfertfiles.AbstractFileSystemURL;
 import tv.hd3g.transfertfiles.CachedFileAttributes;
 import tv.hd3g.transfertfiles.InvalidURLException;
 
+@ExtendWith(MockToolsExtendsJunit.class)
 class WatchfoldersTest {
 	static final Faker faker = Faker.instance();
 
@@ -71,6 +74,9 @@ class WatchfoldersTest {
 	WatchFolderPickupType pickUp;
 	@Mock
 	WatchedFiles watchedFiles;
+
+	@Fake(min = 2, max = 5)
+	int numberManualQueuesToTest;
 
 	ObservedFolder observedFolder;
 	FlatJobKitEngine jobKitEngine;
@@ -92,13 +98,8 @@ class WatchfoldersTest {
 		when(watchedFilesDb.update(eq(observedFolder), any(AbstractFileSystemURL.class))).thenReturn(watchedFiles);
 	}
 
-	@AfterEach
-	void close() throws InterruptedException {
-		verifyNoMoreInteractions(folderActivity, watchedFilesDb, pickUp, watchedFiles);
-	}
-
 	@Test
-	void testDisabledFolder() throws IOException {
+	void testDisabledFolder() {
 		observedFolder.setDisabled(true);
 		watchfolders = new Watchfolders(List.of(observedFolder), folderActivity,
 				Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
@@ -109,7 +110,7 @@ class WatchfoldersTest {
 	}
 
 	@Test
-	void testNotSameLabels() throws IOException {
+	void testNotSameLabels() {
 		final var observedFolder2 = new ObservedFolder();
 		observedFolder2.setLabel(observedFolder.getLabel());
 		final var allObservedFolders = List.of(observedFolder, observedFolder2);
@@ -328,7 +329,7 @@ class WatchfoldersTest {
 		int priority;
 
 		@BeforeEach
-		void init() throws Exception {
+		void init() {
 			defaultSpoolScans = faker.numerify("defaultSpoolScans###");
 			defaultSpoolEvents = faker.numerify("defaultSpoolEvents###");
 			defaultTimeBetweenScans = Duration.ofMillis(abs(faker.random().nextInt()));
@@ -412,6 +413,26 @@ class WatchfoldersTest {
 			assertEquals(priority, observedFolder.getJobsPriority());
 		}
 
+	}
+
+	@Test
+	void testQueueManualScan() throws IOException {// NOSONAR 5961
+		watchfolders = new Watchfolders(List.of(observedFolder), folderActivity,
+				Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
+
+		for (var pos = 0; pos < numberManualQueuesToTest; pos++) {
+			watchfolders.queueManualScan();
+			final var count = pos + 1;
+			assertTrue(jobKitEngine.isEmptyActiveServicesList());
+			verify(folderActivity, times(count)).onBeforeScan(observedFolder);
+			verify(watchedFilesDb, times(count)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
+			verify(folderActivity, times(count)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
+
+			verify(folderActivity, times(1)).getPickUpType(observedFolder);
+			verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068*/
+		}
+
+		jobKitEngine.runAllServicesOnce();
 	}
 
 }

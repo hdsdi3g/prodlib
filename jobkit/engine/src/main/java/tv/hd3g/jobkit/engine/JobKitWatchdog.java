@@ -88,6 +88,18 @@ public class JobKitWatchdog {
 		}
 	}
 
+	private void executePolicies() {
+		if (shutdown.get()) {
+			log.debug("Don't apply policies: shutdown");
+			return;
+		}
+		if (scheduledExecutor.isShutdown() || scheduledExecutor.isTerminated()) {
+			log.debug("Don't apply policies: closed scheduledExecutor");
+			return;
+		}
+		scheduledExecutor.execute(new Policies());
+	}
+
 	void refreshBackgroundService(final String serviceName,
 								  final String spoolName,
 								  final boolean enabled,
@@ -104,7 +116,7 @@ public class JobKitWatchdog {
 								timedInterval));
 			}
 		}
-		scheduledExecutor.execute(new Policies());
+		executePolicies();
 	}
 
 	private void addWatchableJob(final Set<WatchableSpoolJobState> jobs,
@@ -130,7 +142,7 @@ public class JobKitWatchdog {
 			final var jobs = jobsBySpool.get(job.getSpoolName());
 			addWatchableJob(jobs, job, createdDate, 0);
 		}
-		scheduledExecutor.execute(new Policies());
+		executePolicies();
 	}
 
 	private WatchableSpoolJobState getOldAndRemoveJobInSpool(final WatchableSpoolJob job,
@@ -150,7 +162,7 @@ public class JobKitWatchdog {
 			final var createdJob = getOldAndRemoveJobInSpool(job, jobs);
 			addWatchableJob(jobs, job, createdJob.createdDate(), startedDate);
 		}
-		scheduledExecutor.execute(new Policies());
+		executePolicies();
 	}
 
 	void endJob(final WatchableSpoolJob job) {
@@ -158,7 +170,7 @@ public class JobKitWatchdog {
 			final var jobs = jobsBySpool.get(job.getSpoolName());
 			getOldAndRemoveJobInSpool(job, jobs);
 		}
-		scheduledExecutor.execute(new Policies());
+		executePolicies();
 	}
 
 	private static <T> Map<String, Set<T>> deepCloneFilterEmpty(final Map<String, Set<T>> map) {

@@ -26,6 +26,7 @@ import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.FILES_ONLY;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -33,11 +34,13 @@ import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 import tv.hd3g.jobkit.engine.BackgroundService;
 import tv.hd3g.jobkit.engine.JobKitEngine;
+import tv.hd3g.jobkit.engine.RunnableWithException;
 
 @Slf4j
 public class Watchfolders {
 	static final int DEFAULT_RETRY_AFTER_TIME = 10;
 
+	private final Map<ObservedFolder, WatchedFilesDb> observedFoldersDb;
 	private final Map<ObservedFolder, BackgroundService> observedFoldersServices;
 	private final FolderActivity folderActivity;
 	private final Duration defaultTimeBetweenScans;
@@ -68,12 +71,22 @@ public class Watchfolders {
 					"ObservedFolders setup fail: you must have separate labels name for each entry");
 		}
 
-		observedFoldersServices = Objects.requireNonNull(allObservedFolders).stream()
+		final var observedFolders = Objects.requireNonNull(allObservedFolders)
+				.stream()
 				.filter(not(ObservedFolder::isDisabled))
+				.toList();
+
+		observedFoldersDb = observedFolders.stream()
 				.collect(toUnmodifiableMap(
 						of -> of,
-						oF -> createService(oF, watchedFilesDbBuilder.get())));
-		if (observedFoldersServices.isEmpty()) {
+						oF -> watchedFilesDbBuilder.get()));
+
+		observedFoldersServices = observedFoldersDb.entrySet().stream()
+				.collect(toUnmodifiableMap(
+						Entry::getKey,
+						entry -> initWFAndCreateService(entry.getKey(), entry.getValue())));
+
+		if (observedFoldersDb.isEmpty()) {
 			log.warn("No configured watchfolders");
 		}
 	}
@@ -88,7 +101,54 @@ public class Watchfolders {
 		}
 	}
 
-	BackgroundService createService(final ObservedFolder observedFolder, final WatchedFilesDb db) {
+	private RunnableWithException getServiceTask(final ObservedFolder observedFolder,
+												 final WatchedFilesDb db,
+												 final String name) {
+		return () -> {
+			try (var fs = observedFolder.createFileSystem()) {
+				log.trace("Start Watchfolder scan for {} :: {}", name, fs);
+
+				jobKitEngine.runOneShot(
+						"On \"before scan\" event on watchfolder " + name,
+						observedFolder.getSpoolEvents(),
+						observedFolder.getJobsPriority(),
+						() -> folderActivity.onBeforeScan(observedFolder), this::justLogAfterBadUserRun);
+
+				final var startTime = System.currentTimeMillis();
+				final var scanResult = db.update(observedFolder, fs);
+				final var scanTime = Duration.of(System.currentTimeMillis() - startTime, MILLIS);
+
+				jobKitEngine.runOneShot(
+						"On \"after scan\" event on watchfolder " + name,
+						observedFolder.getSpoolEvents(),
+						observedFolder.getJobsPriority(),
+						() -> folderActivity.onAfterScan(observedFolder, scanTime, scanResult),
+						e -> {
+							if (e == null) {
+								return;
+							}
+							final var policy = folderActivity.retryScanPolicyOnUserError(
+									observedFolder, scanResult, e);
+							final var founded = scanResult.founded();
+							if (founded.isEmpty() == false) {
+								log.error("Can't process user event of onAfterScan ({} founded), policy is {}",
+										founded.size(), policy, e);
+								if (policy == RETRY_FOUNDED_FILE) {
+									db.reset(observedFolder, founded);
+								}
+							} else {
+								log.error("Can't process user event of onAfterScan", e);
+							}
+						});
+				log.trace("Ends Watchfolder scan for {} :: {}", name, fs);
+			} catch (final Exception e) {
+				folderActivity.onScanErrorFolder(observedFolder, e);
+				throw e;
+			}
+		};
+	}
+
+	BackgroundService initWFAndCreateService(final ObservedFolder observedFolder, final WatchedFilesDb db) {
 		final var name = observedFolder.getLabel();
 
 		if (observedFolder.getSpoolEvents() == null
@@ -113,50 +173,26 @@ public class Watchfolders {
 		return jobKitEngine.createService(
 				"Watchfolder for " + name,
 				observedFolder.getSpoolScans(),
-				() -> {
-					try (var fs = observedFolder.createFileSystem()) {
-						log.trace("Start Watchfolder scan for {} :: {}", name, fs);
-						jobKitEngine.runOneShot(
-								"Watchfolder start dir scan for " + name,
-								observedFolder.getSpoolEvents(),
-								observedFolder.getJobsPriority(),
-								() -> folderActivity.onBeforeScan(observedFolder), this::justLogAfterBadUserRun);
-						final var startTime = System.currentTimeMillis();
-						final var scanResult = db.update(observedFolder, fs);
-						final var scanTime = Duration.of(System.currentTimeMillis() - startTime, MILLIS);
-
-						jobKitEngine.runOneShot(
-								"On event on watchfolder scan for " + name,
-								observedFolder.getSpoolEvents(),
-								observedFolder.getJobsPriority(),
-								() -> folderActivity.onAfterScan(observedFolder, scanTime, scanResult),
-								e -> {
-									if (e == null) {
-										return;
-									}
-									final var policy = folderActivity.retryScanPolicyOnUserError(
-											observedFolder, scanResult, e);
-									final var founded = scanResult.founded();
-									if (founded.isEmpty() == false) {
-										log.error("Can't process user event of onAfterScan ({} founded), policy is {}",
-												founded.size(), policy, e);
-										if (policy == RETRY_FOUNDED_FILE) {
-											db.reset(observedFolder, founded);
-										}
-									} else {
-										log.error("Can't process user event of onAfterScan", e);
-									}
-								});
-						log.trace("Ends Watchfolder scan for {} :: {}", name, fs);
-					} catch (final Exception e) {
-						folderActivity.onScanErrorFolder(observedFolder, e);
-						throw e;
-					}
-				},
+				getServiceTask(observedFolder, db, name),
 				() -> folderActivity.onStopScan(observedFolder))
 				.setTimedInterval(observedFolder.getTimeBetweenScans())
 				.setRetryAfterTimeFactor(observedFolder.getRetryAfterTimeFactor())
 				.setPriority(observedFolder.getJobsPriority());
+	}
+
+	public void queueManualScan() {
+		observedFoldersDb.forEach((observedFolder, db) -> {
+			final var name = observedFolder.getLabel();
+			final var task = getServiceTask(observedFolder, db, name);
+
+			jobKitEngine.runOneShot(
+					"Start watchfolder manual scan for " + name,
+					observedFolder.getSpoolScans(),
+					observedFolder.getJobsPriority(),
+					task,
+					e -> {
+					});
+		});
 	}
 
 	public synchronized void startScans() {
@@ -171,6 +207,9 @@ public class Watchfolders {
 					() -> {
 						folderActivity.onStartScan(oF);
 						service.enable();
+						if (service.isHasFirstStarted() == false) {
+							service.runFirstOnStartup();
+						}
 					}, this::justLogAfterBadUserRun);
 		});
 	}

@@ -31,6 +31,9 @@ public interface FolderActivity {
 					 final Duration scanTime,
 					 final WatchedFiles scanResult) throws IOException;
 
+	/**
+	 * On start regular scans (as service)
+	 */
 	default void onStartScan(final ObservedFolder observedFolder) throws IOException {
 		getSupervisable()
 				.setContext(OBSERVEDFOLDER, observedFolder)
@@ -38,6 +41,9 @@ public interface FolderActivity {
 				.resultDone("startscan", "Start scans");
 	}
 
+	/**
+	 * On stop regular scans (as service)
+	 */
 	default void onStopScan(final ObservedFolder observedFolder) throws IOException {
 		getSupervisable()
 				.setContext(OBSERVEDFOLDER, observedFolder)

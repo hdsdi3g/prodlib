@@ -142,6 +142,8 @@ class JobKitWatchdogTest {
 		verify(scheduledFuture, atLeast(0)).isDone();
 		verify(scheduledFuture, atLeast(0)).isCancelled();
 		verify(scheduledFuture, atLeast(0)).getDelay(MILLISECONDS);
+		verify(sch, atLeast(0)).isShutdown();
+		verify(sch, atLeast(0)).isTerminated();
 
 		verifyNoMoreInteractions(sch, scheduledFuture, supervisableEvents, policy, spoolExecutor, creator);
 	}
@@ -269,7 +271,6 @@ class JobKitWatchdogTest {
 			verify(sch, times(1)).execute(run.capture());
 			run.getAllValues().forEach(Runnable::run);
 
-
 			w.addJob(waitJob);
 			verify(sch, times(2)).execute(run.capture());
 			run.getAllValues().forEach(Runnable::run);
@@ -286,7 +287,8 @@ class JobKitWatchdogTest {
 			verify(sch, times(4)).execute(run.capture());
 			run.getAllValues().forEach(Runnable::run);
 
-			verify(policy, times(6)).isStatusOk(eq(spoolName), any(WatchableSpoolJobState.class), argThat(s -> s.size() == 1));
+			verify(policy, times(6)).isStatusOk(eq(spoolName), any(WatchableSpoolJobState.class), argThat(s -> s
+					.size() == 1));
 			verify(sch, times(6)).schedule(any(Runnable.class), eq(durationToQueue), eq(MILLISECONDS));
 		}
 
@@ -311,7 +313,8 @@ class JobKitWatchdogTest {
 			verify(sch, times(4)).execute(run.capture());
 			run.getAllValues().forEach(Runnable::run);
 
-			verify(policy, times(6)).isStatusOk(eq(spoolName), any(WatchableSpoolJobState.class), argThat(s -> s.size() == 1));
+			verify(policy, times(6)).isStatusOk(eq(spoolName), any(WatchableSpoolJobState.class), argThat(s -> s
+					.size() == 1));
 			verify(sch, times(1)).schedule(any(Runnable.class), eq(durationToQueue), eq(MILLISECONDS));
 		}
 
@@ -375,8 +378,7 @@ class JobKitWatchdogTest {
 		w.startJob(job, startedDate);
 		w.endJob(job);
 
-		verify(sch, times(5)).execute(run.capture());
-		run.getAllValues().forEach(Runnable::run);
+		verify(sch, times(0)).execute(any());
 
 		w.shutdown();
 	}

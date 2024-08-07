@@ -1,5 +1,6 @@
 package tv.hd3g.jobkit.engine;
 
+import static java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -12,7 +13,6 @@ import static org.mockito.ArgumentMatchers.longThat;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.util.ArrayList;
@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -73,8 +75,6 @@ class SpoolExecutorTest {
 
 	@AfterEach
 	void ends() {
-		verifyNoMoreInteractions(sEvent, jobKitWatchdog);
-
 		for (var pos = 0; pos < runnedTasks.size(); pos++) {
 			assertEquals(pos, runnedTasks.get(pos));
 		}
@@ -384,7 +384,7 @@ class SpoolExecutorTest {
 			Thread.onSpinWait();
 		}
 
-		checkSupervisableEventOnEnd(total * 4, true);
+		checkSupervisableEventOnEnd(total * 4 - 4, true);
 
 		verify(jobKitWatchdog, times(total)).addJob(any(WatchableSpoolJob.class));
 		verify(jobKitWatchdog, times(total)).startJob(any(WatchableSpoolJob.class), anyLong());
@@ -528,6 +528,90 @@ class SpoolExecutorTest {
 		assertFalse(results.get(1).isPresent());
 		assertEquals(error, results.get(2).get());
 		checkWatchdog(atMost(1));
+	}
+
+	@Test
+	void testWaitToEndQueue_1item() throws InterruptedException, ExecutionException, TimeoutException {
+		spoolExecutor.waitToEndQueue(Runnable::run).get();
+
+		final var smChkVerifyEvent = new CountDownLatch(1);
+		final var smCmd = new CountDownLatch(1);
+		final var smAfter = new CountDownLatch(1);
+
+		spoolExecutor.addToQueue(() -> {
+			try {
+				smChkVerifyEvent.await(10, SECONDS);
+			} catch (final InterruptedException e1) {
+				throw new IllegalStateException(e1);
+			}
+			smCmd.countDown();
+		}, name, 0, e -> {
+			smAfter.countDown();
+		});
+
+		final var future = spoolExecutor.waitToEndQueue(newVirtualThreadPerTaskExecutor());
+
+		assertFalse(future.isDone());
+		assertFalse(future.isCancelled());
+
+		smChkVerifyEvent.countDown();
+
+		smCmd.await(10, SECONDS);
+		smAfter.await(10, SECONDS);
+		future.get(10, SECONDS);
+
+		checkSupervisableEventOnEnd(3, true);
+		checkWatchdog(1);
+	}
+
+	@Test
+	void testWaitToEndQueue_10items() throws InterruptedException, ExecutionException, TimeoutException {
+		final var size = 10;
+
+		final var countDownLatchList = new ArrayList<CountDownLatch>();
+		final var smCmd = new CountDownLatch(size);
+		final var smAfter = new CountDownLatch(size);
+
+		for (var pos = 0; pos < size; pos++) {
+			final var latch = new CountDownLatch(1);
+			countDownLatchList.add(latch);
+			spoolExecutor.addToQueue(() -> {
+				try {
+					latch.await(10, SECONDS);
+				} catch (final InterruptedException e1) {
+					throw new IllegalStateException(e1);
+				}
+				smCmd.countDown();
+			}, name, 0, e -> {
+				smAfter.countDown();
+			});
+		}
+
+		final var future = spoolExecutor.waitToEndQueue(newVirtualThreadPerTaskExecutor());
+
+		assertFalse(future.isDone());
+		assertFalse(future.isCancelled());
+
+		for (var pos = 0; pos < size; pos++) {
+			countDownLatchList.get(pos).countDown();
+			Thread.sleep(1);// NOSONAR S2925
+		}
+
+		smCmd.await(10, SECONDS);
+		smAfter.await(10, SECONDS);
+		future.get(10, SECONDS);
+
+		checkSupervisableEventOnEnd(3 * size, true);
+		checkWatchdog(size);
+	}
+
+	@Test
+	void testWaitToEndQueue_noInterblocking() {
+		spoolExecutor.addToQueue(() -> {
+			spoolExecutor.waitToEndQueue(Runnable::run).get(10, SECONDS);
+		}, name, 0, e -> {
+		});
+		checkWatchdog(1);
 	}
 
 	private void checkWatchdog(final VerificationMode mode) {

@@ -4,6 +4,9 @@ import static java.util.function.Predicate.not;
 
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -15,7 +18,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-class SpoolExecutor {
+public class SpoolExecutor {
 
 	@Getter
 	private final String name;
@@ -73,6 +76,20 @@ class SpoolExecutor {
 
 	boolean isRunning() {
 		return currentOperation.computePredicate(Thread::isAlive);
+	}
+
+	/**
+	 * @param executor never put him in this queue's jobs!
+	 * @return blocker
+	 *         Infinit blocking if some jobs create new jobs in the same queue...
+	 */
+	public Future<Void> waitToEndQueue(final Executor executor) {
+		return CompletableFuture.runAsync(() -> {
+			while (queue.isEmpty() == false
+				   || currentOperation.isSet()) {
+				Thread.onSpinWait();
+			}
+		}, executor);
 	}
 
 	private void runNext() {
