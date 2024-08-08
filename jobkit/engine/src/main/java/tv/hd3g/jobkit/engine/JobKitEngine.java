@@ -160,7 +160,7 @@ public class JobKitEngine implements JobTrait {
 		public ShutdownHook() {
 			setName("JobKit ShutdownHook");
 			setPriority(Thread.MAX_PRIORITY);
-			setDaemon(true);
+			setDaemon(false);
 		}
 
 		@Override

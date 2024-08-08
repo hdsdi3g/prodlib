@@ -14,6 +14,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -416,7 +417,7 @@ class BackgroundServiceTest {
 
 	@Test
 	void testRunFirstOnStartup_enabled_short_time() {
-		final var timedInterval = 20L;
+		timedInterval = 20L;
 		when(nextRunReference.getDelay(SECONDS)).thenReturn(0L);
 
 		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
@@ -430,7 +431,9 @@ class BackgroundServiceTest {
 		backgroundService.runFirstOnStartup();
 		assertFalse(backgroundService.isHasFirstStarted());
 
-		Mockito.verifyNoMoreInteractions(scheduledExecutor);
+		verify(scheduledExecutor, times(1)).schedule(any(Runnable.class), eq(1l), eq(MILLISECONDS));
+
+		verifyNoMoreInteractions(scheduledExecutor);
 	}
 
 }
