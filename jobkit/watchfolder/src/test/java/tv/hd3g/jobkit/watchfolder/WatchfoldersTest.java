@@ -49,17 +49,20 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import net.datafaker.Faker;
+import tv.hd3g.commons.testtools.MockToolsExtendsJunit;
 import tv.hd3g.jobkit.engine.BackgroundService;
 import tv.hd3g.jobkit.engine.FlatJobKitEngine;
 import tv.hd3g.transfertfiles.AbstractFileSystemURL;
 import tv.hd3g.transfertfiles.CachedFileAttributes;
 import tv.hd3g.transfertfiles.InvalidURLException;
 
+@ExtendWith(MockToolsExtendsJunit.class)
 class WatchfoldersTest {
 	static final Faker faker = Faker.instance();
 
@@ -93,12 +96,12 @@ class WatchfoldersTest {
 	}
 
 	@AfterEach
-	void close() throws InterruptedException {
+	void close() {
 		verifyNoMoreInteractions(folderActivity, watchedFilesDb, pickUp, watchedFiles);
 	}
 
 	@Test
-	void testDisabledFolder() throws IOException {
+	void testDisabledFolder() {
 		observedFolder.setDisabled(true);
 		watchfolders = new Watchfolders(List.of(observedFolder), folderActivity,
 				Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
@@ -109,7 +112,7 @@ class WatchfoldersTest {
 	}
 
 	@Test
-	void testNotSameLabels() throws IOException {
+	void testNotSameLabels() {
 		final var observedFolder2 = new ObservedFolder();
 		observedFolder2.setLabel(observedFolder.getLabel());
 		final var allObservedFolders = List.of(observedFolder, observedFolder2);
@@ -328,7 +331,7 @@ class WatchfoldersTest {
 		int priority;
 
 		@BeforeEach
-		void init() throws Exception {
+		void init() {
 			defaultSpoolScans = faker.numerify("defaultSpoolScans###");
 			defaultSpoolEvents = faker.numerify("defaultSpoolEvents###");
 			defaultTimeBetweenScans = Duration.ofMillis(abs(faker.random().nextInt()));
@@ -412,6 +415,67 @@ class WatchfoldersTest {
 			assertEquals(priority, observedFolder.getJobsPriority());
 		}
 
+	}
+
+	@Test
+	void testQueueManualScan() throws IOException {// NOSONAR 5961
+		watchfolders = new Watchfolders(List.of(observedFolder), folderActivity,
+				Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
+
+		watchfolders.queueManualScan();
+
+		assertTrue(jobKitEngine.isEmptyActiveServicesList());
+		verify(folderActivity, times(1)).onBeforeScan(observedFolder);
+		verify(watchedFilesDb, times(1)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
+		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
+
+		verify(folderActivity, times(1)).getPickUpType(observedFolder);
+		verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068*/
+
+		watchfolders.queueManualScan();
+
+		assertTrue(jobKitEngine.isEmptyActiveServicesList());
+		verify(folderActivity, times(1)).onBeforeScan(observedFolder);
+		verify(watchedFilesDb, times(1)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
+		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
+
+		verify(folderActivity, times(1)).getPickUpType(observedFolder);
+		verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068*/
+
+		/*watchfolders.stopScans();
+
+
+		assertTrue(jobKitEngine.isEmptyActiveServicesList());
+		verify(folderActivity, times(1)).onStartScan(observedFolder);
+		verify(folderActivity, times(1)).onBeforeScan(observedFolder);
+		verify(watchedFilesDb, times(1)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
+		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
+		verify(folderActivity, times(1)).onStopScan(observedFolder);
+
+		watchfolders.startScans();
+		watchfolders.startScans();
+		jobKitEngine.runAllServicesOnce();
+
+		assertFalse(jobKitEngine.isEmptyActiveServicesList());
+		verify(folderActivity, times(2)).onStartScan(observedFolder);
+		verify(folderActivity, times(2)).onBeforeScan(observedFolder);
+		verify(watchedFilesDb, times(2)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
+		verify(folderActivity, times(2)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
+		verify(folderActivity, times(1)).onStopScan(observedFolder);
+
+		watchfolders.stopScans();
+		watchfolders.stopScans();
+		jobKitEngine.runAllServicesOnce();
+
+		assertTrue(jobKitEngine.isEmptyActiveServicesList());
+		verify(folderActivity, times(2)).onStartScan(observedFolder);
+		verify(folderActivity, times(2)).onBeforeScan(observedFolder);
+		verify(watchedFilesDb, times(2)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
+		verify(folderActivity, times(2)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
+		verify(folderActivity, times(3)).onStopScan(observedFolder);
+		*/
+
+		jobKitEngine.runAllServicesOnce();
 	}
 
 }
