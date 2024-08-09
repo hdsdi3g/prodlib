@@ -180,7 +180,7 @@ public class Watchfolders {
 				.setPriority(observedFolder.getJobsPriority());
 	}
 
-	public void queueManualScan() { // TODO test
+	public void queueManualScan() {
 		observedFoldersDb.forEach((observedFolder, db) -> {
 			final var name = observedFolder.getLabel();
 			final var task = getServiceTask(observedFolder, db, name);

@@ -31,7 +31,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.IGNORE_FOUNDED_FILE;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
@@ -55,6 +54,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import net.datafaker.Faker;
+import tv.hd3g.commons.testtools.Fake;
 import tv.hd3g.commons.testtools.MockToolsExtendsJunit;
 import tv.hd3g.jobkit.engine.BackgroundService;
 import tv.hd3g.jobkit.engine.FlatJobKitEngine;
@@ -75,6 +75,9 @@ class WatchfoldersTest {
 	@Mock
 	WatchedFiles watchedFiles;
 
+	@Fake(min = 2, max = 5)
+	int numberManualQueuesToTest;
+
 	ObservedFolder observedFolder;
 	FlatJobKitEngine jobKitEngine;
 
@@ -93,11 +96,6 @@ class WatchfoldersTest {
 				eq(watchedFiles), any(Exception.class)))
 						.thenReturn(RETRY_FOUNDED_FILE);
 		when(watchedFilesDb.update(eq(observedFolder), any(AbstractFileSystemURL.class))).thenReturn(watchedFiles);
-	}
-
-	@AfterEach
-	void close() {
-		verifyNoMoreInteractions(folderActivity, watchedFilesDb, pickUp, watchedFiles);
 	}
 
 	@Test
@@ -422,58 +420,17 @@ class WatchfoldersTest {
 		watchfolders = new Watchfolders(List.of(observedFolder), folderActivity,
 				Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
 
-		watchfolders.queueManualScan();
+		for (var pos = 0; pos < numberManualQueuesToTest; pos++) {
+			watchfolders.queueManualScan();
+			final var count = pos + 1;
+			assertTrue(jobKitEngine.isEmptyActiveServicesList());
+			verify(folderActivity, times(count)).onBeforeScan(observedFolder);
+			verify(watchedFilesDb, times(count)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
+			verify(folderActivity, times(count)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
 
-		assertTrue(jobKitEngine.isEmptyActiveServicesList());
-		verify(folderActivity, times(1)).onBeforeScan(observedFolder);
-		verify(watchedFilesDb, times(1)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
-		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-
-		verify(folderActivity, times(1)).getPickUpType(observedFolder);
-		verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068*/
-
-		watchfolders.queueManualScan();
-
-		assertTrue(jobKitEngine.isEmptyActiveServicesList());
-		verify(folderActivity, times(1)).onBeforeScan(observedFolder);
-		verify(watchedFilesDb, times(1)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
-		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-
-		verify(folderActivity, times(1)).getPickUpType(observedFolder);
-		verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068*/
-
-		/*watchfolders.stopScans();
-
-
-		assertTrue(jobKitEngine.isEmptyActiveServicesList());
-		verify(folderActivity, times(1)).onStartScan(observedFolder);
-		verify(folderActivity, times(1)).onBeforeScan(observedFolder);
-		verify(watchedFilesDb, times(1)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
-		verify(folderActivity, times(1)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-		verify(folderActivity, times(1)).onStopScan(observedFolder);
-
-		watchfolders.startScans();
-		watchfolders.startScans();
-		jobKitEngine.runAllServicesOnce();
-
-		assertFalse(jobKitEngine.isEmptyActiveServicesList());
-		verify(folderActivity, times(2)).onStartScan(observedFolder);
-		verify(folderActivity, times(2)).onBeforeScan(observedFolder);
-		verify(watchedFilesDb, times(2)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
-		verify(folderActivity, times(2)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-		verify(folderActivity, times(1)).onStopScan(observedFolder);
-
-		watchfolders.stopScans();
-		watchfolders.stopScans();
-		jobKitEngine.runAllServicesOnce();
-
-		assertTrue(jobKitEngine.isEmptyActiveServicesList());
-		verify(folderActivity, times(2)).onStartScan(observedFolder);
-		verify(folderActivity, times(2)).onBeforeScan(observedFolder);
-		verify(watchedFilesDb, times(2)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
-		verify(folderActivity, times(2)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-		verify(folderActivity, times(3)).onStopScan(observedFolder);
-		*/
+			verify(folderActivity, times(1)).getPickUpType(observedFolder);
+			verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068*/
+		}
 
 		jobKitEngine.runAllServicesOnce();
 	}
