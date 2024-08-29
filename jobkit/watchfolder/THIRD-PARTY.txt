@@ -1,5 +1,5 @@
 
-Lists of 51 third-party dependencies.
+Lists of 52 third-party dependencies.
      (Eclipse Public License - v 1.0) (GNU Lesser General Public License) Logback Classic Module (ch.qos.logback:logback-classic:1.5.6 - http://logback.qos.ch/logback-classic)
      (Eclipse Public License - v 1.0) (GNU Lesser General Public License) Logback Core Module (ch.qos.logback:logback-core:1.5.6 - http://logback.qos.ch/logback-core)
      (The Apache Software License, Version 2.0) Jackson-annotations (com.fasterxml.jackson.core:jackson-annotations:2.17.1 - https://github.com/FasterXML/jackson)
@@ -47,7 +47,8 @@ Lists of 51 third-party dependencies.
      (The MIT License) Project Lombok (org.projectlombok:lombok:1.18.32 - https://projectlombok.org)
      (MIT License) SLF4J API Module (org.slf4j:slf4j-api:2.0.13 - http://www.slf4j.org)
      (Public Domain) XZ for Java (org.tukaani:xz:1.9 - https://tukaani.org/xz/java.html)
-     (GNU Lesser General Public License, Version 3) JobKit Engine (tv.hd3g:jobkit-engine:21.1.0 - https://github.com/hdsdi3g/prodlib)
-     (GNU Lesser General Public License, Version 3) TransfertFiles (tv.hd3g:transfertfiles:21.1.0 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) JobKit Engine (tv.hd3g:jobkit-engine:21.2.0 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) TransfertFiles (tv.hd3g:transfertfiles:21.2.0 - https://github.com/hdsdi3g/prodlib)
      (GNU Lesser General Public License, Version 3) CodePolicyValidation (tv.hd3g.commons:codepolicyvalidation:3.1.1 - https://github.com/hdsdi3g/codepolicyvalidation)
-     (GNU Lesser General Public License, Version 3) Commons Interfaces (tv.hd3g.commons:interfaces:21.1.0 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) Commons Interfaces (tv.hd3g.commons:interfaces:21.2.0 - https://github.com/hdsdi3g/prodlib)
+     (GNU Lesser General Public License, Version 3) Commons Test tools (tv.hd3g.commons:testtools:21.2.0 - https://github.com/hdsdi3g/prodlib)

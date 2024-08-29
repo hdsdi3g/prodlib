@@ -1,5 +1,13 @@
 # All ProdLib projects upgrades
 
+## 21.2.0
+
+Watchfolders start scans just after startScans call #175
+
+JobKit code clean.
+
+Add a manual lock to wait when a Spool is empty.
+
 ## 21.1.0
 
 Create testtools project #173
