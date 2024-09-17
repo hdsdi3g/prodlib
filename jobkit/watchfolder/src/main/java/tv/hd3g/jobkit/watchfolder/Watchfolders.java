@@ -23,6 +23,8 @@ import static java.util.stream.Collectors.toUnmodifiableMap;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
 import static tv.hd3g.jobkit.watchfolder.WatchFolderPickupType.FILES_ONLY;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
@@ -180,19 +182,32 @@ public class Watchfolders {
 				.setPriority(observedFolder.getJobsPriority());
 	}
 
-	public void queueManualScan() {
-		observedFoldersDb.forEach((observedFolder, db) -> {
-			final var name = observedFolder.getLabel();
-			final var task = getServiceTask(observedFolder, db, name);
+	public Map<ObservedFolder, WatchedFiles> manualScan() {
+		record InternalResult(ObservedFolder of, WatchedFiles wf) {
+		}
 
-			jobKitEngine.runOneShot(
-					"Start watchfolder manual scan for " + name,
-					observedFolder.getSpoolScans(),
-					observedFolder.getJobsPriority(),
-					task,
-					e -> {
-					});
-		});
+		return observedFoldersDb.entrySet().stream()
+				.map(entry -> {
+					final var observedFolder = entry.getKey();
+					final var db = entry.getValue();
+
+					final var name = observedFolder.getLabel();
+
+					try (var fs = observedFolder.createFileSystem()) {
+						log.trace("Start manual Watchfolder scan for {} :: {}", name, fs);
+
+						final var startTime = System.currentTimeMillis();
+						final var scanResult = db.update(observedFolder, fs);
+						final var scanTime = Duration.of(System.currentTimeMillis() - startTime, MILLIS);
+
+						log.trace("Ends manual Watchfolder scan for {} :: {} during {}", name, fs, scanTime);
+
+						return new InternalResult(observedFolder, scanResult);
+					} catch (final IOException e) {
+						throw new UncheckedIOException(e);
+					}
+				})
+				.collect(toUnmodifiableMap(InternalResult::of, InternalResult::wf));
 	}
 
 	public synchronized void startScans() {

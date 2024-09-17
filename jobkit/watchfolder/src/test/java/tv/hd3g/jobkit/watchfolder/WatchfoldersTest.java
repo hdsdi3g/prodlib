@@ -25,12 +25,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMostOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.IGNORE_FOUNDED_FILE;
 import static tv.hd3g.jobkit.watchfolder.RetryScanPolicyOnUserError.RETRY_FOUNDED_FILE;
@@ -421,18 +423,17 @@ class WatchfoldersTest {
 				Duration.ofMillis(1), jobKitEngine, "default", "default", () -> watchedFilesDb);
 
 		for (var pos = 0; pos < numberManualQueuesToTest; pos++) {
-			watchfolders.queueManualScan();
+			assertNotNull(watchfolders.manualScan());
 			final var count = pos + 1;
 			assertTrue(jobKitEngine.isEmptyActiveServicesList());
-			verify(folderActivity, times(count)).onBeforeScan(observedFolder);
 			verify(watchedFilesDb, times(count)).update(eq(observedFolder), any(AbstractFileSystemURL.class));
-			verify(folderActivity, times(count)).onAfterScan(eq(observedFolder), any(Duration.class), eq(watchedFiles));
-
-			verify(folderActivity, times(1)).getPickUpType(observedFolder);
 			verify(watchedFilesDb, times(1)).setup(eq(observedFolder), eq(pickUp));// NOSONAR S6068*/
 		}
 
 		jobKitEngine.runAllServicesOnce();
+
+		verify(folderActivity, atLeast(1)).getPickUpType(observedFolder);
+		verifyNoMoreInteractions(folderActivity);
 	}
 
 }
