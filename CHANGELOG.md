@@ -1,5 +1,11 @@
 # All ProdLib projects upgrades
 
+## 22.0.0
+
+Watchfolder queueManualScan should not use JobKit #177 (relative from #175).
+
+Update Spring Boot version from 3.3.1 to 3.3.4
+
 ## 21.2.0
 
 Watchfolders start scans just after startScans call #175
