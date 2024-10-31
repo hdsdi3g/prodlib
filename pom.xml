@@ -31,6 +31,7 @@
         <module>mailkit</module>
         <module>jobkit</module>
         <module>transfertfiles</module>
+        <module>datablock</module>
     </modules>
 
     <properties>
