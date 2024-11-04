@@ -1,0 +1,183 @@
+/*
+ * This file is part of datablock.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * Copyright (C) hdsdi3g for hd3g.tv 2024
+ *
+ */
+package tv.hd3g.datablock;
+
+import static org.apache.commons.codec.binary.Hex.encodeHexString;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.Date;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+@Getter
+@EqualsAndHashCode
+public class DatablockChunkHeader implements IOTraits {// TODO test + debug tools
+
+	public static final int FOURCC_EXPECTED_SIZE = 4;
+	public static final int BLANK_EXPECTED_SIZE = 8;
+	public static final int HEADER_LEN = FOURCC_EXPECTED_SIZE
+										 + 2 /** version */
+										 + 4 /** size */
+										 + 8 /** createdDate */
+										 + 1 /** deleted/archived */
+										 + 1 /** compressed */
+										 + 4 /** crc */
+										 + BLANK_EXPECTED_SIZE;
+
+	public static final byte BYTE_TAG_DELETED = 0x01;
+	public static final byte BYTE_TAG_ARCHIVED = 0x02;
+
+	private final byte[] fourCC;
+	private final short version;
+	private final int size;
+	private final long createdDate;
+	private final boolean archived;
+	private final boolean deleted;
+	private final boolean compressed;
+	private final int crc;
+
+	/**
+	 * @param fourCC 4 bytes to identify and route to process the chunk
+	 * @param version chunk type version
+	 * @param size data payload size
+	 * @param compressed is payload is compressed
+	 * @param crc payload crc result
+	 * @param archived marked as archived
+	 */
+	public DatablockChunkHeader(final byte[] fourCC,
+								final short version,
+								final int size,
+								final boolean compressed,
+								final boolean archived,
+								final int crc) {
+		if (fourCC.length != FOURCC_EXPECTED_SIZE) {
+			throw new IllegalArgumentException("fourCC len must equals "
+											   + FOURCC_EXPECTED_SIZE + " bytes");
+		}
+		this.fourCC = fourCC;
+		this.version = version;
+		this.size = size;
+		createdDate = System.currentTimeMillis();
+		deleted = false;
+		this.compressed = compressed;
+		this.archived = archived;
+		this.crc = crc;
+	}
+
+	public DatablockChunkHeader(final ByteBuffer readFrom) {
+		checkRemaining(readFrom, HEADER_LEN);
+		fourCC = new byte[FOURCC_EXPECTED_SIZE];
+		readFrom.get(fourCC);
+
+		version = readFrom.getShort();
+		size = readFrom.getInt();
+		createdDate = readFrom.getLong();
+
+		final var flag = readFrom.get();
+		deleted = (flag & BYTE_TAG_DELETED) == BYTE_TAG_DELETED;
+		archived = (flag & BYTE_TAG_ARCHIVED) == BYTE_TAG_ARCHIVED;
+
+		compressed = readFrom.get() != ZERO_BYTE;
+		crc = readFrom.getInt();
+		checkEndBlank(readFrom, BLANK_EXPECTED_SIZE);
+	}
+
+	public ByteBuffer toByteBuffer() {
+		final var header = ByteBuffer.allocate(HEADER_LEN);
+		header.put(fourCC);
+		header.putShort(version);
+		header.putInt(size);
+		header.putLong(createdDate);
+
+		final var flag = getFlag(deleted, archived);
+		header.put(flag);
+		header.put(compressed ? 0x1 : ZERO_BYTE);
+		header.putInt(crc);
+		header.put(new byte[BLANK_EXPECTED_SIZE]);
+		header.flip();
+		return header.asReadOnlyBuffer();
+	}
+
+	private static byte getFlag(final boolean deleted, final boolean archived) {
+		return (byte) ((deleted ? BYTE_TAG_DELETED : ZERO_BYTE)
+					   + (archived ? BYTE_TAG_ARCHIVED : ZERO_BYTE));
+	}
+
+	/**
+	 * At the end, the file position will be put on the header end, at the first payload byte.
+	 * @param channel pos must be setup on the first chunk header byte
+	 * @return payload size extracted from header
+	 */
+	public static int updateHeader(final FileChannel channel,
+								   final boolean setArchived,
+								   final boolean setDeleted) throws IOException {
+
+		/** size */
+		final var buffer = ByteBuffer.allocate(4);
+		IOTraits.checkIOSize(channel.read(
+				buffer,
+				channel.position()
+						+ FOURCC_EXPECTED_SIZE
+						+ 2 /** version */
+		), 4);
+		final var size = buffer.flip().getInt();
+
+		buffer.clear();
+		buffer.put(getFlag(setDeleted, setArchived));
+		buffer.flip();
+
+		IOTraits.checkIOSize(channel.write(
+				buffer,
+				channel.position()
+						+ 8 /** createdDate */
+		), 1);
+
+		channel.position(channel.position()
+						 + 1 /** compressed */
+						 + 4 /** crc */
+						 + BLANK_EXPECTED_SIZE);
+
+		return size;
+	}
+
+	@Override
+	public String toString() {
+		final var builder = new StringBuilder();
+		builder.append("DatablockChunkHeader [fourCC=");
+		builder.append(encodeHexString(fourCC));
+		builder.append(", version=");
+		builder.append(version);
+		builder.append(", size=");
+		builder.append(size);
+		builder.append(", createdDate=");
+		builder.append(new Date(createdDate));
+		builder.append(", archived=");
+		builder.append(archived);
+		builder.append(", deleted=");
+		builder.append(deleted);
+		builder.append(", compressed=");
+		builder.append(compressed);
+		builder.append(", crc=");
+		builder.append(crc);
+		builder.append("]");
+		return builder.toString();
+	}
+
+}
