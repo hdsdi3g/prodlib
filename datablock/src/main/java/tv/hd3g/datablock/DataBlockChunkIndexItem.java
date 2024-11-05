@@ -19,24 +19,33 @@ package tv.hd3g.datablock;
 import java.io.IOException;
 import java.util.function.Function;
 
-public record DataBlockChunkIndexItem(DatablockChunkHeader header, long payloadPosition) {// TODO test
+import tv.hd3g.datablock.DatablockDocument.ChunkReader;
+
+public record DataBlockChunkIndexItem(DatablockChunkHeader header, long payloadPosition) {
 
 	public <T> T extractPayload(final Function<DatablockChunkPayloadExtractor, T> extractor,
 								final DatablockDocument document) {
-		final var reader = document.new ChunkReader(payloadPosition, header.getPayloadSize());
+		final var reader = createChunkReader(document);
+		T result;
 		try {
-			return extractor.apply(reader);
+			result = extractor.apply(reader);
 		} finally {
 			reader.clean();
 		}
+
+		return result;
 	}
 
 	public void setArchived(final boolean archived, final DatablockDocument document) throws IOException {
-		document.new ChunkReader(payloadPosition, header.getPayloadSize()).updateHeader(archived, header.isDeleted());
+		createChunkReader(document).updateHeader(archived, header.isDeleted());
 	}
 
 	public void setDeleted(final boolean deleted, final DatablockDocument document) throws IOException {
-		document.new ChunkReader(payloadPosition, header.getPayloadSize()).updateHeader(header.isArchived(), deleted);
+		createChunkReader(document).updateHeader(header.isArchived(), deleted);
+	}
+
+	private ChunkReader createChunkReader(final DatablockDocument document) {
+		return document.createChunkReader(payloadPosition, header.getPayloadSize());
 	}
 
 }

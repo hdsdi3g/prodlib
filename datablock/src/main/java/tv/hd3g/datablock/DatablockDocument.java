@@ -141,7 +141,7 @@ public class DatablockDocument implements IOTraits {// TODO test
 
 			if (policy.changeActualChunk()) {
 				try {
-					new ChunkReader(chunkPayloadDocumentPosition, chunkHeader.getPayloadSize())
+					createChunkReader(chunkPayloadDocumentPosition, chunkHeader.getPayloadSize())
 							.updateHeader(
 									policy.markActualChunkAsArchived(),
 									policy.markActualChunkAsDeleted());
@@ -155,6 +155,10 @@ public class DatablockDocument implements IOTraits {// TODO test
 		channel.position(actualPos);
 	}
 
+	ChunkReader createChunkReader(final long position, final long size) {
+		return new ChunkReader(position, size);
+	}
+
 	class ChunkReader implements DatablockChunkPayloadExtractor {
 
 		private final long position;
@@ -166,7 +170,7 @@ public class DatablockDocument implements IOTraits {// TODO test
 		/**
 		 * Always call clean() after getCurrentChunkPayload()
 		 */
-		ChunkReader(final long position, final long size) {
+		private ChunkReader(final long position, final long size) {
 			this.position = position;
 			this.size = size;
 		}

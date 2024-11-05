@@ -19,7 +19,7 @@ package tv.hd3g.datablock;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public interface IOTraits {// TODO test
+public interface IOTraits {
 
 	String BYTES_STR = " bytes";
 	byte ZERO_BYTE = 0x0;
@@ -35,6 +35,10 @@ public interface IOTraits {// TODO test
 	}
 
 	default void checkEndBlank(final ByteBuffer readFrom, final int blankExpectedSize) {
+		if (readFrom.limit() < blankExpectedSize) {
+			throw new IllegalArgumentException("Invalid limit space: " + readFrom.limit() + "/" + blankExpectedSize);
+		}
+
 		for (var pos = 0; pos < blankExpectedSize; pos++) {
 			if (readFrom.get() != ZERO_BYTE) {
 				throw new IllegalArgumentException("Invalid blank space");
