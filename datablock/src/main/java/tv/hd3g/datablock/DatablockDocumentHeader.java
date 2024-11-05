@@ -65,11 +65,8 @@ public class DatablockDocumentHeader implements IOTraits {// TODO test + debug t
 		this.documentVersion = documentVersion;
 	}
 
-	public DatablockDocumentHeader(final DatablockDocumentHeader updateFrom, final int newDocumentVersion) {
-		magicNumber = updateFrom.magicNumber;
-		documentType = updateFrom.documentType;
-		typeVersion = updateFrom.typeVersion;
-		documentVersion = newDocumentVersion;
+	public DatablockDocumentHeader getIncrementedDocumentVersion() {
+		return new DatablockDocumentHeader(magicNumber, documentType, typeVersion, documentVersion + 1);
 	}
 
 	public DatablockDocumentHeader(final ByteBuffer readFrom) {

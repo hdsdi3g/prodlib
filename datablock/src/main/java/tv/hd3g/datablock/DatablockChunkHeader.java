@@ -121,40 +121,26 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 	}
 
 	/**
-	 * At the end, the file position will be put on the header end, at the first payload byte.
-	 * @param channel pos must be setup on the first chunk header byte
+	 * At the end, the file position will be put on the previous (actual) position.
+	 * @param channel pos must be set on the first chunk header byte
 	 * @return payload size extracted from header
 	 */
-	public static int updateHeader(final FileChannel channel,
-								   final boolean setArchived,
-								   final boolean setDeleted) throws IOException {
-
-		/** size */
-		final var buffer = ByteBuffer.allocate(4);
-		IOTraits.checkIOSize(channel.read(
-				buffer,
-				channel.position()
-						+ FOURCC_EXPECTED_SIZE
-						+ 2 /** version */
-		), 4);
-		final var size = buffer.flip().getInt();
-
-		buffer.clear();
-		buffer.put(getFlag(setDeleted, setArchived));
-		buffer.flip();
+	static void updateHeader(final FileChannel channel,
+							 final boolean setArchived,
+							 final boolean setDeleted) throws IOException {
+		final var actualPos = channel.position();
+		final var buffer = ByteBuffer.wrap(new byte[] { getFlag(setDeleted, setArchived) });
 
 		IOTraits.checkIOSize(channel.write(
 				buffer,
 				channel.position()
+						+ FOURCC_EXPECTED_SIZE
+						+ 2 /** version */
+						+ 4 /** size */
 						+ 8 /** createdDate */
 		), 1);
 
-		channel.position(channel.position()
-						 + 1 /** compressed */
-						 + 4 /** crc */
-						 + BLANK_EXPECTED_SIZE);
-
-		return size;
+		channel.position(actualPos);
 	}
 
 	@Override

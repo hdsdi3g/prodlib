@@ -28,4 +28,7 @@ public interface DatablockChunkPayloadExtractor {
 
 	byte[] getCurrentChunkPayloadBytes() throws IOException;
 
+	void updateHeader(final boolean setArchived,
+					  final boolean setDeleted) throws IOException;
+
 }

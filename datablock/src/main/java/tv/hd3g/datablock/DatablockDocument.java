@@ -26,6 +26,7 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 public class DatablockDocument implements IOTraits {
 
@@ -99,7 +100,25 @@ public class DatablockDocument implements IOTraits {
 		return result;
 	}
 
-	// TODO update chunk header (maybe via documentCrawl)
+	public synchronized void documentRefactor(final FileChannel newDocument,
+											  final Predicate<DataBlockChunkIndexItem> keepChunk) throws IOException {
+		final var targetDocument = new DatablockDocument(newDocument);
+		newDocument.truncate(DatablockDocumentHeader.HEADER_LEN);
+		newDocument.position(0);
+
+		final var actualHeader = readDocumentHeader();
+		targetDocument.writeDocumentHeader(actualHeader.getIncrementedDocumentVersion());
+
+		documentCrawl((chunkHeader,
+					   chunkPayloadDocumentPosition,
+					   payloadExtractor) -> {
+			final var keepIt = keepChunk.test(new DataBlockChunkIndexItem(chunkHeader, chunkPayloadDocumentPosition));
+			if (keepIt) {
+				// TODO write
+			}
+		});
+
+	}
 	// TODO document defrag/cleanup
 
 	class ChunkReader implements DatablockChunkPayloadExtractor {
@@ -131,6 +150,15 @@ public class DatablockDocument implements IOTraits {
 			checkIOSize(channel.read(buffer, position), buffer);
 			channel.position(currentPos);
 			return result;
+		}
+
+		@Override
+		public synchronized void updateHeader(final boolean setArchived,
+											  final boolean setDeleted) throws IOException {
+			final var currentPos = channel.position();
+			channel.position(position);
+			DatablockChunkHeader.updateHeader(channel, setArchived, setDeleted);
+			channel.position(currentPos);
 		}
 
 		synchronized void clean() {
