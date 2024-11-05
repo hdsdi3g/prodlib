@@ -23,18 +23,20 @@ public record DataBlockChunkIndexItem(DatablockChunkHeader header, long payloadP
 
 	public <T> T extractPayload(final Function<DatablockChunkPayloadExtractor, T> extractor,
 								final DatablockDocument document) {
-		final var reader = document.new ChunkReader(payloadPosition, header.getSize());
-		final var result = extractor.apply(reader);
-		reader.clean();
-		return result;
+		final var reader = document.new ChunkReader(payloadPosition, header.getPayloadSize());
+		try {
+			return extractor.apply(reader);
+		} finally {
+			reader.clean();
+		}
 	}
 
 	public void setArchived(final boolean archived, final DatablockDocument document) throws IOException {
-		document.new ChunkReader(payloadPosition, header.getSize()).updateHeader(archived, header.isDeleted());
+		document.new ChunkReader(payloadPosition, header.getPayloadSize()).updateHeader(archived, header.isDeleted());
 	}
 
 	public void setDeleted(final boolean deleted, final DatablockDocument document) throws IOException {
-		document.new ChunkReader(payloadPosition, header.getSize()).updateHeader(header.isArchived(), deleted);
+		document.new ChunkReader(payloadPosition, header.getPayloadSize()).updateHeader(header.isArchived(), deleted);
 	}
 
 }

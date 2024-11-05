@@ -32,9 +32,9 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 
 	public static final int FOURCC_EXPECTED_SIZE = 4;
 	public static final int BLANK_EXPECTED_SIZE = 8;
-	public static final int HEADER_LEN = FOURCC_EXPECTED_SIZE
+	public static final int CHUNK_HEADER_LEN = FOURCC_EXPECTED_SIZE
 										 + 2 /** version */
-										 + 4 /** size */
+										 + 4 /** payloadSize */
 										 + 8 /** createdDate */
 										 + 1 /** deleted/archived */
 										 + 1 /** compressed */
@@ -46,7 +46,7 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 
 	private final byte[] fourCC;
 	private final short version;
-	private final int size;
+	private final int payloadSize;
 	private final long createdDate;
 	private final boolean archived;
 	private final boolean deleted;
@@ -56,14 +56,14 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 	/**
 	 * @param fourCC 4 bytes to identify and route to process the chunk
 	 * @param version chunk type version
-	 * @param size data payload size
+	 * @param payloadSize data payload payloadSize
 	 * @param compressed is payload is compressed
 	 * @param crc payload crc result
 	 * @param archived marked as archived
 	 */
 	public DatablockChunkHeader(final byte[] fourCC,
 								final short version,
-								final int size,
+								final int payloadSize,
 								final boolean compressed,
 								final boolean archived,
 								final int crc) {
@@ -73,7 +73,7 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 		}
 		this.fourCC = fourCC;
 		this.version = version;
-		this.size = size;
+		this.payloadSize = payloadSize;
 		createdDate = System.currentTimeMillis();
 		deleted = false;
 		this.compressed = compressed;
@@ -82,12 +82,12 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 	}
 
 	public DatablockChunkHeader(final ByteBuffer readFrom) {
-		checkRemaining(readFrom, HEADER_LEN);
+		checkRemaining(readFrom, CHUNK_HEADER_LEN);
 		fourCC = new byte[FOURCC_EXPECTED_SIZE];
 		readFrom.get(fourCC);
 
 		version = readFrom.getShort();
-		size = readFrom.getInt();
+		payloadSize = readFrom.getInt();
 		createdDate = readFrom.getLong();
 
 		final var flag = readFrom.get();
@@ -100,10 +100,10 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 	}
 
 	public ByteBuffer toByteBuffer() {
-		final var header = ByteBuffer.allocate(HEADER_LEN);
+		final var header = ByteBuffer.allocate(CHUNK_HEADER_LEN);
 		header.put(fourCC);
 		header.putShort(version);
-		header.putInt(size);
+		header.putInt(payloadSize);
 		header.putLong(createdDate);
 
 		final var flag = getFlag(deleted, archived);
@@ -123,7 +123,7 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 	/**
 	 * At the end, the file position will be put on the previous (actual) position.
 	 * @param channel pos must be set on the first chunk header byte
-	 * @return payload size extracted from header
+	 * @return payload payloadSize extracted from header
 	 */
 	static void updateHeader(final FileChannel channel,
 							 final boolean setArchived,
@@ -136,7 +136,7 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 				channel.position()
 						+ FOURCC_EXPECTED_SIZE
 						+ 2 /** version */
-						+ 4 /** size */
+						+ 4 /** payloadSize */
 						+ 8 /** createdDate */
 		), 1);
 
@@ -150,8 +150,8 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 		builder.append(encodeHexString(fourCC));
 		builder.append(", version=");
 		builder.append(version);
-		builder.append(", size=");
-		builder.append(size);
+		builder.append(", payloadSize=");
+		builder.append(payloadSize);
 		builder.append(", createdDate=");
 		builder.append(new Date(createdDate));
 		builder.append(", archived=");

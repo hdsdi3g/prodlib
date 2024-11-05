@@ -30,7 +30,7 @@ public class DatablockDocumentHeader implements IOTraits {// TODO test + debug t
 	public static final int MAGIC_NUMBER_EXPECTED_SIZE = 8;
 	public static final int DOCUMENT_TYPE_EXPECTED_SIZE = 8;
 	public static final int BLANK_EXPECTED_SIZE = 2;
-	public static final int HEADER_LEN = MAGIC_NUMBER_EXPECTED_SIZE +
+	public static final int DOCUMENT_HEADER_LEN = MAGIC_NUMBER_EXPECTED_SIZE +
 										 DOCUMENT_TYPE_EXPECTED_SIZE
 										 + 2 /** typeVersion */
 										 + 4 /** documentVersion */
@@ -70,7 +70,7 @@ public class DatablockDocumentHeader implements IOTraits {// TODO test + debug t
 	}
 
 	public DatablockDocumentHeader(final ByteBuffer readFrom) {
-		checkRemaining(readFrom, HEADER_LEN);
+		checkRemaining(readFrom, DOCUMENT_HEADER_LEN);
 		magicNumber = new byte[MAGIC_NUMBER_EXPECTED_SIZE];
 		readFrom.get(magicNumber);
 		documentType = new byte[DOCUMENT_TYPE_EXPECTED_SIZE];
@@ -82,7 +82,7 @@ public class DatablockDocumentHeader implements IOTraits {// TODO test + debug t
 	}
 
 	public ByteBuffer toByteBuffer() {
-		final var header = ByteBuffer.allocate(HEADER_LEN);
+		final var header = ByteBuffer.allocate(DOCUMENT_HEADER_LEN);
 		header.put(magicNumber);
 		header.put(documentType);
 		header.putShort(typeVersion);
