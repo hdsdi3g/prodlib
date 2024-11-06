@@ -16,22 +16,21 @@
  */
 package tv.hd3g.datablock;
 
-import static java.nio.channels.FileChannel.MapMode.READ_WRITE;
 import static tv.hd3g.datablock.DatablockChunkHeader.CHUNK_HEADER_LEN;
 import static tv.hd3g.datablock.DatablockDocumentHeader.DOCUMENT_HEADER_LEN;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
-import java.lang.foreign.Arena;
-import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
-// TODO add technical readme
+// TODO add technical readme + CRC + compressed
 public class DatablockDocument implements IOTraits {// TODO test
 
 	private final FileChannel channel;
@@ -48,28 +47,52 @@ public class DatablockDocument implements IOTraits {// TODO test
 
 	public synchronized DatablockDocumentHeader readDocumentHeader() throws IOException {
 		documentHeaderBuffer.clear();
-		checkIOSize(channel.read(documentHeaderBuffer, 0), documentHeaderBuffer);
+		checkedRead(channel, 0, documentHeaderBuffer);
 		return new DatablockDocumentHeader(documentHeaderBuffer.flip().asReadOnlyBuffer());
 	}
 
 	public synchronized void writeDocumentHeader(final DatablockDocumentHeader header) throws IOException {
 		final var buffer = header.toByteBuffer();
-		checkIOSize(channel.write(buffer, 0), buffer);
+		checkedWrite(channel, 0, buffer);
 	}
 
 	/**
 	 * @param chunkPayload No reset/flip will be done
 	 */
-	public synchronized void appendChunk(final DatablockChunkHeader chunkHeader,
+	public synchronized void appendChunk(final byte[] fourCC,
+										 final short version,
+										 final boolean archived,
 										 final ByteBuffer chunkPayload) throws IOException {
+		final var chunkHeader = new DatablockChunkHeader(
+				fourCC, version, chunkPayload.remaining(), false, archived, 0);
+
 		final var header = chunkHeader.toByteBuffer();
-		checkIOSize(channel.write(header), header);
-		checkIOSize(channel.write(chunkPayload), chunkPayload);
+		checkedWrite(channel, header);
+		checkedWrite(channel, chunkPayload);
 
 		chunkSeparator.clear();
 		chunkSeparator.put(ZERO_BYTE);
 		chunkSeparator.flip();
-		checkIOSize(channel.write(chunkSeparator), chunkSeparator);
+		checkedWrite(channel, chunkSeparator);
+	}
+
+	public synchronized void appendChunk(final byte[] fourCC,
+										 final short version,
+										 final boolean archived,
+										 final Consumer<OutputStream> reader) throws IOException {
+		final var chunkHeader = new DatablockChunkHeader(
+				fourCC, version, 0, false, archived, 0);
+		final var header = chunkHeader.toByteBuffer();
+		checkedWrite(channel, header);
+
+		try (var outputStream = new DatablockOutputStreamChunk(channel)) {
+			reader.accept(outputStream);
+		} finally {
+			chunkSeparator.clear();
+			chunkSeparator.put(ZERO_BYTE);
+			chunkSeparator.flip();
+			checkedWrite(channel, chunkSeparator);
+		}
 	}
 
 	public synchronized void documentCrawl(final FoundedDataBlockDocumentChunk chunkCallback) throws IOException {
@@ -77,11 +100,12 @@ public class DatablockDocument implements IOTraits {// TODO test
 
 		while (channel.position() + 1l < channel.size()) {
 			chunkHeaderBuffer.clear();
-			checkIOSize(channel.read(chunkHeaderBuffer), chunkHeaderBuffer);
+			checkedRead(channel, chunkHeaderBuffer);
 			final var header = new DatablockChunkHeader(chunkHeaderBuffer);
 			final var chunkPayloadDocumentPosition = channel.position();
 
-			final var currentChunkReader = new ChunkReader(chunkPayloadDocumentPosition, header.getPayloadSize());
+			final var currentChunkReader = new DatablockChunkPayloadExtractorImpl(
+					channel, chunkPayloadDocumentPosition, header.getPayloadSize());
 			try {
 				chunkCallback.onChunk(header, chunkPayloadDocumentPosition, currentChunkReader);
 			} finally {
@@ -91,7 +115,7 @@ public class DatablockDocument implements IOTraits {// TODO test
 			final var nextChunkPosition = chunkPayloadDocumentPosition
 										  + header.getPayloadSize();
 			chunkSeparator.clear();
-			checkIOSize(channel.read(chunkSeparator, nextChunkPosition), chunkSeparator);
+			checkedRead(channel, nextChunkPosition, chunkSeparator);
 			chunkSeparator.flip();
 			checkEndBlank(chunkSeparator, chunkSeparator.capacity());
 		}
@@ -141,10 +165,11 @@ public class DatablockDocument implements IOTraits {// TODO test
 
 			if (policy.changeActualChunk()) {
 				try {
-					createChunkReader(chunkPayloadDocumentPosition, chunkHeader.getPayloadSize())
-							.updateHeader(
-									policy.markActualChunkAsArchived(),
-									policy.markActualChunkAsDeleted());
+					new DatablockChunkPayloadExtractorImpl(
+							channel, chunkPayloadDocumentPosition, chunkHeader.getPayloadSize())
+									.updateHeader(
+											policy.markActualChunkAsArchived(),
+											policy.markActualChunkAsDeleted());
 				} catch (final IOException e) {
 					throw new UncheckedIOException("Can't write to actual document", e);
 				}
@@ -155,66 +180,8 @@ public class DatablockDocument implements IOTraits {// TODO test
 		channel.position(actualPos);
 	}
 
-	ChunkReader createChunkReader(final long position, final long size) {
-		return new ChunkReader(position, size);
-	}
-
-	class ChunkReader implements DatablockChunkPayloadExtractor {
-
-		private final long position;
-		private final long size;
-
-		private MemorySegment currentMemorySegment;
-		private Arena arena;
-
-		/**
-		 * Always call clean() after getCurrentChunkPayload()
-		 */
-		private ChunkReader(final long position, final long size) {
-			this.position = position;
-			this.size = size;
-		}
-
-		@SuppressWarnings("preview")
-		@Override
-		public synchronized ByteBuffer getCurrentChunkPayload() throws IOException {
-			arena = Arena.ofShared();
-			currentMemorySegment = channel.map(READ_WRITE, position, size, arena);
-			return currentMemorySegment.asByteBuffer();
-		}
-
-		@Override
-		public synchronized byte[] getCurrentChunkPayloadBytes() throws IOException {
-			final var result = new byte[(int) size];
-			final var buffer = ByteBuffer.wrap(result);
-			final var currentPos = channel.position();
-			checkIOSize(channel.read(buffer, position), buffer);
-			channel.position(currentPos);
-			return result;
-		}
-
-		@Override
-		public synchronized void updateHeader(final boolean setArchived,
-											  final boolean setDeleted) throws IOException {
-			final var currentPos = channel.position();
-			channel.position(position);
-			DatablockChunkHeader.updateHeader(channel, setArchived, setDeleted);
-			channel.position(currentPos);
-		}
-
-		synchronized void clean() {
-			if (currentMemorySegment == null || arena == null) {
-				return;
-			}
-			try {
-				currentMemorySegment.unload();
-				arena.close();
-			} finally {
-				currentMemorySegment = null;
-				arena = null;
-			}
-		}
-
+	DatablockChunkPayloadExtractorImpl createChunkPayloadExtractor(final long payloadPosition, final int payloadSize) {
+		return new DatablockChunkPayloadExtractorImpl(channel, payloadPosition, payloadSize);
 	}
 
 }

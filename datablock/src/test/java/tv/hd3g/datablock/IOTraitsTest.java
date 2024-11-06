@@ -17,12 +17,19 @@
 package tv.hd3g.datablock;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 
 import tv.hd3g.commons.testtools.Fake;
 import tv.hd3g.commons.testtools.MockToolsExtendsJunit;
@@ -38,6 +45,15 @@ class IOTraitsTest {
 	int operation;
 	@Fake(min = 10, max = 10000)
 	int expect;
+	@Fake(min = 10, max = 10000)
+	long pos;
+
+	@Mock
+	WritableByteChannel writableByteChannel;
+	@Mock
+	ReadableByteChannel readableByteChannel;
+	@Mock
+	FileChannel fileChannel;
 
 	ByteBuffer readFrom;
 	TestIOTraits t = new TestIOTraits();
@@ -49,11 +65,39 @@ class IOTraitsTest {
 	}
 
 	@Test
-	void testCheckIOSizeIntByteBuffer() throws IOException {
+	void testCheckedWriteWritableByteChannelByteBuffer() throws IOException {
 		readFrom = ByteBuffer.allocate(operation);
-		t.checkIOSize(operation, readFrom);
 
-		assertThrows(IOException.class, () -> t.checkIOSize(expect, readFrom));
+		when(writableByteChannel.write(readFrom)).thenReturn(operation);
+		t.checkedWrite(writableByteChannel, readFrom);
+		verify(writableByteChannel, times(1)).write(readFrom);
+	}
+
+	@Test
+	void testCheckedWriteFileChannelLongByteBuffer() throws IOException {
+		readFrom = ByteBuffer.allocate(operation);
+
+		when(fileChannel.write(readFrom, pos)).thenReturn(operation);
+		t.checkedWrite(fileChannel, pos, readFrom);
+		verify(fileChannel, times(1)).write(readFrom, pos);
+	}
+
+	@Test
+	void testCheckedReadReadableByteChannelByteBuffer() throws IOException {
+		readFrom = ByteBuffer.allocate(operation);
+
+		when(readableByteChannel.read(readFrom)).thenReturn(operation);
+		t.checkedRead(readableByteChannel, readFrom);
+		verify(readableByteChannel, times(1)).read(readFrom);
+	}
+
+	@Test
+	void testCheckedReadFileChannelLongByteBuffer() throws IOException {
+		readFrom = ByteBuffer.allocate(operation);
+
+		when(fileChannel.read(readFrom, pos)).thenReturn(operation);
+		t.checkedRead(fileChannel, pos, readFrom);
+		verify(fileChannel, times(1)).read(readFrom, pos);
 	}
 
 	@Test

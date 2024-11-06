@@ -18,6 +18,9 @@ package tv.hd3g.datablock;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 
 public interface IOTraits {
 
@@ -30,8 +33,24 @@ public interface IOTraits {
 		}
 	}
 
-	default void checkIOSize(final int operation, final ByteBuffer fullCapacity) throws IOException {
-		checkIOSize(operation, fullCapacity.capacity());
+	default void checkedWrite(final WritableByteChannel channel, final ByteBuffer buffer) throws IOException {
+		checkIOSize(channel.write(buffer), buffer.capacity());
+	}
+
+	default void checkedWrite(final FileChannel channel,
+							  final long position,
+							  final ByteBuffer buffer) throws IOException {
+		checkIOSize(channel.write(buffer, position), buffer.capacity());
+	}
+
+	default void checkedRead(final ReadableByteChannel channel, final ByteBuffer buffer) throws IOException {
+		checkIOSize(channel.read(buffer), buffer.capacity());
+	}
+
+	default void checkedRead(final FileChannel channel,
+							 final long position,
+							 final ByteBuffer buffer) throws IOException {
+		checkIOSize(channel.read(buffer, position), buffer.capacity());
 	}
 
 	default void checkEndBlank(final ByteBuffer readFrom, final int blankExpectedSize) {

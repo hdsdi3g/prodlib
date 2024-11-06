@@ -17,7 +17,9 @@
 package tv.hd3g.datablock;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.function.Function;
 
 public interface DatablockChunkPayloadExtractor {
 
@@ -30,5 +32,7 @@ public interface DatablockChunkPayloadExtractor {
 
 	void updateHeader(final boolean setArchived,
 					  final boolean setDeleted) throws IOException;
+
+	<T> T createInputStream(final Function<InputStream, T> chunkReader) throws IOException;
 
 }

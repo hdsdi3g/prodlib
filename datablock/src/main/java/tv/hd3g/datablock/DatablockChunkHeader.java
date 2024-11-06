@@ -33,13 +33,13 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 	public static final int FOURCC_EXPECTED_SIZE = 4;
 	public static final int BLANK_EXPECTED_SIZE = 8;
 	public static final int CHUNK_HEADER_LEN = FOURCC_EXPECTED_SIZE
-										 + 2 /** version */
-										 + 4 /** payloadSize */
-										 + 8 /** createdDate */
-										 + 1 /** deleted/archived */
-										 + 1 /** compressed */
-										 + 4 /** crc */
-										 + BLANK_EXPECTED_SIZE;
+											   + 2 /** version */
+											   + 4 /** payloadSize */
+											   + 8 /** createdDate */
+											   + 1 /** deleted/archived */
+											   + 1 /** compressed */
+											   + 4 /** crc */
+											   + BLANK_EXPECTED_SIZE;
 
 	public static final byte BYTE_TAG_DELETED = 0x01;
 	public static final byte BYTE_TAG_ARCHIVED = 0x02;
@@ -61,12 +61,12 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 	 * @param crc payload crc result
 	 * @param archived marked as archived
 	 */
-	public DatablockChunkHeader(final byte[] fourCC,
-								final short version,
-								final int payloadSize,
-								final boolean compressed,
-								final boolean archived,
-								final int crc) {
+	DatablockChunkHeader(final byte[] fourCC,
+						 final short version,
+						 final int payloadSize,
+						 final boolean compressed,
+						 final boolean archived,
+						 final int crc) {
 		if (fourCC.length != FOURCC_EXPECTED_SIZE) {
 			throw new IllegalArgumentException("fourCC len must equals "
 											   + FOURCC_EXPECTED_SIZE + " bytes");
@@ -81,7 +81,7 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 		this.crc = crc;
 	}
 
-	public DatablockChunkHeader(final ByteBuffer readFrom) {
+	DatablockChunkHeader(final ByteBuffer readFrom) {
 		checkRemaining(readFrom, CHUNK_HEADER_LEN);
 		fourCC = new byte[FOURCC_EXPECTED_SIZE];
 		readFrom.get(fourCC);
@@ -99,7 +99,7 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 		checkEndBlank(readFrom, BLANK_EXPECTED_SIZE);
 	}
 
-	public ByteBuffer toByteBuffer() {
+	ByteBuffer toByteBuffer() {
 		final var header = ByteBuffer.allocate(CHUNK_HEADER_LEN);
 		header.put(fourCC);
 		header.putShort(version);
@@ -121,14 +121,11 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 	}
 
 	/**
-	 * At the end, the file position will be put on the previous (actual) position.
 	 * @param channel pos must be set on the first chunk header byte
-	 * @return payload payloadSize extracted from header
 	 */
-	static void updateHeader(final FileChannel channel,
-							 final boolean setArchived,
-							 final boolean setDeleted) throws IOException {
-		final var actualPos = channel.position();
+	static void updateChunkHeaderTags(final FileChannel channel,
+									  final boolean setArchived,
+									  final boolean setDeleted) throws IOException {
 		final var buffer = ByteBuffer.wrap(new byte[] { getFlag(setDeleted, setArchived) });
 
 		IOTraits.checkIOSize(channel.write(
@@ -138,9 +135,25 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 						+ 2 /** version */
 						+ 4 /** payloadSize */
 						+ 8 /** createdDate */
-		), 1);
+		), buffer.capacity());
+	}
 
-		channel.position(actualPos);
+	/**
+	 * @param channel pos must be set on the first chunk header byte
+	 */
+	static void updateChunkHeaderPayloadSize(final FileChannel channel,
+											 final int newPayloadSize) throws IOException {
+		final var buffer = ByteBuffer.allocate(4 /** payloadSize */
+		);
+		buffer.putInt(newPayloadSize);
+		buffer.flip();
+
+		IOTraits.checkIOSize(channel.write(
+				buffer,
+				channel.position()
+						+ FOURCC_EXPECTED_SIZE
+						+ 2 /** version */
+		), buffer.capacity());
 	}
 
 	@Override

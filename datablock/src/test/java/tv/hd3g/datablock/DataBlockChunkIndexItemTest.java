@@ -37,7 +37,6 @@ import org.mockito.Mock;
 
 import tv.hd3g.commons.testtools.Fake;
 import tv.hd3g.commons.testtools.MockToolsExtendsJunit;
-import tv.hd3g.datablock.DatablockDocument.ChunkReader;
 
 @ExtendWith(MockToolsExtendsJunit.class)
 class DataBlockChunkIndexItemTest {
@@ -47,7 +46,7 @@ class DataBlockChunkIndexItemTest {
 	@Mock
 	DatablockDocument document;
 	@Mock
-	ChunkReader chunkReader;
+	DatablockChunkPayloadExtractorImpl chunkPayloadExtractor;
 
 	@Fake(min = 10, max = 10000)
 	long position;
@@ -60,16 +59,16 @@ class DataBlockChunkIndexItemTest {
 	void init() {
 		i = new DataBlockChunkIndexItem(header, position);
 		when(header.getPayloadSize()).thenReturn(size);
-		when(document.createChunkReader(position, size)).thenReturn(chunkReader);
+		when(document.createChunkPayloadExtractor(position, size)).thenReturn(chunkPayloadExtractor);
 	}
 
 	@Test
 	void testExtractPayload() {
-		assertEquals(chunkReader, i.extractPayload(identity(), document));
+		assertEquals(chunkPayloadExtractor, i.extractPayload(identity(), document));
 
 		verify(header, atLeastOnce()).getPayloadSize();
-		verify(document, times(1)).createChunkReader(position, size);
-		verify(chunkReader, times(1)).clean();
+		verify(document, times(1)).createChunkPayloadExtractor(position, size);
+		verify(chunkPayloadExtractor, times(1)).clean();
 	}
 
 	private static Stream<Arguments> provideBooleans() {
@@ -86,10 +85,10 @@ class DataBlockChunkIndexItemTest {
 
 		i.setArchived(archived, document);
 
-		verify(chunkReader, times(1)).updateHeader(archived, deleted);
+		verify(chunkPayloadExtractor, times(1)).updateHeader(archived, deleted);
 		verify(header, atLeastOnce()).isDeleted();
 		verify(header, atLeastOnce()).getPayloadSize();
-		verify(document, times(1)).createChunkReader(position, size);
+		verify(document, times(1)).createChunkPayloadExtractor(position, size);
 	}
 
 	@ParameterizedTest
@@ -99,10 +98,10 @@ class DataBlockChunkIndexItemTest {
 
 		i.setDeleted(deleted, document);
 
-		verify(chunkReader, times(1)).updateHeader(archived, deleted);
+		verify(chunkPayloadExtractor, times(1)).updateHeader(archived, deleted);
 		verify(header, atLeastOnce()).isArchived();
 		verify(header, atLeastOnce()).getPayloadSize();
-		verify(document, times(1)).createChunkReader(position, size);
+		verify(document, times(1)).createChunkPayloadExtractor(position, size);
 	}
 
 }
