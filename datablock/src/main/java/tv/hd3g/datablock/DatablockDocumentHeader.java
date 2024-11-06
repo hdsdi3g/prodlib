@@ -31,10 +31,15 @@ public class DatablockDocumentHeader implements IOTraits {// TODO test + debug t
 	public static final int DOCUMENT_TYPE_EXPECTED_SIZE = 8;
 	public static final int BLANK_EXPECTED_SIZE = 2;
 	public static final int DOCUMENT_HEADER_LEN = MAGIC_NUMBER_EXPECTED_SIZE +
-										 DOCUMENT_TYPE_EXPECTED_SIZE
-										 + 2 /** typeVersion */
-										 + 4 /** documentVersion */
-										 + BLANK_EXPECTED_SIZE;
+												  DOCUMENT_TYPE_EXPECTED_SIZE
+												  + 2 /** typeVersion */
+												  + 4 /** documentVersion */
+												  + BLANK_EXPECTED_SIZE;
+
+	public static final long DOCUMENT_VERSION_POS = MAGIC_NUMBER_EXPECTED_SIZE +
+													DOCUMENT_TYPE_EXPECTED_SIZE
+													+ 2 /** typeVersion */
+	;
 
 	private final byte[] magicNumber;
 	private final byte[] documentType;
@@ -65,11 +70,11 @@ public class DatablockDocumentHeader implements IOTraits {// TODO test + debug t
 		this.documentVersion = documentVersion;
 	}
 
-	public DatablockDocumentHeader getIncrementedDocumentVersion() {
+	DatablockDocumentHeader getIncrementedDocumentVersion() {
 		return new DatablockDocumentHeader(magicNumber, documentType, typeVersion, documentVersion + 1);
 	}
 
-	public DatablockDocumentHeader(final ByteBuffer readFrom) {
+	DatablockDocumentHeader(final ByteBuffer readFrom) {
 		checkRemaining(readFrom, DOCUMENT_HEADER_LEN);
 		magicNumber = new byte[MAGIC_NUMBER_EXPECTED_SIZE];
 		readFrom.get(magicNumber);
@@ -81,7 +86,7 @@ public class DatablockDocumentHeader implements IOTraits {// TODO test + debug t
 		checkEndBlank(readFrom, BLANK_EXPECTED_SIZE);
 	}
 
-	public ByteBuffer toByteBuffer() {
+	ByteBuffer toByteBuffer() {
 		final var header = ByteBuffer.allocate(DOCUMENT_HEADER_LEN);
 		header.put(magicNumber);
 		header.put(documentType);

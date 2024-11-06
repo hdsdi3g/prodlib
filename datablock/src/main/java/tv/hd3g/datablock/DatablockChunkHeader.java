@@ -31,14 +31,12 @@ import lombok.Getter;
 public class DatablockChunkHeader implements IOTraits {// TODO test + debug tools
 
 	public static final int FOURCC_EXPECTED_SIZE = 4;
-	public static final int BLANK_EXPECTED_SIZE = 8;
+	public static final int BLANK_EXPECTED_SIZE = 13;
 	public static final int CHUNK_HEADER_LEN = FOURCC_EXPECTED_SIZE
 											   + 2 /** version */
 											   + 4 /** payloadSize */
 											   + 8 /** createdDate */
 											   + 1 /** deleted/archived */
-											   + 1 /** compressed */
-											   + 4 /** crc */
 											   + BLANK_EXPECTED_SIZE;
 
 	public static final byte BYTE_TAG_DELETED = 0x01;
@@ -50,8 +48,6 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 	private final long createdDate;
 	private final boolean archived;
 	private final boolean deleted;
-	private final boolean compressed;
-	private final int crc;
 
 	/**
 	 * @param fourCC 4 bytes to identify and route to process the chunk
@@ -64,9 +60,7 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 	DatablockChunkHeader(final byte[] fourCC,
 						 final short version,
 						 final int payloadSize,
-						 final boolean compressed,
-						 final boolean archived,
-						 final int crc) {
+						 final boolean archived) {
 		if (fourCC.length != FOURCC_EXPECTED_SIZE) {
 			throw new IllegalArgumentException("fourCC len must equals "
 											   + FOURCC_EXPECTED_SIZE + " bytes");
@@ -76,9 +70,7 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 		this.payloadSize = payloadSize;
 		createdDate = System.currentTimeMillis();
 		deleted = false;
-		this.compressed = compressed;
 		this.archived = archived;
-		this.crc = crc;
 	}
 
 	DatablockChunkHeader(final ByteBuffer readFrom) {
@@ -94,8 +86,6 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 		deleted = (flag & BYTE_TAG_DELETED) == BYTE_TAG_DELETED;
 		archived = (flag & BYTE_TAG_ARCHIVED) == BYTE_TAG_ARCHIVED;
 
-		compressed = readFrom.get() != ZERO_BYTE;
-		crc = readFrom.getInt();
 		checkEndBlank(readFrom, BLANK_EXPECTED_SIZE);
 	}
 
@@ -108,8 +98,6 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 
 		final var flag = getFlag(deleted, archived);
 		header.put(flag);
-		header.put(compressed ? 0x1 : ZERO_BYTE);
-		header.putInt(crc);
 		header.put(new byte[BLANK_EXPECTED_SIZE]);
 		header.flip();
 		return header.asReadOnlyBuffer();
@@ -171,10 +159,6 @@ public class DatablockChunkHeader implements IOTraits {// TODO test + debug tool
 		builder.append(archived);
 		builder.append(", deleted=");
 		builder.append(deleted);
-		builder.append(", compressed=");
-		builder.append(compressed);
-		builder.append(", crc=");
-		builder.append(crc);
 		builder.append("]");
 		return builder.toString();
 	}
