@@ -19,7 +19,10 @@ package tv.hd3g.commons.testtools;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -37,6 +40,24 @@ import net.datafaker.Faker;
 public class MockToolsExtendsJunit implements BeforeEachCallback, AfterEachCallback {
 	static Faker faker = net.datafaker.Faker.instance();
 
+	static final Fake ZERO_FAKE = new Fake() {
+
+		@Override
+		public Class<? extends Annotation> annotationType() {
+			return Fake.class;
+		}
+
+		@Override
+		public long min() {
+			return 0;
+		}
+
+		@Override
+		public long max() {
+			return 0;
+		}
+	};
+
 	Object getFake(final Field field, final Class<?> fromClass) {
 		final Class<?> type = field.getType();
 		final var name = field.getName();
@@ -46,6 +67,38 @@ public class MockToolsExtendsJunit implements BeforeEachCallback, AfterEachCallb
 			throw new ArithmeticException("[" + name + "] Annotation min can't be more than max");
 		}
 
+		final var sourceClass = fromClass.getName();
+
+		if (type.isArray()) {
+			final var componentType = type.getComponentType();
+			final var sizeMin = (int) fakeA.min();
+			final var sizeMax = (int) fakeA.max();
+			if (sizeMin == sizeMax && sizeMin == 0) {
+				return Array.newInstance(componentType, 0);
+			}
+
+			int size;
+			if (sizeMin == sizeMax) {
+				size = sizeMin;
+			} else {
+				size = faker.random().nextInt((int) fakeA.min(), (int) fakeA.max());
+			}
+
+			if (componentType.isAssignableFrom(Byte.TYPE)) {
+				return faker.random().nextRandomBytes(size);
+			}
+
+			final var result = Array.newInstance(componentType, size);
+			for (var pos = 0; pos < size; pos++) {
+				Array.set(result, pos, generateValue(sourceClass, componentType, name, ZERO_FAKE));
+			}
+			return result;
+		}
+
+		return generateValue(fromClass.getName(), type, name, fakeA);
+	}
+
+	private Object generateValue(final String sourceClass, final Class<?> type, final String name, final Fake fakeA) {// NOSONAR S3776
 		if (type.isAssignableFrom(String.class)) {
 			return faker.numerify(name + "#####");
 		} else if (type.isAssignableFrom(File.class)) {
@@ -62,6 +115,26 @@ public class MockToolsExtendsJunit implements BeforeEachCallback, AfterEachCallb
 				return faker.random().nextLong();
 			}
 			return faker.random().nextLong(fakeA.min(), fakeA.max());
+		} else if (type.isAssignableFrom(Short.TYPE)) {
+			final var bb = ByteBuffer.allocate(4);
+			if (fakeA.min() == fakeA.max()) {
+				return makeShortNumber(bb);
+			}
+			var result = makeShortNumber(bb);
+			while (result < (short) fakeA.min() || result > (short) fakeA.max()) {
+				result = makeShortNumber(bb);
+			}
+			return result;
+		} else if (type.isAssignableFrom(Byte.TYPE)) {
+			final var bb = ByteBuffer.allocate(4);
+			if (fakeA.min() == fakeA.max()) {
+				return makeByteNumber(bb);
+			}
+			var result = makeByteNumber(bb);
+			while (result < (byte) fakeA.min() || result > (byte) fakeA.max()) {
+				result = makeByteNumber(bb);
+			}
+			return result;
 		} else if (type.isAssignableFrom(Double.TYPE)) {
 			if (fakeA.min() == fakeA.max()) {
 				return faker.random().nextDouble();
@@ -78,7 +151,21 @@ public class MockToolsExtendsJunit implements BeforeEachCallback, AfterEachCallb
 
 		throw new IllegalArgumentException("Can't manage this type: "
 										   + type.getName()
-										   + " on field [" + fromClass.getName() + "." + name + "]");
+										   + " on field [" + sourceClass + "." + name + "]");
+	}
+
+	private static short makeShortNumber(final ByteBuffer bb) {
+		bb.clear();
+		bb.putInt(faker.random().nextInt());
+		bb.flip();
+		return bb.getShort();
+	}
+
+	private static byte makeByteNumber(final ByteBuffer bb) {
+		bb.clear();
+		bb.putInt(faker.random().nextInt());
+		bb.flip();
+		return bb.get();
 	}
 
 	void apply(final Object instance) {

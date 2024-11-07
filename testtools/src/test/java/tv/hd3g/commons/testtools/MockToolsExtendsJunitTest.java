@@ -124,6 +124,10 @@ class MockToolsExtendsJunitTest {
 	float fFloat;
 	@Fake
 	boolean fBoolean;
+	@Fake
+	short fShort;
+	@Fake
+	byte fByte;
 
 	@Fake(min = -100, max = -5)
 	int fNegBoundInt;
@@ -133,6 +137,8 @@ class MockToolsExtendsJunitTest {
 	double fNegBoundDouble;
 	@Fake(min = -100, max = -5)
 	float fNegBoundFloat;
+	@Fake(min = -100, max = -5)
+	short fNegBoundShort;
 
 	@Fake(min = 1, max = 50)
 	int fPosBoundInt;
@@ -142,6 +148,20 @@ class MockToolsExtendsJunitTest {
 	double fPosBoundDouble;
 	@Fake(min = 1, max = 50)
 	float fPosBoundFloat;
+	@Fake(min = 1, max = 50)
+	short fPosBoundShort;
+	@Fake(min = 1, max = 50)
+	byte fBoundByte;
+
+	@Fake
+	byte[] bByteArrayEmpty;
+	@Fake(min = 5, max = 5)
+	byte[] bByteArray5;
+	@Fake(min = 5, max = 20)
+	byte[] bByteArrayBound;
+
+	@Fake(min = 5, max = 5)
+	int[] bIntArray5;
 
 	@Test
 	void testFake() {
@@ -153,27 +173,54 @@ class MockToolsExtendsJunitTest {
 		assertThat(fLong).isNotZero();
 		assertThat(fDouble).isNotZero();
 		assertThat(fFloat).isNotZero();
+		assertThat(fShort).isNotZero();
+		assertThat(fByte).isNotZero();
 
 		assertThat(fNegBoundInt).isBetween(-100, -5);
 		assertThat(fNegBoundLong).isBetween(-100l, -5l);
 		assertThat(fNegBoundDouble).isBetween(-100d, -5d);
 		assertThat(fNegBoundFloat).isBetween(-100f, -5f);
+		assertThat(fNegBoundShort).isBetween((short) -100, (short) -5);
 
 		assertThat(fPosBoundInt).isBetween(1, 50);
 		assertThat(fPosBoundLong).isBetween(1l, 50l);
 		assertThat(fPosBoundDouble).isBetween(1d, 50d);
 		assertThat(fPosBoundFloat).isBetween(1f, 50f);
+		assertThat(fPosBoundShort).isBetween((short) 1, (short) 50);
+		assertThat(fBoundByte).isBetween((byte) 1, (byte) 50);
+
+		assertThat(bByteArrayEmpty).isEmpty();
+		assertThat(bByteArray5)
+				.hasSize(5)
+				.isNotEqualTo(new byte[5]);
+		assertThat(bByteArrayBound)
+				.hasSizeBetween(5, 20)
+				.isNotEqualTo(new byte[bByteArrayBound.length]);
+		assertThat(bIntArray5)
+				.hasSize(5)
+				.isNotEqualTo(new int[5]);
 	}
 
-	static class TestFakeError {
+	static class TestFakeNumberError {
 		@Fake(min = -5, max = -10)
 		int value;
 	}
 
 	@Test
-	void testFakeError() {
-		final var tfe = new TestFakeError();
+	void testFakeNumberError() {
+		final var tfe = new TestFakeNumberError();
 		assertThrows(ArithmeticException.class, () -> m.apply(tfe));
+	}
+
+	static class TestFakeNegativeArray {
+		@Fake(min = -10, max = -4)
+		int[] value;
+	}
+
+	@Test
+	void testFakeNegativeArray() {
+		final var tfe = new TestFakeNegativeArray();
+		assertThrows(NegativeArraySizeException.class, () -> m.apply(tfe));
 	}
 
 	static class TestFakeNonManaged {
