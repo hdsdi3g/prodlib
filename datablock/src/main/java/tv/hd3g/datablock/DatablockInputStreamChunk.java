@@ -26,8 +26,6 @@ import java.util.Objects;
 
 class DatablockInputStreamChunk extends InputStream {// TODO test
 
-	/** 1MB */
-	public static final int BUFFER_SIZE = 0xFFFFF;
 	private final FileChannel channel;
 	private final long payloadPosition;
 	private final int payloadSize;
@@ -35,12 +33,13 @@ class DatablockInputStreamChunk extends InputStream {// TODO test
 
 	DatablockInputStreamChunk(final FileChannel channel,
 							  final long payloadPosition,
-							  final int payloadSize) throws IOException {
+							  final int payloadSize,
+							  final int maxBufferSize) throws IOException {
 		this.channel = Objects.requireNonNull(channel, "\"channel\" can't to be null");
 		this.payloadPosition = payloadPosition;
 		this.payloadSize = payloadSize;
 		channel.position(payloadPosition);
-		buffer = ByteBuffer.allocate(min(payloadSize, BUFFER_SIZE));
+		buffer = ByteBuffer.allocate(min(payloadSize, maxBufferSize));
 	}
 
 	private boolean readNextBuffer() throws IOException {
