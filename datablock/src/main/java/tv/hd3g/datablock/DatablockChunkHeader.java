@@ -28,7 +28,7 @@ import lombok.Getter;
 
 @Getter
 @EqualsAndHashCode
-public class DatablockChunkHeader implements IOTraits {// TODO test + debug tools
+public class DatablockChunkHeader implements IOTraits {// TODO debug tools
 
 	public static final int FOURCC_EXPECTED_SIZE = 4;
 	public static final int BLANK_EXPECTED_SIZE = 13;

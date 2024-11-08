@@ -24,14 +24,11 @@ import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.io.IOException;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 
@@ -71,15 +68,8 @@ class DataBlockChunkIndexItemTest {
 		verify(chunkPayloadExtractor, times(1)).clean();
 	}
 
-	private static Stream<Arguments> provideBooleans() {
-		return IntStream.range(0, 4)
-				.mapToObj(i -> Arguments.of(
-						(i & 1) == 1,
-						(i & 2) == 2));
-	}
-
 	@ParameterizedTest
-	@MethodSource("provideBooleans")
+	@MethodSource("tv.hd3g.commons.testtools.MockToolsExtendsJunit#provide2Booleans")
 	void testSetArchived(final boolean archived, final boolean deleted) throws IOException {
 		when(header.isDeleted()).thenReturn(deleted);
 
@@ -92,7 +82,7 @@ class DataBlockChunkIndexItemTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("provideBooleans")
+	@MethodSource("tv.hd3g.commons.testtools.MockToolsExtendsJunit#provide2Booleans")
 	void testSetDeleted(final boolean archived, final boolean deleted) throws IOException {
 		when(header.isArchived()).thenReturn(archived);
 

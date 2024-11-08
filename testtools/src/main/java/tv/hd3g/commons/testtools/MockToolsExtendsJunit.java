@@ -24,11 +24,13 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -218,6 +220,27 @@ public class MockToolsExtendsJunit implements BeforeEachCallback, AfterEachCallb
 		context.getRequiredTestInstances()
 				.getAllInstances()
 				.forEach(this::check);
+	}
+
+	/**
+	 * With @ParameterizedTest and @MethodSource("tv.hd3g.commons.testtools.MockToolsExtendsJunit#provide3Booleans")
+	 */
+	public static Stream<Arguments> provide3Booleans() {// TODO test
+		return IntStream.range(0, 8)
+				.mapToObj(i -> Arguments.of(
+						(i & 1) == 1,
+						(i & 2) == 2,
+						(i & 4) == 4));
+	}
+
+	/**
+	 * With @ParameterizedTest and @MethodSource("tv.hd3g.commons.testtools.MockToolsExtendsJunit#provide2Booleans")
+	 */
+	public static Stream<Arguments> provide2Booleans() {// TODO test
+		return IntStream.range(0, 4)
+				.mapToObj(i -> Arguments.of(
+						(i & 1) == 1,
+						(i & 2) == 2));
 	}
 
 }

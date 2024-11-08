@@ -24,7 +24,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-public class DatablockOutputStreamChunk extends OutputStream implements IOTraits {// TODO test
+public class DatablockOutputStreamChunk extends OutputStream implements IOTraits {
 
 	private final FileChannel channel;
 	private final long payloadPosition;

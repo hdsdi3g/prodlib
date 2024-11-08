@@ -24,12 +24,8 @@ import static tv.hd3g.datablock.DatablockMigrateChunkPolicy.keepChunk;
 import static tv.hd3g.datablock.DatablockMigrateChunkPolicy.keepChunkMarkActualArchived;
 import static tv.hd3g.datablock.DatablockMigrateChunkPolicy.keepChunkMarkActualDeleted;
 
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class DatablockMigrateChunkPolicyTest {
@@ -90,16 +86,8 @@ class DatablockMigrateChunkPolicyTest {
 		assertThat(p.markActualChunkAsDeleted()).isFalse();
 	}
 
-	private static Stream<Arguments> provideBooleans() {
-		return IntStream.range(0, 8)
-				.mapToObj(i -> Arguments.of(
-						(i & 1) == 1,
-						(i & 2) == 2,
-						(i & 4) == 4));
-	}
-
 	@ParameterizedTest
-	@MethodSource("provideBooleans")
+	@MethodSource("tv.hd3g.commons.testtools.MockToolsExtendsJunit#provide3Booleans")
 	void testChangeActualChunk(final boolean keep, final boolean pArchived, final boolean pDeleted) {
 		assertThat(new DatablockMigrateChunkPolicy(keep, pArchived, pDeleted).changeActualChunk())
 				.isEqualTo(pArchived || pDeleted);
