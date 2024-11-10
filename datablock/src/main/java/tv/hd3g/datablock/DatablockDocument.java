@@ -18,7 +18,6 @@ package tv.hd3g.datablock;
 
 import static tv.hd3g.datablock.DatablockChunkHeader.CHUNK_HEADER_LEN;
 import static tv.hd3g.datablock.DatablockDocumentHeader.DOCUMENT_HEADER_LEN;
-import static tv.hd3g.datablock.DatablockDocumentHeader.DOCUMENT_VERSION_POS;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -54,13 +53,14 @@ public class DatablockDocument implements IOTraits {// TODO test
 		return new DatablockDocumentHeader(documentHeaderBuffer.flip().asReadOnlyBuffer());
 	}
 
-	/**
+	/*
+	 * TODO needed ?
 	 * @return newDocumentVersion
 	 */
-	public synchronized int incrementDocumentVersion() throws IOException {
-		final var buffer = ByteBuffer.allocate(4 /** documentVersion */
+	/*public synchronized int incrementDocumentVersion() throws IOException {
+		final var buffer = ByteBuffer.allocate(4 /** documentVersion *
 		);
-
+	
 		checkedRead(channel, DOCUMENT_VERSION_POS, buffer);
 		buffer.flip();
 		final var newDocumentVersion = buffer.getInt() + 1;
@@ -69,7 +69,7 @@ public class DatablockDocument implements IOTraits {// TODO test
 		buffer.flip();
 		checkedWrite(channel, DOCUMENT_VERSION_POS, buffer);
 		return newDocumentVersion;
-	}
+	}*/
 
 	public synchronized void writeDocumentHeader(final DatablockDocumentHeader header) throws IOException {
 		final var buffer = header.toByteBuffer();
@@ -98,13 +98,13 @@ public class DatablockDocument implements IOTraits {// TODO test
 	public synchronized void appendChunk(final byte[] fourCC,
 										 final short version,
 										 final boolean archived,
-										 final Consumer<OutputStream> reader) throws IOException {
+										 final Consumer<OutputStream> writer) throws IOException {
 		final var chunkHeader = new DatablockChunkHeader(fourCC, version, 0, archived);
 		final var header = chunkHeader.toByteBuffer();
 		checkedWrite(channel, header);
 
 		try (var outputStream = new DatablockOutputStreamChunk(channel)) {
-			reader.accept(outputStream);
+			writer.accept(outputStream);
 		} finally {
 			chunkSeparator.clear();
 			chunkSeparator.put(ZERO_BYTE);

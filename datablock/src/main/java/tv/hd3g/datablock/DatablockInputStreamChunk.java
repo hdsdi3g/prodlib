@@ -29,76 +29,45 @@ class DatablockInputStreamChunk extends InputStream {// TODO test
 	private final FileChannel channel;
 	private final long payloadPosition;
 	private final int payloadSize;
-	private final ByteBuffer buffer;
+	private final ByteBuffer oneByteBuffer;
 
 	DatablockInputStreamChunk(final FileChannel channel,
 							  final long payloadPosition,
-							  final int payloadSize,
-							  final int maxBufferSize) throws IOException {
+							  final int payloadSize) throws IOException {
 		this.channel = Objects.requireNonNull(channel, "\"channel\" can't to be null");
 		this.payloadPosition = payloadPosition;
 		this.payloadSize = payloadSize;
 		channel.position(payloadPosition);
-		buffer = ByteBuffer.allocate(min(payloadSize, maxBufferSize));
-	}
-
-	private boolean readNextBuffer() throws IOException {
-		if (buffer.hasRemaining() == false) {
-			final var available = getCurrentAvailable();
-			if (available == 0) {
-				return false;
-			}
-			buffer.clear();
-			buffer.limit(min(buffer.capacity(), available));
-			final var readed = channel.read(buffer);
-			if (readed == 0) {
-				return false;
-			}
-			buffer.flip();
-		}
-		return true;
+		oneByteBuffer = ByteBuffer.allocate(1);
 	}
 
 	@Override
 	public int read() throws IOException {
-		if (readNextBuffer() == false) {
+		if (getCurrentAvailable() <= 0) {
 			return -1;
 		}
-		return buffer.get() & 0xFF;
+
+		oneByteBuffer.clear();
+		if (channel.read(oneByteBuffer) <= 0) {
+			return -1;
+		}
+
+		oneByteBuffer.flip();
+		return oneByteBuffer.get() & 0xFF;
 	}
 
 	@Override
 	public int read(final byte[] b, final int off, final int len) throws IOException {
-		var pos = off;
-		var writeRemain = len;
-
-		while (writeRemain > 0) {
-			if (readNextBuffer() == false) {
-				break;
-			}
-
-			final var ioSize = min(writeRemain, buffer.remaining());
-			buffer.get(b, pos, ioSize);
-
-			pos += ioSize;
-			writeRemain -= ioSize;
+		final var available = getCurrentAvailable();
+		if (getCurrentAvailable() <= 0) {
+			return -1;
 		}
-
-		return pos - off;
-
+		final var buffer = ByteBuffer.wrap(b, off, min(available, len));
+		return channel.read(buffer);
 	}
 
-	@Override
-	public void close() throws IOException {
-		buffer.clear();
-	}
-
-	private int getCurrentPosition() throws IOException {
-		return (int) (channel.position() - payloadPosition);
-	}
-
-	private int getCurrentAvailable() throws IOException {
-		return payloadSize - getCurrentPosition();
+	int getCurrentAvailable() throws IOException {
+		return payloadSize - (int) (channel.position() - payloadPosition);
 	}
 
 }

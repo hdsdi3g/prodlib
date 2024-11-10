@@ -96,11 +96,14 @@ class DatablockChunkPayloadExtractorImpl implements DatablockChunkPayloadExtract
 		try {
 			Optional.ofNullable(currentMemorySegment)
 					.ifPresent(MemorySegment::unload);
-			Optional.ofNullable(arena)
-					.ifPresent(Arena::close);
 		} finally {
 			currentMemorySegment = null;
-			arena = null;
+			try {
+				Optional.ofNullable(arena)
+						.ifPresent(Arena::close);
+			} finally {
+				arena = null;
+			}
 		}
 	}
 

@@ -53,8 +53,6 @@ public class DatablockChunkHeader implements IOTraits {// TODO debug tools
 	 * @param fourCC 4 bytes to identify and route to process the chunk
 	 * @param version chunk type version
 	 * @param payloadSize data payload payloadSize
-	 * @param compressed is payload is compressed
-	 * @param crc payload crc result
 	 * @param archived marked as archived
 	 */
 	DatablockChunkHeader(final byte[] fourCC,
@@ -89,8 +87,11 @@ public class DatablockChunkHeader implements IOTraits {// TODO debug tools
 		checkEndBlank(readFrom, BLANK_EXPECTED_SIZE);
 	}
 
-	ByteBuffer toByteBuffer() {
-		final var header = ByteBuffer.allocate(CHUNK_HEADER_LEN);
+	void toByteBuffer(final ByteBuffer header) {// TODO needed 2 toByteBuffer ?
+		if (header.remaining() < CHUNK_HEADER_LEN) {
+			throw new IllegalArgumentException(
+					"No left space (" + header.remaining() + "/" + CHUNK_HEADER_LEN + ") on buffer");
+		}
 		header.put(fourCC);
 		header.putShort(version);
 		header.putInt(payloadSize);
@@ -99,8 +100,13 @@ public class DatablockChunkHeader implements IOTraits {// TODO debug tools
 		final var flag = getFlag(deleted, archived);
 		header.put(flag);
 		header.put(new byte[BLANK_EXPECTED_SIZE]);
+	}
+
+	ByteBuffer toByteBuffer() {
+		final var header = ByteBuffer.allocate(CHUNK_HEADER_LEN);
+		toByteBuffer(header);
 		header.flip();
-		return header.asReadOnlyBuffer();
+		return header;
 	}
 
 	private static byte getFlag(final boolean deleted, final boolean archived) {
