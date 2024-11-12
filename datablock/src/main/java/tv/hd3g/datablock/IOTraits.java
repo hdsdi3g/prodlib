@@ -40,7 +40,8 @@ public interface IOTraits {
 	default void checkedWrite(final FileChannel channel,
 							  final long position,
 							  final ByteBuffer buffer) throws IOException {
-		checkIOSize(channel.write(buffer, position), buffer.capacity());
+		channel.position(position);
+		checkIOSize(channel.write(buffer), buffer.capacity());
 	}
 
 	default void checkedRead(final ReadableByteChannel channel, final ByteBuffer buffer) throws IOException {
@@ -50,7 +51,8 @@ public interface IOTraits {
 	default void checkedRead(final FileChannel channel,
 							 final long position,
 							 final ByteBuffer buffer) throws IOException {
-		checkIOSize(channel.read(buffer, position), buffer.capacity());
+		channel.position(position);
+		checkIOSize(channel.read(buffer), buffer.capacity());
 	}
 
 	default void checkEndBlank(final ByteBuffer readFrom, final int blankExpectedSize) {

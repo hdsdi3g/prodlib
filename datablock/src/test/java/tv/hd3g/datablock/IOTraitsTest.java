@@ -77,9 +77,10 @@ class IOTraitsTest {
 	void testCheckedWriteFileChannelLongByteBuffer() throws IOException {
 		readFrom = ByteBuffer.allocate(operation);
 
-		when(fileChannel.write(readFrom, pos)).thenReturn(operation);
+		when(fileChannel.write(readFrom)).thenReturn(operation);
 		t.checkedWrite(fileChannel, pos, readFrom);
-		verify(fileChannel, times(1)).write(readFrom, pos);
+		verify(fileChannel, times(1)).position(pos);
+		verify(fileChannel, times(1)).write(readFrom);
 	}
 
 	@Test
@@ -95,9 +96,10 @@ class IOTraitsTest {
 	void testCheckedReadFileChannelLongByteBuffer() throws IOException {
 		readFrom = ByteBuffer.allocate(operation);
 
-		when(fileChannel.read(readFrom, pos)).thenReturn(operation);
+		when(fileChannel.read(readFrom)).thenReturn(operation);
 		t.checkedRead(fileChannel, pos, readFrom);
-		verify(fileChannel, times(1)).read(readFrom, pos);
+		verify(fileChannel, times(1)).position(pos);
+		verify(fileChannel, times(1)).read(readFrom);
 	}
 
 	@Test

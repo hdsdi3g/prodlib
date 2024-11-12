@@ -18,60 +18,29 @@ package tv.hd3g.datablock;
 
 import static java.nio.file.StandardOpenOption.READ;
 import static java.util.Arrays.fill;
-import static org.apache.commons.io.FileUtils.delete;
-import static org.apache.commons.io.FileUtils.forceMkdir;
 import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import net.datafaker.Faker;
+class DatablockInputStreamChunkTest extends RealFileWork {
 
-class DatablockInputStreamChunkTest {
-
-	static Faker faker = net.datafaker.Faker.instance();
-	static byte[] data;
-	static File file;
-
-	@BeforeAll
-	static void prepare() throws Exception {
-		final var dir = new File("target/test-temp");
-		forceMkdir(dir);
-
-		data = faker.random().nextRandomBytes(faker.random().nextInt(1000, 10000));
-		file = File.createTempFile(
-				DatablockInputStreamChunkTest.class.getSimpleName(),
-				".bin",
-				dir);
-		writeByteArrayToFile(file, data);
-	}
-
-	@AfterAll
-	static void close() throws IOException {
-		if (file != null) {
-			delete(file);
-		}
-	}
-
-	FileChannel channel;
 	int payloadPosition;
 	int payloadSize;
 	DatablockInputStreamChunk c;
 
 	@BeforeEach
 	void init() throws Exception {
+		writeByteArrayToFile(file, data);
+
 		channel = FileChannel.open(file.toPath(), READ);
 		payloadPosition = faker.random().nextInt(data.length / 12, data.length / 10);
 		final var from = data.length / 20;
@@ -81,11 +50,6 @@ class DatablockInputStreamChunkTest {
 		c = new DatablockInputStreamChunk(channel, payloadPosition, payloadSize);
 		assertEquals(payloadPosition, channel.position());
 		assertEquals(payloadSize, c.available());
-	}
-
-	@AfterEach
-	void end() throws Exception {
-		channel.close();
 	}
 
 	@Test

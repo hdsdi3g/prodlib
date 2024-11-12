@@ -20,25 +20,25 @@ import static tv.hd3g.datablock.DatablockChunkHeader.CHUNK_HEADER_LEN;
 import static tv.hd3g.datablock.DatablockDocumentHeader.DOCUMENT_HEADER_LEN;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 // TODO add technical readme
 // TODO add v1 + object storage + defrag
 // TODO add indexed list
-public class DatablockDocument implements IOTraits {// TODO test
+public class DatablockDocument implements IOTraits {
+
+	public static final int CHUNK_SEPARATOR_SIZE = 1;
 
 	private final FileChannel channel;
 	private final ByteBuffer documentHeaderBuffer = ByteBuffer.allocate(DOCUMENT_HEADER_LEN);
 	private final ByteBuffer chunkHeaderBuffer = ByteBuffer.allocate(CHUNK_HEADER_LEN);
-	private final ByteBuffer chunkSeparator = ByteBuffer.allocate(1);
+	private final ByteBuffer chunkSeparator = ByteBuffer.allocate(CHUNK_SEPARATOR_SIZE);
 
 	public DatablockDocument(final FileChannel channel) throws IOException {
 		this.channel = Objects.requireNonNull(channel, "\"channel\" can't to be null");
@@ -47,34 +47,18 @@ public class DatablockDocument implements IOTraits {// TODO test
 		}
 	}
 
-	public synchronized DatablockDocumentHeader readDocumentHeader() throws IOException {
+	public synchronized DatablockDocumentHeader getDocumentHeader() throws IOException {
 		documentHeaderBuffer.clear();
 		checkedRead(channel, 0, documentHeaderBuffer);
 		return new DatablockDocumentHeader(documentHeaderBuffer.flip().asReadOnlyBuffer());
 	}
 
-	/*
-	 * TODO needed ?
-	 * @return newDocumentVersion
-	 */
-	/*public synchronized int incrementDocumentVersion() throws IOException {
-		final var buffer = ByteBuffer.allocate(4 /** documentVersion *
-		);
-
-		checkedRead(channel, DOCUMENT_VERSION_POS, buffer);
-		buffer.flip();
-		final var newDocumentVersion = buffer.getInt() + 1;
-		buffer.reset();
-		buffer.putInt(newDocumentVersion);
-		buffer.flip();
-		checkedWrite(channel, DOCUMENT_VERSION_POS, buffer);
-		return newDocumentVersion;
-	}*/
-
-	public synchronized void writeDocumentHeader(final DatablockDocumentHeader header) throws IOException {
+	public synchronized void putDocumentHeader(final DatablockDocumentHeader header) throws IOException {
 		final var buffer = header.toByteBuffer();
 		checkedWrite(channel, 0, buffer);
 	}
+
+	// FIXME + test APPEND FROM THE EOF !
 
 	/**
 	 * @param chunkPayload No reset/flip will be done
@@ -88,28 +72,21 @@ public class DatablockDocument implements IOTraits {// TODO test
 		final var header = chunkHeader.toByteBuffer();
 		checkedWrite(channel, header);
 		checkedWrite(channel, chunkPayload);
-
-		chunkSeparator.clear();
-		chunkSeparator.put(ZERO_BYTE);
-		chunkSeparator.flip();
-		checkedWrite(channel, chunkSeparator);
+		writeChunkSeparator();
 	}
 
 	public synchronized void appendChunk(final byte[] fourCC,
 										 final short version,
 										 final boolean archived,
-										 final Consumer<OutputStream> writer) throws IOException {
+										 final OutputStreamConsumer writer) throws IOException {
 		final var chunkHeader = new DatablockChunkHeader(fourCC, version, 0, archived);
 		final var header = chunkHeader.toByteBuffer();
 		checkedWrite(channel, header);
 
 		try (var outputStream = new DatablockOutputStreamChunk(channel)) {
-			writer.accept(outputStream);
+			writer.writeTo(outputStream);
 		} finally {
-			chunkSeparator.clear();
-			chunkSeparator.put(ZERO_BYTE);
-			chunkSeparator.flip();
-			checkedWrite(channel, chunkSeparator);
+			writeChunkSeparator();
 		}
 	}
 
@@ -123,19 +100,22 @@ public class DatablockDocument implements IOTraits {// TODO test
 
 		final var payloadPosition = channel.position();
 		channel.position(payloadPosition + payloadSize);
+		writeChunkSeparator();
 
+		return new DataBlockChunkIndexItem(chunkHeader, payloadPosition);
+	}
+
+	private void writeChunkSeparator() throws IOException {
 		chunkSeparator.clear();
 		chunkSeparator.put(ZERO_BYTE);
 		chunkSeparator.flip();
 		checkedWrite(channel, chunkSeparator);
-
-		return new DataBlockChunkIndexItem(chunkHeader, payloadPosition);
 	}
 
 	public synchronized void documentCrawl(final FoundedDataBlockDocumentChunk chunkCallback) throws IOException {
 		channel.position(DOCUMENT_HEADER_LEN);
 
-		while (channel.position() + 1l < channel.size()) {
+		while (channel.position() <= channel.size()) {
 			chunkHeaderBuffer.clear();
 			checkedRead(channel, chunkHeaderBuffer);
 			final var header = new DatablockChunkHeader(chunkHeaderBuffer);
@@ -173,8 +153,8 @@ public class DatablockDocument implements IOTraits {// TODO test
 		newDocument.truncate(DOCUMENT_HEADER_LEN);
 		newDocument.position(0);
 
-		final var actualHeader = readDocumentHeader();
-		targetDocument.writeDocumentHeader(actualHeader.getIncrementedDocumentVersion());
+		final var actualHeader = getDocumentHeader();
+		targetDocument.putDocumentHeader(actualHeader.getIncrementedDocumentVersion());
 
 		final var actualPos = channel.position();
 

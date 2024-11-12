@@ -30,7 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-class DatablockChunkPayloadExtractorImpl implements DatablockChunkPayloadExtractor, IOTraits {// TODO tests
+class DatablockChunkPayloadExtractorImpl implements DatablockChunkPayloadExtractor, IOTraits {// TODO tests via E2E
 
 	private final FileChannel channel;
 	private final long payloadPosition;
@@ -42,7 +42,8 @@ class DatablockChunkPayloadExtractorImpl implements DatablockChunkPayloadExtract
 	/**
 	 * Always call clean() after getCurrentChunkPayload()
 	 */
-	DatablockChunkPayloadExtractorImpl(final FileChannel channel, final long payloadPosition,
+	DatablockChunkPayloadExtractorImpl(final FileChannel channel,
+									   final long payloadPosition,
 									   final int payloadSize) {
 		this.channel = Objects.requireNonNull(channel, "\"channel\" can't to be null");
 		this.payloadPosition = payloadPosition;

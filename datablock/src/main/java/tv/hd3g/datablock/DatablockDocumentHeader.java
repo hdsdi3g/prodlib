@@ -25,7 +25,7 @@ import lombok.Getter;
 
 @Getter
 @EqualsAndHashCode
-public class DatablockDocumentHeader implements IOTraits {// TODO test + debug tools
+public class DatablockDocumentHeader implements IOTraits {// TODO debug tools
 
 	public static final int MAGIC_NUMBER_EXPECTED_SIZE = 8;
 	public static final int DOCUMENT_TYPE_EXPECTED_SIZE = 8;
@@ -35,11 +35,6 @@ public class DatablockDocumentHeader implements IOTraits {// TODO test + debug t
 												  + 2 /** typeVersion */
 												  + 4 /** documentVersion */
 												  + BLANK_EXPECTED_SIZE;
-
-	public static final long DOCUMENT_VERSION_POS = MAGIC_NUMBER_EXPECTED_SIZE +
-													DOCUMENT_TYPE_EXPECTED_SIZE
-													+ 2 /** typeVersion */
-	;
 
 	private final byte[] magicNumber;
 	private final byte[] documentType;
@@ -94,7 +89,7 @@ public class DatablockDocumentHeader implements IOTraits {// TODO test + debug t
 		header.putInt(documentVersion);
 		header.put(new byte[BLANK_EXPECTED_SIZE]);
 		header.flip();
-		return header.asReadOnlyBuffer();
+		return header;
 	}
 
 	@Override
