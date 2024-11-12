@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 // TODO add technical readme
-// TODO add v1 + object storage
+// TODO add v1 + object storage + defrag
 // TODO add indexed list
 public class DatablockDocument implements IOTraits {// TODO test
 
@@ -60,7 +60,7 @@ public class DatablockDocument implements IOTraits {// TODO test
 	/*public synchronized int incrementDocumentVersion() throws IOException {
 		final var buffer = ByteBuffer.allocate(4 /** documentVersion *
 		);
-	
+
 		checkedRead(channel, DOCUMENT_VERSION_POS, buffer);
 		buffer.flip();
 		final var newDocumentVersion = buffer.getInt() + 1;

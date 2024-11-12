@@ -24,7 +24,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Objects;
 
-class DatablockInputStreamChunk extends InputStream {// TODO test
+class DatablockInputStreamChunk extends InputStream {
 
 	private final FileChannel channel;
 	private final long payloadPosition;
@@ -43,7 +43,7 @@ class DatablockInputStreamChunk extends InputStream {// TODO test
 
 	@Override
 	public int read() throws IOException {
-		if (getCurrentAvailable() <= 0) {
+		if (available() <= 0) {
 			return -1;
 		}
 
@@ -57,17 +57,27 @@ class DatablockInputStreamChunk extends InputStream {// TODO test
 	}
 
 	@Override
+	public long skip(final long n) throws IOException {
+		final var avaliable = available();
+		final var realSkip = min(n, avaliable);
+		channel.position(channel.position() + realSkip);
+		return realSkip;
+	}
+
+	@Override
+	public int available() throws IOException {
+		return payloadSize - (int) (channel.position() - payloadPosition);
+	}
+
+	@Override
 	public int read(final byte[] b, final int off, final int len) throws IOException {
-		final var available = getCurrentAvailable();
-		if (getCurrentAvailable() <= 0) {
+		Objects.checkFromIndexSize(off, len, b.length);
+		final var available = available();
+		if (available <= 0) {
 			return -1;
 		}
 		final var buffer = ByteBuffer.wrap(b, off, min(available, len));
 		return channel.read(buffer);
-	}
-
-	int getCurrentAvailable() throws IOException {
-		return payloadSize - (int) (channel.position() - payloadPosition);
 	}
 
 }
