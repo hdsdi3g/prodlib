@@ -18,6 +18,10 @@ package tv.hd3g.datablock;
 
 import static tv.hd3g.datablock.DatablockChunkHeader.CHUNK_HEADER_LEN;
 import static tv.hd3g.datablock.DatablockDocumentHeader.DOCUMENT_HEADER_LEN;
+import static tv.hd3g.datablock.NIOUtils.ZERO_BYTE;
+import static tv.hd3g.datablock.NIOUtils.checkEndBlank;
+import static tv.hd3g.datablock.NIOUtils.checkedRead;
+import static tv.hd3g.datablock.NIOUtils.checkedWrite;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -26,12 +30,11 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 
-// TODO add technical readme
-// TODO add v1 + object storage + defrag
-// TODO add indexed list
-public class DatablockDocument implements IOTraits {
+// TODO (after) add technical readme
+// TODO (after) add v1 + object storage + defrag
+// TODO (after) add indexed list
+public class DatablockDocument {
 
 	public static final int CHUNK_SEPARATOR_SIZE = 1;
 
@@ -50,7 +53,7 @@ public class DatablockDocument implements IOTraits {
 	public synchronized DatablockDocumentHeader getDocumentHeader() throws IOException {
 		documentHeaderBuffer.clear();
 		checkedRead(channel, 0, documentHeaderBuffer);
-		return new DatablockDocumentHeader(documentHeaderBuffer.flip().asReadOnlyBuffer());
+		return new DatablockDocumentHeader(documentHeaderBuffer);
 	}
 
 	public synchronized void putDocumentHeader(final DatablockDocumentHeader header) throws IOException {
@@ -58,42 +61,53 @@ public class DatablockDocument implements IOTraits {
 		checkedWrite(channel, 0, buffer);
 	}
 
-	// FIXME + test APPEND FROM THE EOF !
+	private void goToEOF() throws IOException {
+		channel.position(channel.size());
+	}
 
 	/**
 	 * @param chunkPayload No reset/flip will be done
 	 */
-	public synchronized void appendChunk(final byte[] fourCC,
-										 final short version,
-										 final boolean archived,
-										 final ByteBuffer chunkPayload) throws IOException {
+	public synchronized DataBlockChunkIndexItem appendChunk(final byte[] fourCC,
+															final short version,
+															final boolean archived,
+															final ByteBuffer chunkPayload) throws IOException {
+		goToEOF();
 		final var chunkHeader = new DatablockChunkHeader(fourCC, version, chunkPayload.remaining(), archived);
 
 		final var header = chunkHeader.toByteBuffer();
 		checkedWrite(channel, header);
+		final var payloadPosition = channel.position();
 		checkedWrite(channel, chunkPayload);
 		writeChunkSeparator();
+
+		return new DataBlockChunkIndexItem(chunkHeader, payloadPosition);// TODO test
 	}
 
-	public synchronized void appendChunk(final byte[] fourCC,
-										 final short version,
-										 final boolean archived,
-										 final OutputStreamConsumer writer) throws IOException {
+	public synchronized DataBlockChunkIndexItem appendChunk(final byte[] fourCC,
+															final short version,
+															final boolean archived,
+															final OutputStreamConsumer writer) throws IOException {
+		goToEOF();
 		final var chunkHeader = new DatablockChunkHeader(fourCC, version, 0, archived);
 		final var header = chunkHeader.toByteBuffer();
 		checkedWrite(channel, header);
+		final var payloadPosition = channel.position();
 
 		try (var outputStream = new DatablockOutputStreamChunk(channel)) {
 			writer.writeTo(outputStream);
 		} finally {
 			writeChunkSeparator();
 		}
+
+		return new DataBlockChunkIndexItem(chunkHeader, payloadPosition);// TODO test
 	}
 
 	public synchronized DataBlockChunkIndexItem appendEmptyChunk(final byte[] fourCC,
 																 final short version,
 																 final boolean archived,
 																 final int payloadSize) throws IOException {
+		goToEOF();
 		final var chunkHeader = new DatablockChunkHeader(fourCC, version, payloadSize, archived);
 		final var header = chunkHeader.toByteBuffer();
 		checkedWrite(channel, header);
@@ -113,9 +127,13 @@ public class DatablockDocument implements IOTraits {
 	}
 
 	public synchronized void documentCrawl(final FoundedDataBlockDocumentChunk chunkCallback) throws IOException {
+		if (channel.size() < DOCUMENT_HEADER_LEN) {
+			throw new IOException("Document has no header/too empty");
+		}
+
 		channel.position(DOCUMENT_HEADER_LEN);
 
-		while (channel.position() <= channel.size()) {
+		while (channel.position() < channel.size()) {
 			chunkHeaderBuffer.clear();
 			checkedRead(channel, chunkHeaderBuffer);
 			final var header = new DatablockChunkHeader(chunkHeaderBuffer);
@@ -133,7 +151,6 @@ public class DatablockDocument implements IOTraits {
 										  + header.getPayloadSize();
 			chunkSeparator.clear();
 			checkedRead(channel, nextChunkPosition, chunkSeparator);
-			chunkSeparator.flip();
 			checkEndBlank(chunkSeparator, chunkSeparator.capacity());
 		}
 	}
@@ -147,21 +164,22 @@ public class DatablockDocument implements IOTraits {
 		return result;
 	}
 
-	public synchronized void documentRefactor(final FileChannel newDocument,
-											  final Function<DataBlockChunkIndexItem, DatablockMigrateChunkPolicy> keepChunkPolicy) throws IOException {
-		final var targetDocument = new DatablockDocument(newDocument);
-		newDocument.truncate(DOCUMENT_HEADER_LEN);
-		newDocument.position(0);
+	/**
+	 * @return new created document
+	 */
+	public synchronized DatablockDocument documentRefactor(final FileChannel newChannel,
+														   final DatablockKeepChunkPolicy keepChunkPolicy) throws IOException {
+		final var targetDocument = new DatablockDocument(newChannel);
+		newChannel.truncate(DOCUMENT_HEADER_LEN);
+		newChannel.position(0);
 
 		final var actualHeader = getDocumentHeader();
 		targetDocument.putDocumentHeader(actualHeader.getIncrementedDocumentVersion());
 
-		final var actualPos = channel.position();
-
 		documentCrawl((chunkHeader,
 					   chunkPayloadDocumentPosition,
 					   payloadExtractor) -> {
-			final var policy = keepChunkPolicy.apply(
+			final var policy = keepChunkPolicy.getPolicy(
 					new DataBlockChunkIndexItem(chunkHeader, chunkPayloadDocumentPosition));
 
 			if (policy.keepActualChunk()) {
@@ -171,7 +189,7 @@ public class DatablockDocument implements IOTraits {
 									 + chunkSeparator.capacity();
 
 				try {
-					channel.transferTo(startChunkPos, chunkLen, newDocument);
+					channel.transferTo(startChunkPos, chunkLen, newChannel);
 				} catch (final IOException e) {
 					throw new UncheckedIOException(
 							"Can't transfert to newDocument (readed from=" + startChunkPos + ", len=" + chunkLen + ")",
@@ -182,11 +200,12 @@ public class DatablockDocument implements IOTraits {
 
 			if (policy.changeActualChunk()) {
 				try {
-					new DatablockChunkPayloadExtractorImpl(
-							channel, chunkPayloadDocumentPosition, chunkHeader.getPayloadSize())
-									.updateHeader(
-											policy.markActualChunkAsArchived(),
-											policy.markActualChunkAsDeleted());
+					final var impl = new DatablockChunkPayloadExtractorImpl(
+							channel, chunkPayloadDocumentPosition, chunkHeader.getPayloadSize());
+
+					impl.updateHeader(
+							policy.markActualChunkAsArchived(),
+							policy.markActualChunkAsDeleted());
 				} catch (final IOException e) {
 					throw new UncheckedIOException("Can't write to actual document", e);
 				}
@@ -194,7 +213,7 @@ public class DatablockDocument implements IOTraits {
 
 		});
 
-		channel.position(actualPos);
+		return targetDocument;
 	}
 
 	DatablockChunkPayloadExtractorImpl createChunkPayloadExtractor(final long payloadPosition, final int payloadSize) {

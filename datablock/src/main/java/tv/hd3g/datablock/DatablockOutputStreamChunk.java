@@ -18,13 +18,14 @@ package tv.hd3g.datablock;
 
 import static tv.hd3g.datablock.DatablockChunkHeader.CHUNK_HEADER_LEN;
 import static tv.hd3g.datablock.DatablockChunkHeader.updateChunkHeaderPayloadSize;
+import static tv.hd3g.datablock.NIOUtils.checkedWrite;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-public class DatablockOutputStreamChunk extends OutputStream implements IOTraits {
+public class DatablockOutputStreamChunk extends OutputStream {
 
 	private final FileChannel channel;
 	private final long payloadPosition;

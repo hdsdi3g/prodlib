@@ -19,18 +19,17 @@ package tv.hd3g.datablock;
 import static java.nio.channels.FileChannel.MapMode.READ_WRITE;
 import static tv.hd3g.datablock.DatablockChunkHeader.CHUNK_HEADER_LEN;
 import static tv.hd3g.datablock.DatablockChunkHeader.updateChunkHeaderTags;
+import static tv.hd3g.datablock.NIOUtils.checkedRead;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
-class DatablockChunkPayloadExtractorImpl implements DatablockChunkPayloadExtractor, IOTraits {// TODO tests via E2E
+class DatablockChunkPayloadExtractorImpl implements DatablockChunkPayloadExtractor {
 
 	private final FileChannel channel;
 	private final long payloadPosition;
@@ -79,11 +78,11 @@ class DatablockChunkPayloadExtractorImpl implements DatablockChunkPayloadExtract
 	}
 
 	@Override
-	public synchronized <T> T createInputStream(final Function<InputStream, T> chunkReader) throws IOException {
+	public synchronized <T> T createInputStream(final InputStreamFunction<T> chunkReader) throws IOException {
 		final var currentPos = channel.position();
 		T result;
 		try (final var inputStream = new DatablockInputStreamChunk(channel, payloadPosition, payloadSize)) {
-			result = chunkReader.apply(inputStream);
+			result = chunkReader.chunkReader(inputStream);
 		} finally {
 			channel.position(currentPos);
 		}

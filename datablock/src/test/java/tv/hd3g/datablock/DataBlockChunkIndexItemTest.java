@@ -16,7 +16,6 @@
  */
 package tv.hd3g.datablock;
 
-import static java.util.function.Function.identity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -60,8 +59,8 @@ class DataBlockChunkIndexItemTest {
 	}
 
 	@Test
-	void testExtractPayload() {
-		assertEquals(chunkPayloadExtractor, i.extractPayload(identity(), document));
+	void testExtractPayload() throws IOException {
+		assertEquals(chunkPayloadExtractor, i.extractPayload(p -> p, document));
 
 		verify(header, atLeastOnce()).getPayloadSize();
 		verify(document, times(1)).createChunkPayloadExtractor(position, size);

@@ -17,6 +17,9 @@
 package tv.hd3g.datablock;
 
 import static org.apache.commons.codec.binary.Hex.encodeHexString;
+import static tv.hd3g.datablock.NIOUtils.ZERO_BYTE;
+import static tv.hd3g.datablock.NIOUtils.checkEndBlank;
+import static tv.hd3g.datablock.NIOUtils.checkRemaining;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -28,7 +31,7 @@ import lombok.Getter;
 
 @Getter
 @EqualsAndHashCode
-public class DatablockChunkHeader implements IOTraits {// TODO debug tools
+public class DatablockChunkHeader {
 
 	public static final int FOURCC_EXPECTED_SIZE = 4;
 	public static final int BLANK_EXPECTED_SIZE = 13;
@@ -87,7 +90,8 @@ public class DatablockChunkHeader implements IOTraits {// TODO debug tools
 		checkEndBlank(readFrom, BLANK_EXPECTED_SIZE);
 	}
 
-	void toByteBuffer(final ByteBuffer header) {// TODO needed 2 toByteBuffer ?
+	ByteBuffer toByteBuffer() {
+		final var header = ByteBuffer.allocate(CHUNK_HEADER_LEN);
 		if (header.remaining() < CHUNK_HEADER_LEN) {
 			throw new IllegalArgumentException(
 					"No left space (" + header.remaining() + "/" + CHUNK_HEADER_LEN + ") on buffer");
@@ -100,11 +104,6 @@ public class DatablockChunkHeader implements IOTraits {// TODO debug tools
 		final var flag = getFlag(deleted, archived);
 		header.put(flag);
 		header.put(new byte[BLANK_EXPECTED_SIZE]);
-	}
-
-	ByteBuffer toByteBuffer() {
-		final var header = ByteBuffer.allocate(CHUNK_HEADER_LEN);
-		toByteBuffer(header);
 		header.flip();
 		return header;
 	}
@@ -122,7 +121,7 @@ public class DatablockChunkHeader implements IOTraits {// TODO debug tools
 									  final boolean setDeleted) throws IOException {
 		final var buffer = ByteBuffer.wrap(new byte[] { getFlag(setDeleted, setArchived) });
 
-		IOTraits.checkIOSize(channel.write(
+		NIOUtils.checkIOSize(channel.write(
 				buffer,
 				channel.position()
 						+ FOURCC_EXPECTED_SIZE
@@ -142,7 +141,7 @@ public class DatablockChunkHeader implements IOTraits {// TODO debug tools
 		buffer.putInt(newPayloadSize);
 		buffer.flip();
 
-		IOTraits.checkIOSize(channel.write(
+		NIOUtils.checkIOSize(channel.write(
 				buffer,
 				channel.position()
 						+ FOURCC_EXPECTED_SIZE

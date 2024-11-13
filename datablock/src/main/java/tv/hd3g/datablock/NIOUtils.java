@@ -22,40 +22,45 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
-public interface IOTraits {
+public final class NIOUtils {
 
-	String BYTES_STR = " bytes";
-	byte ZERO_BYTE = 0x0;
+	public static final String BYTES_STR = " bytes";
+	public static final byte ZERO_BYTE = 0x0;
 
-	static void checkIOSize(final int operation, final int expect) throws IOException {
+	private NIOUtils() {
+	}
+
+	public static void checkIOSize(final int operation, final int expect) throws IOException {
 		if (operation != expect) {
 			throw new IOException("Invalid I/O operation: expect " + expect + " and get " + operation);
 		}
 	}
 
-	default void checkedWrite(final WritableByteChannel channel, final ByteBuffer buffer) throws IOException {
+	public static void checkedWrite(final WritableByteChannel channel, final ByteBuffer buffer) throws IOException {
 		checkIOSize(channel.write(buffer), buffer.capacity());
 	}
 
-	default void checkedWrite(final FileChannel channel,
-							  final long position,
-							  final ByteBuffer buffer) throws IOException {
+	public static void checkedWrite(final FileChannel channel,
+									final long position,
+									final ByteBuffer buffer) throws IOException {
 		channel.position(position);
 		checkIOSize(channel.write(buffer), buffer.capacity());
 	}
 
-	default void checkedRead(final ReadableByteChannel channel, final ByteBuffer buffer) throws IOException {
+	public static void checkedRead(final ReadableByteChannel channel, final ByteBuffer buffer) throws IOException {
 		checkIOSize(channel.read(buffer), buffer.capacity());
+		buffer.flip();
 	}
 
-	default void checkedRead(final FileChannel channel,
-							 final long position,
-							 final ByteBuffer buffer) throws IOException {
+	public static void checkedRead(final FileChannel channel,
+								   final long position,
+								   final ByteBuffer buffer) throws IOException {
 		channel.position(position);
 		checkIOSize(channel.read(buffer), buffer.capacity());
+		buffer.flip();
 	}
 
-	default void checkEndBlank(final ByteBuffer readFrom, final int blankExpectedSize) {
+	public static void checkEndBlank(final ByteBuffer readFrom, final int blankExpectedSize) {
 		if (readFrom.limit() < blankExpectedSize) {
 			throw new IllegalArgumentException("Invalid limit space: " + readFrom.limit() + "/" + blankExpectedSize);
 		}
@@ -67,7 +72,7 @@ public interface IOTraits {
 		}
 	}
 
-	default void checkRemaining(final ByteBuffer readFrom, final int headerLen) {
+	public static void checkRemaining(final ByteBuffer readFrom, final int headerLen) {
 		if (readFrom.remaining() < headerLen) {
 			throw new IllegalArgumentException("Not enough remaining space (" + readFrom.remaining()
 											   + " bytes) to read from buffer. It need at least "

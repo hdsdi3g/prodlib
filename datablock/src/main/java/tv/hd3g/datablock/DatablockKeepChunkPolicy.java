@@ -17,20 +17,10 @@
 package tv.hd3g.datablock;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
-public interface DatablockChunkPayloadExtractor {
+@FunctionalInterface
+public interface DatablockKeepChunkPolicy {
 
-	/**
-	 * @return a ByteBuffer that will be destroy after use
-	 */
-	ByteBuffer getCurrentChunkPayload() throws IOException;
-
-	byte[] getCurrentChunkPayloadBytes() throws IOException;
-
-	void updateHeader(final boolean setArchived,
-					  final boolean setDeleted) throws IOException;
-
-	<T> T createInputStream(final InputStreamFunction<T> chunkReader) throws IOException;
+	DatablockMigrateChunkPolicy getPolicy(DataBlockChunkIndexItem item) throws IOException;
 
 }

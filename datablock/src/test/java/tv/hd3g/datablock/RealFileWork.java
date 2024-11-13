@@ -21,6 +21,7 @@ import static org.apache.commons.io.FileUtils.forceMkdir;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.channels.FileChannel;
 
 import org.junit.jupiter.api.AfterAll;
@@ -31,15 +32,24 @@ import net.datafaker.Faker;
 
 public class RealFileWork {
 
+	private static final File dir;
+
+	static {
+		dir = new File("target/test-temp");
+		try {
+			forceMkdir(dir);
+		} catch (final IOException e) {
+			throw new UncheckedIOException("Can't prepare dir", e);
+		}
+	}
+
 	static Faker faker = net.datafaker.Faker.instance();
 	static byte[] data;
 	static File file;
+	static File file1;
 
 	@BeforeAll
 	static void prepare() throws Exception {
-		final var dir = new File("target/test-temp");
-		forceMkdir(dir);
-
 		data = faker.random().nextRandomBytes(faker.random().nextInt(1000, 10000));
 		file = File.createTempFile(
 				DatablockInputStreamChunkTest.class.getSimpleName(),
@@ -47,23 +57,42 @@ public class RealFileWork {
 				dir);
 	}
 
+	void prepareFile1() throws IOException {
+		file1 = File.createTempFile(
+				DatablockInputStreamChunkTest.class.getSimpleName(),
+				".bin",
+				dir);
+	}
+
 	@AfterAll
 	static void close() throws IOException {
-		if (file != null) {
+		if (file != null && file.exists()) {
 			delete(file);
+		}
+		if (file1 != null && file1.exists()) {
+			delete(file1);
 		}
 	}
 
 	FileChannel channel;
+	FileChannel channel1;
 
 	@AfterEach
-	void end() throws Exception {
+	void ends() {
+		closeChannel(channel);
+		closeChannel(channel1);
+	}
+
+	private static void closeChannel(final FileChannel channel) {
 		if (channel == null) {
 			return;
 		}
 		try {
 			channel.close();
 		} catch (final IOException e) {
+			/**
+			 * Silent close channel
+			 */
 		}
 	}
 

@@ -17,6 +17,9 @@
 package tv.hd3g.datablock;
 
 import static org.apache.commons.codec.binary.Hex.encodeHexString;
+import static tv.hd3g.datablock.NIOUtils.BYTES_STR;
+import static tv.hd3g.datablock.NIOUtils.checkEndBlank;
+import static tv.hd3g.datablock.NIOUtils.checkRemaining;
 
 import java.nio.ByteBuffer;
 
@@ -25,7 +28,7 @@ import lombok.Getter;
 
 @Getter
 @EqualsAndHashCode
-public class DatablockDocumentHeader implements IOTraits {// TODO debug tools
+public class DatablockDocumentHeader {
 
 	public static final int MAGIC_NUMBER_EXPECTED_SIZE = 8;
 	public static final int DOCUMENT_TYPE_EXPECTED_SIZE = 8;

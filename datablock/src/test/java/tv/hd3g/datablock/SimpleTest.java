@@ -32,8 +32,6 @@ class SimpleTest {
 
 	@Test
 	void test() throws IOException {
-		System.out.println(aa());
-
 		try (var channel = FileChannel.open(Path.of("test.bin"), CREATE, READ, WRITE)) {
 			final var m = channel.map(READ_WRITE, 0, 1, Arena.ofShared());
 			final var bb = m.asByteBuffer();
@@ -42,15 +40,6 @@ class SimpleTest {
 			// bb.put((byte) 0x67);
 			// m.unload();
 		}
-	}
-
-	String aa() {
-		try {
-			return "upe";
-		} finally {
-			System.out.println("+++");
-		}
-
 	}
 
 }

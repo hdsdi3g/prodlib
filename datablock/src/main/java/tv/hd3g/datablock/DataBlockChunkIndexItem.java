@@ -17,21 +17,24 @@
 package tv.hd3g.datablock;
 
 import java.io.IOException;
-import java.util.function.Function;
 
 public record DataBlockChunkIndexItem(DatablockChunkHeader header, long payloadPosition) {
 
-	public <T> T extractPayload(final Function<DatablockChunkPayloadExtractor, T> extractor,
-								final DatablockDocument document) {
+	public <T> T extractPayload(final DatablockChunkPayloadExtractorFunction<T> extractor,
+								final DatablockDocument document) throws IOException {
 		final var reader = createChunkPayloadExtractor(document);
 		T result;
 		try {
-			result = extractor.apply(reader);
+			result = extractor.extract(reader);
 		} finally {
 			reader.clean();
 		}
 
 		return result;
+	}
+
+	public byte[] extractPayload(final DatablockDocument document) throws IOException {// TODO test
+		return extractPayload(DatablockChunkPayloadExtractor::getCurrentChunkPayloadBytes, document);
 	}
 
 	public void setArchived(final boolean archived, final DatablockDocument document) throws IOException {

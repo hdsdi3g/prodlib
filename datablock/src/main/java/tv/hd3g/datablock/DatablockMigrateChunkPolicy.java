@@ -16,6 +16,10 @@
  */
 package tv.hd3g.datablock;
 
+/**
+ * Overwrite the actual chunk flags (archived/deleted).
+ * The keeped chunk (migrated to another document) will get archived flag like the actual chunk (before the edit), but not set to deleted flag.
+ */
 public record DatablockMigrateChunkPolicy(boolean keepActualChunk,
 										  boolean markActualChunkAsArchived,
 										  boolean markActualChunkAsDeleted) {
@@ -28,19 +32,19 @@ public record DatablockMigrateChunkPolicy(boolean keepActualChunk,
 		return new DatablockMigrateChunkPolicy(false, false, false);
 	}
 
-	public static DatablockMigrateChunkPolicy keepChunkMarkActualDeleted() {
+	public static DatablockMigrateChunkPolicy keepChunkThenMarkActualDeleted() {
 		return new DatablockMigrateChunkPolicy(true, false, true);
 	}
 
-	public static DatablockMigrateChunkPolicy keepChunkMarkActualArchived() {
+	public static DatablockMigrateChunkPolicy keepChunkThenMarkActualArchived() {
 		return new DatablockMigrateChunkPolicy(true, true, false);
 	}
 
-	public static DatablockMigrateChunkPolicy dontKeepChunkMarkActualDeleted() {
+	public static DatablockMigrateChunkPolicy dontKeepChunkThenMarkActualDeleted() {
 		return new DatablockMigrateChunkPolicy(false, false, true);
 	}
 
-	public static DatablockMigrateChunkPolicy dontKeepChunkMarkActualArchived() {
+	public static DatablockMigrateChunkPolicy dontKeepChunkThenMarkActualArchived() {
 		return new DatablockMigrateChunkPolicy(false, true, false);
 	}
 

@@ -20,6 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
+import static tv.hd3g.datablock.NIOUtils.checkEndBlank;
+import static tv.hd3g.datablock.NIOUtils.checkIOSize;
+import static tv.hd3g.datablock.NIOUtils.checkRemaining;
+import static tv.hd3g.datablock.NIOUtils.checkedRead;
+import static tv.hd3g.datablock.NIOUtils.checkedWrite;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -35,11 +40,7 @@ import tv.hd3g.commons.testtools.Fake;
 import tv.hd3g.commons.testtools.MockToolsExtendsJunit;
 
 @ExtendWith(MockToolsExtendsJunit.class)
-class IOTraitsTest {
-
-	class TestIOTraits implements IOTraits {
-
-	}
+class NIOUtilsTest {
 
 	@Fake(min = 10, max = 10000)
 	int operation;
@@ -56,12 +57,11 @@ class IOTraitsTest {
 	FileChannel fileChannel;
 
 	ByteBuffer readFrom;
-	TestIOTraits t = new TestIOTraits();
 
 	@Test
 	void testCheckIOSizeIntInt() throws IOException {
-		assertThrows(IOException.class, () -> IOTraits.checkIOSize(operation, expect));
-		IOTraits.checkIOSize(expect, expect);
+		assertThrows(IOException.class, () -> checkIOSize(operation, expect));
+		NIOUtils.checkIOSize(expect, expect);
 	}
 
 	@Test
@@ -69,7 +69,7 @@ class IOTraitsTest {
 		readFrom = ByteBuffer.allocate(operation);
 
 		when(writableByteChannel.write(readFrom)).thenReturn(operation);
-		t.checkedWrite(writableByteChannel, readFrom);
+		checkedWrite(writableByteChannel, readFrom);
 		verify(writableByteChannel, times(1)).write(readFrom);
 	}
 
@@ -78,7 +78,7 @@ class IOTraitsTest {
 		readFrom = ByteBuffer.allocate(operation);
 
 		when(fileChannel.write(readFrom)).thenReturn(operation);
-		t.checkedWrite(fileChannel, pos, readFrom);
+		checkedWrite(fileChannel, pos, readFrom);
 		verify(fileChannel, times(1)).position(pos);
 		verify(fileChannel, times(1)).write(readFrom);
 	}
@@ -88,7 +88,7 @@ class IOTraitsTest {
 		readFrom = ByteBuffer.allocate(operation);
 
 		when(readableByteChannel.read(readFrom)).thenReturn(operation);
-		t.checkedRead(readableByteChannel, readFrom);
+		checkedRead(readableByteChannel, readFrom);
 		verify(readableByteChannel, times(1)).read(readFrom);
 	}
 
@@ -97,7 +97,7 @@ class IOTraitsTest {
 		readFrom = ByteBuffer.allocate(operation);
 
 		when(fileChannel.read(readFrom)).thenReturn(operation);
-		t.checkedRead(fileChannel, pos, readFrom);
+		checkedRead(fileChannel, pos, readFrom);
 		verify(fileChannel, times(1)).position(pos);
 		verify(fileChannel, times(1)).read(readFrom);
 	}
@@ -106,25 +106,25 @@ class IOTraitsTest {
 	void testCheckEndBlank() {
 		readFrom = ByteBuffer.allocate(operation * 2);
 		readFrom.limit(readFrom.capacity());
-		t.checkEndBlank(readFrom, operation);
+		checkEndBlank(readFrom, operation);
 		readFrom.clear();
 
 		readFrom.put(operation / 2, new byte[] { (byte) 0x01 });
 		readFrom.position(0);
 		readFrom.limit(readFrom.capacity());
 
-		assertThrows(IllegalArgumentException.class, () -> t.checkEndBlank(readFrom, operation));
-		assertThrows(IllegalArgumentException.class, () -> t.checkEndBlank(readFrom, operation * 2 + 1));
+		assertThrows(IllegalArgumentException.class, () -> checkEndBlank(readFrom, operation));
+		assertThrows(IllegalArgumentException.class, () -> checkEndBlank(readFrom, operation * 2 + 1));
 	}
 
 	@Test
 	void testCheckRemaining() {
 		readFrom = ByteBuffer.allocate(operation);
 
-		t.checkRemaining(readFrom, operation);
-		assertThrows(IllegalArgumentException.class, () -> t.checkRemaining(readFrom, operation + 1));
+		checkRemaining(readFrom, operation);
+		assertThrows(IllegalArgumentException.class, () -> checkRemaining(readFrom, operation + 1));
 		readFrom.get();
-		assertThrows(IllegalArgumentException.class, () -> t.checkRemaining(readFrom, operation));
+		assertThrows(IllegalArgumentException.class, () -> checkRemaining(readFrom, operation));
 	}
 
 }

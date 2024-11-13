@@ -18,11 +18,11 @@ package tv.hd3g.datablock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static tv.hd3g.datablock.DatablockMigrateChunkPolicy.dontKeepChunk;
-import static tv.hd3g.datablock.DatablockMigrateChunkPolicy.dontKeepChunkMarkActualArchived;
-import static tv.hd3g.datablock.DatablockMigrateChunkPolicy.dontKeepChunkMarkActualDeleted;
+import static tv.hd3g.datablock.DatablockMigrateChunkPolicy.dontKeepChunkThenMarkActualArchived;
+import static tv.hd3g.datablock.DatablockMigrateChunkPolicy.dontKeepChunkThenMarkActualDeleted;
 import static tv.hd3g.datablock.DatablockMigrateChunkPolicy.keepChunk;
-import static tv.hd3g.datablock.DatablockMigrateChunkPolicy.keepChunkMarkActualArchived;
-import static tv.hd3g.datablock.DatablockMigrateChunkPolicy.keepChunkMarkActualDeleted;
+import static tv.hd3g.datablock.DatablockMigrateChunkPolicy.keepChunkThenMarkActualArchived;
+import static tv.hd3g.datablock.DatablockMigrateChunkPolicy.keepChunkThenMarkActualDeleted;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -52,7 +52,7 @@ class DatablockMigrateChunkPolicyTest {
 
 	@Test
 	void testKeepChunkMarkActualDeleted() {
-		p = keepChunkMarkActualDeleted();
+		p = keepChunkThenMarkActualDeleted();
 
 		assertThat(p.keepActualChunk()).isTrue();
 		assertThat(p.markActualChunkAsArchived()).isFalse();
@@ -61,7 +61,7 @@ class DatablockMigrateChunkPolicyTest {
 
 	@Test
 	void testKeepChunkMarkActualArchived() {
-		p = keepChunkMarkActualArchived();
+		p = keepChunkThenMarkActualArchived();
 
 		assertThat(p.keepActualChunk()).isTrue();
 		assertThat(p.markActualChunkAsArchived()).isTrue();
@@ -70,7 +70,7 @@ class DatablockMigrateChunkPolicyTest {
 
 	@Test
 	void testDontKeepChunkMarkActualDeleted() {
-		p = dontKeepChunkMarkActualDeleted();
+		p = dontKeepChunkThenMarkActualDeleted();
 
 		assertThat(p.keepActualChunk()).isFalse();
 		assertThat(p.markActualChunkAsArchived()).isFalse();
@@ -79,7 +79,7 @@ class DatablockMigrateChunkPolicyTest {
 
 	@Test
 	void testDontKeepChunkMarkActualArchived() {
-		p = dontKeepChunkMarkActualArchived();
+		p = dontKeepChunkThenMarkActualArchived();
 
 		assertThat(p.keepActualChunk()).isFalse();
 		assertThat(p.markActualChunkAsArchived()).isTrue();

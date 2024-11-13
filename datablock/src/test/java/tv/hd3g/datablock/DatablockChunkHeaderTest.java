@@ -39,7 +39,6 @@ import static tv.hd3g.datablock.DatablockChunkHeader.updateChunkHeaderTags;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ReadOnlyBufferException;
 import java.nio.channels.FileChannel;
 import java.util.Date;
 
@@ -209,7 +208,6 @@ class DatablockChunkHeaderTest {
 	void testToByteBuffer(final boolean archived) {
 		h = new DatablockChunkHeader(fourCC, version, payloadSize, archived);
 		final var buffer = h.toByteBuffer();
-		assertThrows(ReadOnlyBufferException.class, () -> buffer.put((byte) 0));
 
 		assertEquals(CHUNK_HEADER_LEN, buffer.remaining());
 		assertEquals(CHUNK_HEADER_LEN, buffer.capacity());

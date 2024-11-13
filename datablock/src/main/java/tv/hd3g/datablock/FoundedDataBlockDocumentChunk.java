@@ -16,6 +16,8 @@
  */
 package tv.hd3g.datablock;
 
+import java.io.IOException;
+
 @FunctionalInterface
 public interface FoundedDataBlockDocumentChunk {
 
@@ -24,6 +26,6 @@ public interface FoundedDataBlockDocumentChunk {
 	 */
 	void onChunk(DatablockChunkHeader chunkHeader,
 				 long chunkPayloadDocumentPosition,
-				 DatablockChunkPayloadExtractor payloadExtractor);
+				 DatablockChunkPayloadExtractor payloadExtractor) throws IOException;
 
 }
