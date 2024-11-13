@@ -33,7 +33,7 @@ public record DataBlockChunkIndexItem(DatablockChunkHeader header, long payloadP
 		return result;
 	}
 
-	public byte[] extractPayload(final DatablockDocument document) throws IOException {// TODO test
+	public byte[] extractPayload(final DatablockDocument document) throws IOException {
 		return extractPayload(DatablockChunkPayloadExtractor::getCurrentChunkPayloadBytes, document);
 	}
 

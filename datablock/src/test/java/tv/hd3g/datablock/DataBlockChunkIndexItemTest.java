@@ -16,6 +16,7 @@
  */
 package tv.hd3g.datablock;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -48,6 +49,8 @@ class DataBlockChunkIndexItemTest {
 	long position;
 	@Fake(min = 10, max = 10000)
 	int size;
+	@Fake(min = 10, max = 1000)
+	byte[] datas;
 
 	DataBlockChunkIndexItem i;
 
@@ -64,6 +67,17 @@ class DataBlockChunkIndexItemTest {
 
 		verify(header, atLeastOnce()).getPayloadSize();
 		verify(document, times(1)).createChunkPayloadExtractor(position, size);
+		verify(chunkPayloadExtractor, times(1)).clean();
+	}
+
+	@Test
+	void testExtractPayload_toBytes() throws IOException {
+		when(chunkPayloadExtractor.getCurrentChunkPayloadBytes()).thenReturn(datas);
+		assertArrayEquals(datas, i.extractPayload(document));
+
+		verify(header, atLeastOnce()).getPayloadSize();
+		verify(document, times(1)).createChunkPayloadExtractor(position, size);
+		verify(chunkPayloadExtractor, times(1)).getCurrentChunkPayloadBytes();
 		verify(chunkPayloadExtractor, times(1)).clean();
 	}
 

@@ -32,8 +32,7 @@ import java.util.List;
 import java.util.Objects;
 
 // TODO (after) add technical readme
-// TODO (after) add v1 + object storage + defrag
-// TODO (after) add indexed list
+// TODO (after) add v1 + object storage / serializers + defrag + indexed list
 public class DatablockDocument {
 
 	public static final int CHUNK_SEPARATOR_SIZE = 1;
