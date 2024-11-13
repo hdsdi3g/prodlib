@@ -102,7 +102,7 @@ public class DatablockDocument {
 		final var payloadSize = (int) channel.position() - CHUNK_SEPARATOR_SIZE - (int) payloadPosition;
 
 		return new DataBlockChunkIndexItem(
-				new DatablockChunkHeader(fourCC, version, payloadSize, archived),
+				chunkHeader.forceNewPayloadSize(payloadSize),
 				payloadPosition);
 	}
 

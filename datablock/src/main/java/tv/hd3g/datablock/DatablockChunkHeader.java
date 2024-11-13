@@ -52,6 +52,30 @@ public class DatablockChunkHeader {
 	private final boolean archived;
 	private final boolean deleted;
 
+	private DatablockChunkHeader(final byte[] fourCC,
+								 final short version,
+								 final int payloadSize,
+								 final long createdDate,
+								 final boolean archived) {
+		if (fourCC.length != FOURCC_EXPECTED_SIZE) {
+			throw new IllegalArgumentException("fourCC len must equals "
+											   + FOURCC_EXPECTED_SIZE + " bytes");
+		}
+		this.fourCC = fourCC;
+		this.version = version;
+		this.payloadSize = payloadSize;
+		this.createdDate = createdDate;
+		this.archived = archived;
+		deleted = false;
+	}
+
+	/**
+	 * For internal use only
+	 */
+	DatablockChunkHeader forceNewPayloadSize(final int payloadSize) {
+		return new DatablockChunkHeader(fourCC, version, payloadSize, createdDate, archived);
+	}
+
 	/**
 	 * @param fourCC 4 bytes to identify and route to process the chunk
 	 * @param version chunk type version
@@ -62,16 +86,7 @@ public class DatablockChunkHeader {
 						 final short version,
 						 final int payloadSize,
 						 final boolean archived) {
-		if (fourCC.length != FOURCC_EXPECTED_SIZE) {
-			throw new IllegalArgumentException("fourCC len must equals "
-											   + FOURCC_EXPECTED_SIZE + " bytes");
-		}
-		this.fourCC = fourCC;
-		this.version = version;
-		this.payloadSize = payloadSize;
-		createdDate = System.currentTimeMillis();
-		deleted = false;
-		this.archived = archived;
+		this(fourCC, version, payloadSize, System.currentTimeMillis(), archived);
 	}
 
 	DatablockChunkHeader(final ByteBuffer readFrom) {
