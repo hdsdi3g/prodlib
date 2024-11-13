@@ -80,7 +80,7 @@ public class DatablockDocument {
 		checkedWrite(channel, chunkPayload);
 		writeChunkSeparator();
 
-		return new DataBlockChunkIndexItem(chunkHeader, payloadPosition);// TODO test
+		return new DataBlockChunkIndexItem(chunkHeader, payloadPosition);
 	}
 
 	public synchronized DataBlockChunkIndexItem appendChunk(final byte[] fourCC,
@@ -99,7 +99,11 @@ public class DatablockDocument {
 			writeChunkSeparator();
 		}
 
-		return new DataBlockChunkIndexItem(chunkHeader, payloadPosition);// TODO test
+		final var payloadSize = (int) channel.position() - CHUNK_SEPARATOR_SIZE - (int) payloadPosition;
+
+		return new DataBlockChunkIndexItem(
+				new DatablockChunkHeader(fourCC, version, payloadSize, archived),
+				payloadPosition);
 	}
 
 	public synchronized DataBlockChunkIndexItem appendEmptyChunk(final byte[] fourCC,

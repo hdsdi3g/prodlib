@@ -149,14 +149,16 @@ class DatablockDocumentTest extends RealFileWork {
 	@Test
 	void testAppendChunk_byteBuffer() throws IOException {
 		channel.position(invalidStartPosition);
-		d.appendChunk(fourCC, version, archived, ByteBuffer.wrap(data));
+		final var item = d.appendChunk(fourCC, version, archived, ByteBuffer.wrap(data));
+		checksAppendChunk(item);
 		checkWritedChunk();
 	}
 
 	@Test
 	void testAppendChunk_outputStream() throws IOException {
 		channel.position(invalidStartPosition);
-		d.appendChunk(fourCC, version, archived, writer -> writer.write(data));
+		final var item = d.appendChunk(fourCC, version, archived, writer -> writer.write(data));
+		checksAppendChunk(item);
 		checkWritedChunk();
 	}
 
@@ -164,7 +166,8 @@ class DatablockDocumentTest extends RealFileWork {
 	void testAppendEmptyChunk() throws IOException {
 		channel.position(invalidStartPosition);
 		Arrays.fill(data, ZERO_BYTE);
-		d.appendEmptyChunk(fourCC, version, archived, data.length);
+		final var item = d.appendEmptyChunk(fourCC, version, archived, data.length);
+		checksAppendChunk(item);
 		checkWritedChunk();
 	}
 
@@ -488,6 +491,19 @@ class DatablockDocumentTest extends RealFileWork {
 			assertEquals(deleted, h.isDeleted(), "Invalid deleted flag");
 		}
 
+	}
+
+	private void checksAppendChunk(final DataBlockChunkIndexItem item) throws IOException {
+		final var h = item.header();
+		assertThat(h.getFourCC()).containsExactly(fourCC);
+		assertEquals(version, h.getVersion());
+		assertEquals(data.length, h.getPayloadSize());
+		assertEquals(archived, h.isArchived());
+		assertFalse(h.isDeleted());
+		final var now = System.currentTimeMillis();
+		assertThat(h.getCreatedDate()).isBetween(now - 1000, now);
+		assertEquals(DOCUMENT_POS0 - DOCUMENT_HEADER_LEN, item.payloadPosition());
+		assertArrayEquals(data, item.extractPayload(d));
 	}
 
 	private DataBlockChunkIndexItem documentMapUpdateCheck(final int index,
