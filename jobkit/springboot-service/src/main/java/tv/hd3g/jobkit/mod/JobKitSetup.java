@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -65,7 +64,6 @@ public class JobKitSetup {
 	}
 
 	@Bean
-	@Autowired
 	JobKitEngine getJobKitEngine(final ScheduledExecutorService scheduledExecutor,
 								 final ExecutionEvent executionEvent,
 								 final BackgroundServiceEvent backgroundServiceEvent,
