@@ -1,5 +1,15 @@
 # All ProdLib projects upgrades
 
+## 23.0.0
+
+Big Java 25 and Spring Boot 3.5.6 upgrade: commons compress/sshj/bouncycastle (security), correct Mockito deps Maven behavior, update mvn deps: Jacoco/Sonar/GPG/Surefire/Compiler, correct Graalvm deps, Lombok in Maven, correct code after Spring Boot upgrade.
+
+Correct annotations MockBean to MockitoBean (Spring Boot deprecated), and little code clean.
+
+Correct code style and deprecated APIs
+
+Update GH actions to Java 25
+
 ## 22.0.0
 
 Watchfolder queueManualScan should not use JobKit #177 (relative from #175).
