@@ -11,7 +11,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -26,7 +25,7 @@ import tv.hd3g.commons.mailkit.SendMailDto.MessageGrade;
 
 class SendMailDtoTest {
 
-	public final static RandomService random = instance().random();
+	public static final RandomService random = instance().random();
 
 	private SendMailDto sendMailDto;
 
@@ -53,7 +52,7 @@ class SendMailDtoTest {
 	private Set<String> resourceFiles;
 
 	@BeforeEach
-	public void init() throws Exception {
+	void init() throws Exception {
 		MockitoAnnotations.openMocks(this).close();
 		templateName = makeRandomString();
 		senderAddr = makeRandomString();
@@ -63,18 +62,18 @@ class SendMailDtoTest {
 		senderReference = makeRandomString();
 
 		sendMailDto = new SendMailDto(templateName, lang, templateVars, senderAddr,
-		        recipientsAddr, recipientsCCAddr, recipientsBCCAddr);
+				recipientsAddr, recipientsCCAddr, recipientsBCCAddr);
 	}
 
 	@Test
 	void testSendMailDtoStringLocaleMapOfStringObjectStringListOfStringListOfStringListOfString() {
-		final var list = makeRandomThings().collect(Collectors.toList());
-		final var recipientsAddr = new String[list.size()];
-		for (var pos = 0; pos < recipientsAddr.length; pos++) {
-			recipientsAddr[pos] = list.get(pos);
+		final var list = makeRandomThings().toList();
+		final var currentRecipientsAddr = new String[list.size()];
+		for (var pos = 0; pos < currentRecipientsAddr.length; pos++) {
+			currentRecipientsAddr[pos] = list.get(pos);
 		}
 
-		sendMailDto = new SendMailDto(templateName, lang, templateVars, senderAddr, recipientsAddr);
+		sendMailDto = new SendMailDto(templateName, lang, templateVars, senderAddr, currentRecipientsAddr);
 		assertEquals(templateName, sendMailDto.getTemplateName());
 		assertEquals(lang, sendMailDto.getLang());
 		assertEquals(templateVars, sendMailDto.getTemplateVars());
@@ -85,7 +84,7 @@ class SendMailDtoTest {
 		for (var pos = 0; pos < rRecipientsAddr.length; pos++) {
 			rRecipientsAddr[pos] = rList.get(pos);
 		}
-		assertArrayEquals(recipientsAddr, rRecipientsAddr);
+		assertArrayEquals(currentRecipientsAddr, rRecipientsAddr);
 	}
 
 	@Test
@@ -189,13 +188,13 @@ class SendMailDtoTest {
 		assertNull(sendMailDto.getResourceFiles());
 	}
 
-	public static <T extends Enum<?>> T getRandomEnum(final Class<T> enum_class) {
-		final var x = random.nextInt(enum_class.getEnumConstants().length);
-		return enum_class.getEnumConstants()[x];
+	public static <T extends Enum<?>> T getRandomEnum(final Class<T> enumClass) {
+		final var x = random.nextInt(enumClass.getEnumConstants().length);
+		return enumClass.getEnumConstants()[x];
 	}
 
 	public static String makeRandomString() {
-		return RandomStringUtils.randomAscii(5000, 10000);
+		return RandomStringUtils.insecure().nextAscii(5000, 10000);
 	}
 
 	public static String makeRandomThing() {
@@ -226,7 +225,7 @@ class SendMailDtoTest {
 	}
 
 	public static Stream<String> makeRandomThings() {
-		return IntStream.range(0, random.nextInt(1, 20)).distinct().mapToObj(i -> makeRandomThing());
+		return IntStream.range(0, random.nextInt(1, 20)).distinct().mapToObj(_ -> makeRandomThing());
 	}
 
 }

@@ -3,5 +3,10 @@
     "name": "spring.main.log-startup-info",
     "type": "java.lang.String",
     "description": "SpringBoot startup info"
+  },
+  {
+    "name": "jobkit.watchdogpolicies",
+    "type": "tv.hd3g.jobkit.mod.JobKitWatchdogConfig",
+    "description": "WatchdogConfig for JobKit"
   }
 ]}

@@ -62,7 +62,7 @@ class FolderActivityTest {
 		// Mockito.doThrow(new Exception()).when();
 		jobKit = new FlatJobKitEngine();
 		observedFolder = new ObservedFolder();
-		a = (observedFolder, scanTime, scanResult) -> {
+		a = (_, _, _) -> {
 		};
 	}
 

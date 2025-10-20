@@ -162,7 +162,7 @@ class JobKitWatchdogTest {
 	class OkPolicyOneShot {
 
 		@BeforeEach
-		void init() throws Exception {
+		void init() throws Exception { // NOSONAR 1130
 			w.addPolicies(policy);
 		}
 
@@ -233,7 +233,7 @@ class JobKitWatchdogTest {
 		}
 
 		@Test
-		void testAddStartEndJob() throws JobWatchdogPolicyWarning {
+		void testAddStartEndJob() {
 			w.addJob(job);
 			w.startJob(job, startedDate);
 			w.endJob(job);
@@ -391,7 +391,7 @@ class JobKitWatchdogTest {
 		AtomicInteger count;
 
 		@BeforeEach
-		void init() throws Exception {
+		void init() {
 			w.addPolicies(policy);
 			warning = new JobWatchdogPolicyWarning(faker.numerify("warningMessage###"));
 			count = new AtomicInteger(0);
@@ -401,7 +401,7 @@ class JobKitWatchdogTest {
 		void testAddStartReleaseEndJob() throws JobWatchdogPolicyWarning {
 			final var now = System.currentTimeMillis();
 			when(policy.isStatusOk(eq(spoolName), any(WatchableSpoolJobState.class), anySet()))
-					.thenAnswer(invocation -> {
+					.thenAnswer(_ -> {
 						if (count.getAndAdd(1) <= 1) {
 							throw warning;
 						}
@@ -429,36 +429,36 @@ class JobKitWatchdogTest {
 			verify(sch, times(1)).schedule(any(Runnable.class), eq(durationToQueue), eq(MILLISECONDS));
 
 			verify(supervisableEvents, times(1)).onJobWatchdogSpoolReport(reportCaptor.capture());
-			final var report = reportCaptor.getValue();
+			final var rpt = reportCaptor.getValue();
 
-			assertEquals(commandName, report.activeJob().commandName());
-			assertEquals(createdIndex, report.activeJob().createdIndex());
-			assertEquals(startedDate, report.activeJob().startedDate().get());
-			assertEquals(creator, report.activeJob().creator());
-			assertTrue(now <= report.activeJob().createdDate().getTime());
-			assertTrue(System.currentTimeMillis() >= report.activeJob().createdDate().getTime());
-			assertEquals(spoolName, report.spoolName());
-			assertTrue(report.relativeBackgroundServices().isEmpty());
-			assertEquals(policy, report.policy());
-			assertTrue(now <= report.created().getTime());
-			assertTrue(System.currentTimeMillis() >= report.created().getTime());
-			assertTrue(System.currentTimeMillis() - startedDate <= report.activeJob().getRunTime().get().toMillis());
-			assertEquals(warning, report.warning());
+			assertEquals(commandName, rpt.activeJob().commandName());
+			assertEquals(createdIndex, rpt.activeJob().createdIndex());
+			assertEquals(startedDate, rpt.activeJob().startedDate().get());
+			assertEquals(creator, rpt.activeJob().creator());
+			assertTrue(now <= rpt.activeJob().createdDate().getTime());
+			assertTrue(System.currentTimeMillis() >= rpt.activeJob().createdDate().getTime());
+			assertEquals(spoolName, rpt.spoolName());
+			assertTrue(rpt.relativeBackgroundServices().isEmpty());
+			assertEquals(policy, rpt.policy());
+			assertTrue(now <= rpt.created().getTime());
+			assertTrue(System.currentTimeMillis() >= rpt.created().getTime());
+			assertTrue(System.currentTimeMillis() - startedDate <= rpt.activeJob().getRunTime().get().toMillis());
+			assertEquals(warning, rpt.warning());
 
-			assertFalse(report.queuedJobs().isEmpty());
-			final var queued = report.queuedJobs().stream().findFirst().get();
+			assertFalse(rpt.queuedJobs().isEmpty());
+			final var queued = rpt.queuedJobs().stream().findFirst().get();
 			assertTrue(queued.getRunTime().isEmpty());
 			assertTrue(queued.startedDate().isEmpty());
 			assertEquals(createdIndex + 1, queued.createdIndex());
 
 			verify(supervisableEvents, times(1)).onJobWatchdogSpoolReleaseReport(reportCaptor.capture());
-			assertEquals(report, reportCaptor.getValue());
+			assertEquals(rpt, reportCaptor.getValue());
 		}
 
 		@Test
 		void testAddStartReleaseEndJob_service() throws JobWatchdogPolicyWarning {
 			final var now = System.currentTimeMillis();
-			doAnswer(invocation -> {
+			doAnswer(_ -> {
 				if (count.getAndAdd(1) <= 1) {
 					throw warning;
 				}
@@ -493,36 +493,36 @@ class JobKitWatchdogTest {
 			verify(sch, times(8)).schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS));
 
 			verify(supervisableEvents, times(1)).onJobWatchdogSpoolReport(reportCaptor.capture());
-			final var report = reportCaptor.getValue();
+			final var rpt = reportCaptor.getValue();
 
-			assertEquals(commandName, report.activeJob().commandName());
-			assertEquals(createdIndex, report.activeJob().createdIndex());
-			assertEquals(startedDate, report.activeJob().startedDate().get());
-			assertEquals(creator, report.activeJob().creator());
-			assertTrue(now <= report.activeJob().createdDate().getTime());
-			assertTrue(System.currentTimeMillis() >= report.activeJob().createdDate().getTime());
-			assertEquals(spoolName, report.spoolName());
+			assertEquals(commandName, rpt.activeJob().commandName());
+			assertEquals(createdIndex, rpt.activeJob().createdIndex());
+			assertEquals(startedDate, rpt.activeJob().startedDate().get());
+			assertEquals(creator, rpt.activeJob().creator());
+			assertTrue(now <= rpt.activeJob().createdDate().getTime());
+			assertTrue(System.currentTimeMillis() >= rpt.activeJob().createdDate().getTime());
+			assertEquals(spoolName, rpt.spoolName());
 
-			assertEquals(1, report.relativeBackgroundServices().size());
-			final var service = report.relativeBackgroundServices().stream().findFirst().get();
+			assertEquals(1, rpt.relativeBackgroundServices().size());
+			final var service = rpt.relativeBackgroundServices().stream().findFirst().get();
 			assertEquals(serviceName, service.serviceName());
 			assertEquals(spoolName, service.spoolName());
 			assertEquals(timedInterval, service.timedInterval());
 
-			assertEquals(policy, report.policy());
-			assertTrue(now <= report.created().getTime());
-			assertTrue(System.currentTimeMillis() >= report.created().getTime());
-			assertTrue(System.currentTimeMillis() - startedDate <= report.activeJob().getRunTime().get().toMillis());
-			assertEquals(warning, report.warning());
+			assertEquals(policy, rpt.policy());
+			assertTrue(now <= rpt.created().getTime());
+			assertTrue(System.currentTimeMillis() >= rpt.created().getTime());
+			assertTrue(System.currentTimeMillis() - startedDate <= rpt.activeJob().getRunTime().get().toMillis());
+			assertEquals(warning, rpt.warning());
 
-			assertFalse(report.queuedJobs().isEmpty());
-			final var queued = report.queuedJobs().stream().findFirst().get();
+			assertFalse(rpt.queuedJobs().isEmpty());
+			final var queued = rpt.queuedJobs().stream().findFirst().get();
 			assertTrue(queued.getRunTime().isEmpty());
 			assertTrue(queued.startedDate().isEmpty());
 			assertEquals(createdIndex + 1, queued.createdIndex());
 
 			verify(supervisableEvents, times(1)).onJobWatchdogSpoolReleaseReport(reportCaptor.capture());
-			assertEquals(report, reportCaptor.getValue());
+			assertEquals(rpt, reportCaptor.getValue());
 		}
 	}
 

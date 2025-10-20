@@ -75,7 +75,7 @@ class BackgroundServiceTest {
 				name, spoolName, spooler, scheduledExecutor, event, jobKitWatchdog, task, disableTask);
 
 		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
-				.then(invocation -> nextRunReference);
+				.then(_ -> nextRunReference);
 		when(spooler.getExecutor(spoolName)).thenReturn(spoolExecutor);
 		when(nextRunReference.isDone()).thenReturn(false);
 		when(nextRunReference.isCancelled()).thenReturn(false);
@@ -266,7 +266,7 @@ class BackgroundServiceTest {
 	void testStartup_changeTimedInterval() {
 		timedInterval = TimeUnit.HOURS.toMillis(1);
 		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
-				.then(invocation -> nextRunReference);
+				.then(_ -> nextRunReference);
 		when(nextRunReference.getDelay(MILLISECONDS)).thenReturn(timedInterval);
 
 		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
@@ -286,7 +286,7 @@ class BackgroundServiceTest {
 	void testStartup_changeTimedInterval_duringRun() {
 		timedInterval = TimeUnit.HOURS.toMillis(1);
 		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
-				.then(invocation -> nextRunReference);
+				.then(_ -> nextRunReference);
 		when(nextRunReference.getDelay(MILLISECONDS)).thenReturn(timedInterval);
 
 		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
@@ -371,7 +371,7 @@ class BackgroundServiceTest {
 		when(nextRunReference.getDelay(SECONDS)).thenReturn(10000L);
 
 		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
-				.then(invocation -> nextRunReference);
+				.then(_ -> nextRunReference);
 
 		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
 
@@ -421,7 +421,7 @@ class BackgroundServiceTest {
 		when(nextRunReference.getDelay(SECONDS)).thenReturn(0L);
 
 		when(scheduledExecutor.schedule(any(Runnable.class), eq(timedInterval), eq(MILLISECONDS)))
-				.then(invocation -> nextRunReference);
+				.then(_ -> nextRunReference);
 
 		backgroundService.setTimedInterval(timedInterval, MILLISECONDS).enable();
 

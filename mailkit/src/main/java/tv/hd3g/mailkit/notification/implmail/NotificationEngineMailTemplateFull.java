@@ -64,7 +64,7 @@ public class NotificationEngineMailTemplateFull implements NotificationMailMessa
 		toolkit.makeDocumentContext(lang, event, listBodyContent, listCSSEntries);
 
 		Optional.ofNullable(event.steps())
-				.ifPresent(steps -> toolkit.stepsList(lang, event, false, listBodyContent, listCSSEntries));
+				.ifPresent(_ -> toolkit.stepsList(lang, event, false, listBodyContent, listCSSEntries));
 
 		listBodyContent.add(hr());
 		toolkit.makeDocumentEventEnv(lang, event, listBodyContent, listCSSEntries);

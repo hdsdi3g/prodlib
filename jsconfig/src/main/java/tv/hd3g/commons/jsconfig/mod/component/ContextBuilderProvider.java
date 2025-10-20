@@ -24,6 +24,7 @@ import java.util.Set;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Context.Builder;
 import org.graalvm.polyglot.EnvironmentAccess;
+import org.graalvm.polyglot.io.IOAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,13 +44,13 @@ public class ContextBuilderProvider {
 	Builder newBuilder() {
 		return Context.newBuilder("js")
 				.allowHostAccess(ALL)
-				.allowHostClassLookup(className -> true)
+				.allowHostClassLookup(_ -> true)
 				.allowCreateProcess(config.isAllowCreateProcess())
 				.allowCreateThread(config.isAllowCreateThread())
 				.allowEnvironmentAccess(EnvironmentAccess.INHERIT)
 				.allowExperimentalOptions(config.isAllowExperimentalOptions())
 				.allowHostClassLoading(config.isDisableHostClassLoading() == false)
-				.allowIO(config.isAllowIO())
+				.allowIO(config.isAllowIO() ? IOAccess.ALL : IOAccess.NONE)
 				.allowNativeAccess(config.isAllowNativeAccess());
 	}
 

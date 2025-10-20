@@ -101,7 +101,7 @@ class SupervisableAspectTest {
 			testWithSupervisable.aSupervisableMethodWithName(() -> {
 				refS.set(Supervisable.getSupervisable());
 			});
-		}, e -> {
+		}, _ -> {
 		});
 		while (refS.get() != null) {
 			Thread.onSpinWait();

@@ -58,7 +58,7 @@ public class WatchedFileScanner {
 		}
 		minFixedStateTime = observedFolder.getMinFixedStateTime();
 
-		try (var fs = observedFolder.createFileSystem()) {
+		try (var _ = observedFolder.createFileSystem()) {
 			/** try only to load FileSystem/configured URL */
 		} catch (final IOException e) {
 			throw new UncheckedIOException(new IOException("Can't load FileSystem", e));

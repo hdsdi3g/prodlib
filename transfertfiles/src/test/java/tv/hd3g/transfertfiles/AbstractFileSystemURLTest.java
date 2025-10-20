@@ -158,7 +158,7 @@ class AbstractFileSystemURLTest {
 	@Test
 	void testBadResolve() throws IOException {
 		final var url = "ftpes://" + Faker.instance().numerify("this-host-dont-exists###") + "/";
-		try (var afs = new AbstractFileSystemURL(url)) {
+		try (var _ = new AbstractFileSystemURL(url)) {
 			fail("Expect exception");
 		} catch (final InvalidURLException e) {
 			assertEquals("Can't resolve hostname: " + url, e.getMessage());

@@ -82,13 +82,13 @@ class SpoolerTest {
 	@Test
 	void testShutdown_noKeepRun() {
 		assertTrue(spooler.getExecutor(a)
-				.addToQueue(nothing, "empty1", 0, e -> {
+				.addToQueue(nothing, "empty1", 0, _ -> {
 				}));
 
 		spooler.shutdown(Set.of());
 
 		assertFalse(spooler.getExecutor(a)
-				.addToQueue(nothing, "empty2", 0, e -> {
+				.addToQueue(nothing, "empty2", 0, _ -> {
 				}));
 
 		assertNull(spooler.getExecutor(b));
@@ -114,13 +114,13 @@ class SpoolerTest {
 			assertTrue(spooler.getExecutor(a).addToQueue(() -> {
 				countA.getAndIncrement();
 				Thread.sleep(1);// NOSONAR
-			}, "taskA #" + pos, 0, e -> {
+			}, "taskA #" + pos, 0, _ -> {
 				countA.getAndIncrement();
 			}));
 			assertTrue(spooler.getExecutor(b).addToQueue(() -> {
 				countB.getAndIncrement();
 				Thread.sleep(1);// NOSONAR
-			}, "taskB #" + pos, 0, e -> {
+			}, "taskB #" + pos, 0, _ -> {
 				countB.getAndIncrement();
 			}));
 		}

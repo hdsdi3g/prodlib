@@ -101,7 +101,7 @@ class FlatJavaMailSenderTest {
 			verify(mimeMessageAnalyzer, times(1)).getMailContent();
 
 			final var outFiles = List.of(new File("target/mailkit")
-					.listFiles(f -> f.getName().endsWith(".html")));
+					.listFiles(f0 -> f0.getName().endsWith(".html")));
 			assertEquals(1, outFiles.size());
 			final var lines = Files.readAllLines(outFiles.get(0).toPath());
 			lines.stream().anyMatch(l -> l.equals(header));

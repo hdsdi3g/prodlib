@@ -93,7 +93,7 @@ class SpoolExecutorTest {
 				throw new IllegalStateException(e1);
 			}
 			smCmd.countDown();
-		}, name, 0, e -> {
+		}, name, 0, _ -> {
 			smAfter.countDown();
 		}));
 
@@ -180,7 +180,7 @@ class SpoolExecutorTest {
 				count.incrementAndGet();
 				runnedTasks.add(val);
 				smBefore.countDown();
-			}, name, 0, e -> {
+			}, name, 0, _ -> {
 				smAfter.countDown();
 			}));
 		}
@@ -212,7 +212,7 @@ class SpoolExecutorTest {
 			assertTrue(spoolExecutor.addToQueue(() -> {
 				count.incrementAndGet();
 				runnedTasks.add(val);
-			}, name, 0, e -> {
+			}, name, 0, _ -> {
 				smAfter.countDown();
 			}));
 			assertTrue(smAfter.await(10, SECONDS));
@@ -235,7 +235,7 @@ class SpoolExecutorTest {
 
 		assertTrue(spoolExecutor.addToQueue(() -> {
 			smCmd0.countDown();
-		}, name, 0, e -> {
+		}, name, 0, _ -> {
 			throw new IllegalArgumentException("This is a test error, this is normal if you see it in log message...");
 		}));
 		assertTrue(smCmd0.await(10, SECONDS));
@@ -243,7 +243,7 @@ class SpoolExecutorTest {
 		final var smCmd1 = new CountDownLatch(2);
 		assertTrue(spoolExecutor.addToQueue(() -> {
 			smCmd1.countDown();
-		}, name, 0, e -> {
+		}, name, 0, _ -> {
 			smCmd1.countDown();
 		}));
 		assertTrue(smCmd1.await(10, SECONDS));
@@ -268,13 +268,13 @@ class SpoolExecutorTest {
 		spoolExecutor.addToQueue(() -> {
 			smCmd0.countDown();
 			reverseCmd.await(10, SECONDS);
-		}, name, 0, e -> {
+		}, name, 0, _ -> {
 			smCmd1.countDown();
 		});
 
 		assertTrue(smCmd0.await(10, SECONDS));
 		spoolExecutor.addToQueue(() -> {
-		}, name, 0, e -> {
+		}, name, 0, _ -> {
 		});
 		assertEquals(1, spoolExecutor.getQueueSize());
 		reverseCmd.countDown();
@@ -300,7 +300,7 @@ class SpoolExecutorTest {
 		spoolExecutor.addToQueue(() -> {
 			smCmd0.countDown();
 			reverseCmd.await(10, SECONDS);
-		}, name, 0, e -> {
+		}, name, 0, _ -> {
 			smCmd1.countDown();
 		});
 		assertTrue(smCmd0.await(10, SECONDS));
@@ -319,9 +319,7 @@ class SpoolExecutorTest {
 	void testStopToAcceptNewJobs() throws InterruptedException {
 		spoolExecutor.stopToAcceptNewJobs();
 		final var count = new AtomicInteger(0);
-		assertFalse(spoolExecutor.addToQueue(() -> {
-			count.getAndIncrement();
-		}, name, 0, e -> {
+		assertFalse(spoolExecutor.addToQueue(count::getAndIncrement, name, 0, _ -> {
 			count.getAndIncrement();
 		}));
 
@@ -338,7 +336,7 @@ class SpoolExecutorTest {
 			assertTrue(spoolExecutor.addToQueue(() -> {
 				count.incrementAndGet();
 				Thread.sleep(10);// NOSONAR
-			}, name, 0, e -> {
+			}, name, 0, _ -> {
 				count.incrementAndGet();
 			}));
 		}
@@ -371,7 +369,7 @@ class SpoolExecutorTest {
 			assertTrue(spoolExecutor.addToQueue(() -> {
 				smCmd.countDown();
 				Thread.sleep(1);// NOSONAR
-			}, name, 0, e -> {
+			}, name, 0, _ -> {
 				smCmd.countDown();
 			}));
 		}
@@ -412,12 +410,12 @@ class SpoolExecutorTest {
 			};
 			final String name = "N" /*+ String.valueOf(random.nextInt(10000))*/;
 			final int priority = random.nextInt(count * 100);
-			final Consumer<Exception> afterRunCommand = e -> {
+			final Consumer<Exception> afterRunCommand = _ -> {
 			};
 		}
 
 		final var allPjobs = IntStream.range(0, count)
-				.mapToObj(i -> new PJob())
+				.mapToObj(_ -> new PJob())
 				.toList();
 		allPjobs.forEach(j -> spoolExecutor.addToQueue(j.command, j.name, j.priority, j.afterRunCommand));
 
@@ -485,7 +483,7 @@ class SpoolExecutorTest {
 		final var sm = new CountDownLatch(2);
 		assertTrue(spoolExecutor.addToQueue(() -> {
 			sm.countDown();
-		}, name, 0, e -> {
+		}, name, 0, _ -> {
 			sm.countDown();
 		}));
 		assertTrue(sm.await(10, SECONDS));
@@ -515,7 +513,7 @@ class SpoolExecutorTest {
 		final var sm = new CountDownLatch(2);
 		assertTrue(spoolExecutor.addToQueue(() -> {
 			sm.countDown();
-		}, name, 0, e -> {
+		}, name, 0, _ -> {
 			sm.countDown();
 		}));
 		assertTrue(sm.await(10, SECONDS));
@@ -545,7 +543,7 @@ class SpoolExecutorTest {
 				throw new IllegalStateException(e1);
 			}
 			smCmd.countDown();
-		}, name, 0, e -> {
+		}, name, 0, _ -> {
 			smAfter.countDown();
 		});
 
@@ -582,7 +580,7 @@ class SpoolExecutorTest {
 					throw new IllegalStateException(e1);
 				}
 				smCmd.countDown();
-			}, name, 0, e -> {
+			}, name, 0, _ -> {
 				smAfter.countDown();
 			});
 		}
@@ -609,7 +607,7 @@ class SpoolExecutorTest {
 	void testWaitToEndQueue_noInterblocking() {
 		spoolExecutor.addToQueue(() -> {
 			spoolExecutor.waitToEndQueue(Runnable::run).get(10, SECONDS);
-		}, name, 0, e -> {
+		}, name, 0, _ -> {
 		});
 		checkWatchdog(1);
 	}

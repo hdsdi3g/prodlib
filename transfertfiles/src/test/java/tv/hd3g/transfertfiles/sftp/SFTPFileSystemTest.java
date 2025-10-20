@@ -128,10 +128,10 @@ class SFTPFileSystemTest {
 		        PASSWORD.create(),
 		        PUBLICKEY.create()));
 		sshd.setPasswordAuthenticator(
-		        (usr, passw, session) -> (usr.equalsIgnoreCase(username)
+		        (usr, passw, _) -> (usr.equalsIgnoreCase(username)
 		                                  && passw.equals(password)));
 		sshd.setPublickeyAuthenticator(
-		        (usr, key, session) -> (usr.equalsIgnoreCase(username)
+		        (usr, key, _) -> (usr.equalsIgnoreCase(username)
 		                                && (clientPublicKey.equals(key)
 		                                    || clientPasswordProtectedPublicKey.equals(key))));
 

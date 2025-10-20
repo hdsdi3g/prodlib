@@ -47,7 +47,7 @@ public class JobKitAsyncConfigurer implements AsyncConfigurer {
 
 	@Override
 	public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-		return (e, method, params) -> {
+		return (e, method, _) -> {
 			final var className = method.getDeclaringClass().getName();
 			final var methodName = method.getName();
 			final var fullParams = Stream.of(method.getParameters())

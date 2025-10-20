@@ -77,7 +77,7 @@ class FlatJobKitEngineTest {
 	@Test
 	void testRunAllServicesOnce() {
 		final var i = new AtomicInteger();
-		task = () -> i.getAndIncrement();
+		task = i::getAndIncrement;
 		jobKitEngine.startService(null, null, 0, TimeUnit.DAYS, task, disableTask);
 		jobKitEngine.runAllServicesOnce();
 		assertEquals(1, i.get());
@@ -103,8 +103,8 @@ class FlatJobKitEngineTest {
 	void testRunOneShot() {
 		final var i = new AtomicInteger();
 		final var j = new AtomicInteger();
-		task = () -> i.getAndIncrement();
-		final Consumer<Exception> afterRunCommand = e -> j.getAndIncrement();
+		task = i::getAndIncrement;
+		final Consumer<Exception> afterRunCommand = _ -> j.getAndIncrement();
 
 		assertTrue(jobKitEngine.runOneShot(null, null, 0, task, afterRunCommand));
 		assertEquals(1, i.get());

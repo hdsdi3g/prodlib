@@ -195,7 +195,7 @@ class BufferVaultTest {
 
 			final var count = new AtomicInteger();
 			final var fullSize = vault.stream(inputArray.length / 7)
-			        .peek(array -> count.incrementAndGet())
+			        .peek(_ -> count.incrementAndGet())
 			        .mapToInt(array -> array.length)
 			        .sum();
 			assertEquals(inputArray.length, fullSize);

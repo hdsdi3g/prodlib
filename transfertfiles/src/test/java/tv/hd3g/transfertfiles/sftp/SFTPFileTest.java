@@ -67,7 +67,7 @@ class SFTPFileTest extends TestFileToolkit<SFTPFile> {
 
 		sshd.setUserAuthFactories(List.of(PASSWORD.create()));
 		sshd.setPasswordAuthenticator(
-		        (usr, passw, session) -> (usr.equalsIgnoreCase(username)
+		        (usr, passw, _) -> (usr.equalsIgnoreCase(username)
 		                                  && passw.equals(password)));
 		sshd.setCommandFactory(UnknownCommandFactory.INSTANCE);
 		sshd.setSubsystemFactories(List.of(new SftpSubsystemFactory()));

@@ -63,7 +63,7 @@ public class NotificationEngineMailTemplateSimple implements NotificationMailMes
 				env.lang(), event, listBodyContent, listCSSEntries, env.sendAsSimpleNotificationContextPredicate());
 
 		Optional.ofNullable(event.steps())
-				.ifPresent(steps -> toolkit.stepsList(env.lang(), event, false, listBodyContent, listCSSEntries));
+				.ifPresent(_ -> toolkit.stepsList(env.lang(), event, false, listBodyContent, listCSSEntries));
 
 		listBodyContent.add(hr());
 		toolkit.makeDocumentFooter(listBodyContent, listCSSEntries);

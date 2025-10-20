@@ -112,7 +112,7 @@ class SupervisableContextExtractorTest {
 	}
 
 	@Test
-	void testGetBusinessObjectStringClassOfT_noContextKey() throws JsonProcessingException {
+	void testGetBusinessObjectStringClassOfT_noContextKey() {
 		when(event.context()).thenReturn(context);
 		when(context.get(key)).thenReturn(null);
 
@@ -122,7 +122,7 @@ class SupervisableContextExtractorTest {
 	}
 
 	@Test
-	void testGetBusinessObjectStringClassOfT_nullContextKey() throws JsonProcessingException {
+	void testGetBusinessObjectStringClassOfT_nullContextKey() {
 		when(event.context()).thenReturn(context);
 		when(context.get(key)).thenReturn(NullNode.instance);
 

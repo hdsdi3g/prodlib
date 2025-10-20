@@ -114,7 +114,7 @@ public class Translate {
 		if (conf.getSaveMissingMessages() == null) {
 			return;
 		}
-		final var messages = messagesFiles.computeIfAbsent(lang, l -> new Properties());
+		final var messages = messagesFiles.computeIfAbsent(lang, _ -> new Properties());
 		final var previous = messages.putIfAbsent(keyDefault, defaultResult);
 		if (previous != null) {
 			return;

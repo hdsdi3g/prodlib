@@ -36,7 +36,7 @@ public class JobKitSetup {
 			t.setDaemon(false);
 			t.setPriority(MIN_PRIORITY + 1);
 			t.setName("SchTaskStarter");
-			t.setUncaughtExceptionHandler((thrd, e) -> log.error("Regular scheduled thread have an uncaught error", e));
+			t.setUncaughtExceptionHandler((_, e) -> log.error("Regular scheduled thread have an uncaught error", e));
 			return t;
 		});
 	}

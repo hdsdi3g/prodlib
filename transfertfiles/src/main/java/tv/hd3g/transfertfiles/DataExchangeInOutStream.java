@@ -300,8 +300,8 @@ public class DataExchangeInOutStream implements TimeOutTrait {
 			long now;
 			int inputBufferSize;
 
-			currentPerformance = filterPerformance.computeIfAbsent(currentFilter, cF -> 0L);
-			currentDeltaThroughput = filterDeltaThroughput.computeIfAbsent(currentFilter, cF -> 0L);
+			currentPerformance = filterPerformance.computeIfAbsent(currentFilter, _ -> 0L);
+			currentDeltaThroughput = filterDeltaThroughput.computeIfAbsent(currentFilter, _ -> 0L);
 			inputBufferSize = nextBuffers.getSize();
 			now = System.currentTimeMillis();
 
@@ -368,8 +368,8 @@ public class DataExchangeInOutStream implements TimeOutTrait {
 		if (state == State.WORKING) {
 			throw new IllegalStateException("Can't access to transfert stats during processing...");
 		}
-		return new TransfertStats(filterPerformance.computeIfAbsent(filter, f -> 0L),
-				filterDeltaThroughput.computeIfAbsent(filter, f -> 0L));
+		return new TransfertStats(filterPerformance.computeIfAbsent(filter, _ -> 0L),
+				filterDeltaThroughput.computeIfAbsent(filter, _ -> 0L));
 	}
 
 	/**

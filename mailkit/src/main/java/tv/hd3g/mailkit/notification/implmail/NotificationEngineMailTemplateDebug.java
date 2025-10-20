@@ -64,7 +64,7 @@ public class NotificationEngineMailTemplateDebug implements NotificationMailMess
 		toolkit.makeDocumentContext(lang, event, listBodyContent, listCSSEntries);
 
 		Optional.ofNullable(event.steps())
-				.ifPresent(steps -> toolkit.stepsList(lang, event, true, listBodyContent, listCSSEntries));
+				.ifPresent(_ -> toolkit.stepsList(lang, event, true, listBodyContent, listCSSEntries));
 
 		if (result != null) {
 			toolkit.makeDocumentCallers(lang, event, listBodyContent, listCSSEntries);

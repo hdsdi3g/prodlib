@@ -455,7 +455,7 @@ public abstract class TestFileToolkit<T extends AbstractFile> { // NOSONAR S5786
 		final Map<String, Executable1<AbstractFile>> tests = new LinkedHashMap<>();
 		addRegularTests(tests, fs, false, false, 0);
 		tests.put("testIsHidden-reallyhidded",
-				f -> assertTrue(fs.getFromPath(".dontseeme").isHidden()));
+				_ -> assertTrue(fs.getFromPath(".dontseeme").isHidden()));
 		tests.put("testList",
 				f -> assertEquals(0, f.list().count()));
 		tests.put("testToCachedList",

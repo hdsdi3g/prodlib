@@ -81,7 +81,7 @@ public class Watchfolders {
 		observedFoldersDb = observedFolders.stream()
 				.collect(toUnmodifiableMap(
 						of -> of,
-						oF -> watchedFilesDbBuilder.get()));
+						_ -> watchedFilesDbBuilder.get()));
 
 		observedFoldersServices = observedFoldersDb.entrySet().stream()
 				.collect(toUnmodifiableMap(

@@ -263,7 +263,7 @@ class DataExchangeInOutStreamTest {
 	@Test
 	void testBuffers() throws IOException, InterruptedException, ExecutionException, TimeoutException {
 		final var sourceBuffers = IntStream.range(0, random.nextInt(100))
-		        .map(i -> random.nextInt(1000) + 1)
+		        .map(_ -> random.nextInt(1000) + 1)
 		        .mapToObj(iR -> new byte[iR])
 		        .collect(toUnmodifiableList());
 		sourceBuffers.forEach(random::nextBytes);
@@ -310,7 +310,7 @@ class DataExchangeInOutStreamTest {
 	@Test
 	void testBuffers_filtered() throws IOException, InterruptedException, ExecutionException, TimeoutException {
 		final var sourceBuffers = IntStream.range(0, random.nextInt(100))
-		        .map(i -> random.nextInt(1000) + 1)
+		        .map(_ -> random.nextInt(1000) + 1)
 		        .mapToObj(iR -> new byte[iR])
 		        .collect(toUnmodifiableList());
 		sourceBuffers.forEach(random::nextBytes);
@@ -947,7 +947,7 @@ class DataExchangeInOutStreamTest {
 	@Test
 	void testCopyBigger_filtered_transparent() throws IOException, InterruptedException, ExecutionException, TimeoutException {
 		exchange = new DataExchangeInOutStream();
-		exchange.addFilter((dataSource, last) -> new BufferVault());
+		exchange.addFilter((_, _) -> new BufferVault());
 
 		final var dataInput = new byte[2000];
 		random.nextBytes(dataInput);

@@ -102,7 +102,7 @@ public class TransfertFilesSerializer {
 			final var abstractFile = (AbstractFile) Proxy.newProxyInstance(
 					TransfertFilesSerializer.class.getClassLoader(),
 					new Class[] { AbstractFile.class },
-					(proxy, method, args) -> {
+					(_, method, _) -> {
 						log.trace("Access to AbstractFile via a Proxy, {}", path);
 						if (method.getName().equals("getPath")) {
 							return path;
