@@ -44,7 +44,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import jakarta.transaction.Transactional;
 import net.datafaker.Faker;
@@ -77,9 +77,9 @@ class WatchedFilesDbServiceTest {
 	CachedFileAttributes anotherFile;
 	@Mock
 	ObservedFolder observedFolder;
-	@MockBean
+	@MockitoBean
 	WatchedFileSetupManager watchedFileSetupManager;
-	@MockBean
+	@MockitoBean
 	WatchedFileScannerSupplier watchedFileScannerSupplier;
 	@Mock
 	WatchedFileScanner watchedFileScanner;

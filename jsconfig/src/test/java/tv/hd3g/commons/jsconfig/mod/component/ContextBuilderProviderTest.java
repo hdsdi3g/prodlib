@@ -36,7 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import net.datafaker.Faker;
 import tv.hd3g.commons.jsconfig.mod.JSConfigConfig;
@@ -48,7 +48,7 @@ class ContextBuilderProviderTest {
 	@Autowired
 	ContextBuilderProvider p;
 
-	@MockBean
+	@MockitoBean
 	JSConfigConfig jsConfigConfig;
 	File demoJs;
 

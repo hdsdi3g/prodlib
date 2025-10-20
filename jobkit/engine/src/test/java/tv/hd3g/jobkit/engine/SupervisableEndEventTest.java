@@ -69,11 +69,6 @@ class SupervisableEndEventTest {
 	@BeforeEach
 	void init() throws Exception {
 		openMocks(this).close();
-		// assertTrue(MockUtil.isMock());
-		// MockUtil.resetMock(toolRunner);
-		// @MockBean
-		// @Captor ArgumentCaptor<>
-		// Mockito.doThrow(new Exception()).when();
 		spoolName = faker.numerify("spoolName###");
 		jobName = faker.numerify("jobName###");
 		typeName = faker.numerify("typeName###");

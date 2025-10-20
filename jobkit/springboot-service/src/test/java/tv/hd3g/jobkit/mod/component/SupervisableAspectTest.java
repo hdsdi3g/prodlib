@@ -31,11 +31,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import tv.hd3g.jobkit.engine.JobKitEngine;
 import tv.hd3g.jobkit.engine.RunnableWithException;
@@ -49,11 +48,11 @@ class SupervisableAspectTest {
 	TestWithSupervisable testWithSupervisable;
 	@Autowired
 	JobKitEngine jobKitEngine;
-	@Mock
+	@MockitoBean
 	Supervisable supervisable;
-	@MockBean
+	@MockitoBean
 	SupervisableServiceSupplier supervisableServiceSupplier;
-	@Mock
+	@MockitoBean
 	RunnableWithException runnableWithException;
 
 	@BeforeEach

@@ -70,11 +70,6 @@ class FlatJavaMailSenderTest {
 	@BeforeEach
 	void init() throws Exception {
 		openMocks(this).close();
-		// assertTrue(MockUtil.isMock());
-		// MockUtil.resetMock(toolRunner);
-		// @MockBean
-		// @Captor ArgumentCaptor<>
-		// Mockito.doThrow(new Exception()).when();
 		when(mimeMessageAnalyzerProvider.apply(mimeMessage)).thenReturn(mimeMessageAnalyzer);
 	}
 

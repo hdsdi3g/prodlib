@@ -58,12 +58,6 @@ class SupervisableContextExtractorTest {
 	@BeforeEach
 	void init() throws Exception {
 		openMocks(this).close();
-		// assertTrue(MockUtil.isMock());
-		// MockUtil.resetMock(toolRunner);
-		// @MockBean
-		// @Captor ArgumentCaptor<>
-		// Mockito.doThrow(new Exception()).when();
-
 		ce = new SupervisableContextExtractor(serializer, event);
 		key = faker.yoda().quote();
 	}
