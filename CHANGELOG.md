@@ -1,5 +1,11 @@
 # All ProdLib projects upgrades
 
+## 24.0.0
+
+Update Spring Boot (3.5.13) and deps from starter #186
+
+Correct startup pom about Maven warning gpg #185
+
 ## 23.0.0
 
 Big Java 25 and Spring Boot 3.5.6 upgrade: commons compress/sshj/bouncycastle (security), correct Mockito deps Maven behavior, update mvn deps: Jacoco/Sonar/GPG/Surefire/Compiler, correct Graalvm deps, Lombok in Maven, correct code after Spring Boot upgrade.
