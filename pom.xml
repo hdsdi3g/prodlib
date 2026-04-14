@@ -15,7 +15,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.6</version>
+        <version>3.5.13</version>
         <relativePath />
     </parent>
 
@@ -41,37 +41,39 @@
         <java.version>25</java.version>
         <aspectj-java.version>25</aspectj-java.version>
 
-        <mockito.version>5.20.0</mockito.version>
+        <mockito.version>5.23.0</mockito.version>
         <datafaker.version>1.6.0</datafaker.version>
         <owasp.encoder.version>1.2.3</owasp.encoder.version>
         <ognl.version>3.3.4</ognl.version>
-        <commons.text.version>1.11.0</commons.text.version>
-        <commons.net.version>3.10.0</commons.net.version>
-        <commons.io.version>2.16.1</commons.io.version>
+        <commons.text.version>1.15.0</commons.text.version>
+        <commons.net.version>3.13.0</commons.net.version>
+        <commons.io.version>2.21.0</commons.io.version>
         <commons.compress.version>1.28.0</commons.compress.version>
-        <commons.collections4.version>4.4</commons.collections4.version>
+        <commons.collections4.version>4.5.0</commons.collections4.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <tomcat-embed-core.version>10.1.54</tomcat-embed-core.version>
         <httpclient.version>4.5.14</httpclient.version>
         <sshj.version>0.40.0</sshj.version>
-        <bouncycastle.version>1.79</bouncycastle.version>
-        <xz.version>1.9</xz.version>
-        <ftpserver.version>1.2.0</ftpserver.version>
-        <sshd.version>2.12.1</sshd.version>
-        <jsch.version>0.2.17</jsch.version>
+        <bouncycastle.version>1.83</bouncycastle.version>
+        <xz.version>1.12</xz.version>
+        <ftpserver.version>1.2.1</ftpserver.version>
+        <sshd.version>2.17.1</sshd.version>
+        <jsch.version>2.28.0</jsch.version>
         <j2html.version>1.6.0</j2html.version>
         <graalvm.version>25.0.0</graalvm.version>
-        <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
         <maven.gpg.version>3.2.8</maven.gpg.version>
         <gpg.skip>true</gpg.skip>
         <native.skip>true</native.skip>
-        <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
-	<central-publishing.version>0.9.0</central-publishing.version>
-        <aspectj-maven-plugin.version>1.14.0</aspectj-maven-plugin.version>
+        <license-maven-plugin.version>2.7.1</license-maven-plugin.version>
+        <central-publishing.version>0.10.0</central-publishing.version>
+        <aspectj-maven-plugin.version>1.16.0</aspectj-maven-plugin.version>
         <maven.jacoco.version>0.8.14</maven.jacoco.version>
-        <sonar.version>5.2.0.4988</sonar.version>
+        <sonar.version>5.5.0.6356</sonar.version>
 
         <codepolicyvalidation.version>3.1.1</codepolicyvalidation.version>
-        <processlauncher.version>6.0.5</processlauncher.version>
+        <processlauncher.version>21.1.1</processlauncher.version>
     </properties>
 
     <dependencies>
@@ -159,6 +161,11 @@
                 <groupId>com.j2html</groupId>
                 <artifactId>j2html</artifactId>
                 <version>${j2html.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat-embed-core.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -305,7 +312,8 @@
                      https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
                 -->
                 <configuration>
-                    <argLine>-Xshare:off -javaagent:"${project.build.directory}/test-agent/mockito-core-${mockito.version}.jar" -javaagent:"${project.build.directory}/test-agent/byte-buddy-agent-${byte-buddy.version}.jar"</argLine>
+                    <argLine>-Xshare:off -javaagent:"${project.build.directory}/test-agent/mockito-core-${mockito.version}.jar"
+                        -javaagent:"${project.build.directory}/test-agent/byte-buddy-agent-${byte-buddy.version}.jar"</argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -344,12 +352,12 @@
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-	        <version>${central-publishing.version}</version>
+                <version>${central-publishing.version}</version>
                 <extensions>true</extensions>
                 <configuration>
-		    <publishingServerId>central</publishingServerId>
-		    <autoPublish>true</autoPublish>
-		    <waitUntil>published</waitUntil>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                    <waitUntil>published</waitUntil>
                 </configuration>
             </plugin>
             <plugin>
